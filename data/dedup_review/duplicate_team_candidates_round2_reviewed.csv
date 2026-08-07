@@ -1,0 +1,9 @@
+score,team_id_a,name_a,leagues_a,team_id_b,name_b,leagues_b,MERGE(y/n)
+1.00,165,Ajaccio,Ligue 1[understat]; Ligue 2[football-data-couk],444,Ajaccio GFCO,Ligue 2[football-data-couk],
+1.00,9,Arsenal,Premier League[understat]; UEFA Champions League[football-data-org],183,Arsenal Tula,Russian Premier League[understat],
+1.00,42,Atletico Madrid,La Liga[understat],488,Club Atlético de Madrid,UEFA Champions League[football-data-org],y
+1.00,46,Barcelona,La Liga[understat]; UEFA Champions League[football-data-org],312,Barcelona B,La Liga 2[football-data-couk],
+1.00,68,Bayern Munich,Bundesliga[understat],491,FC Bayern München,UEFA Champions League[football-data-org],y
+1.00,168,Paris FC,Ligue 1[understat]; Ligue 2[football-data-couk],136,Paris Saint Germain,Ligue 1[understat]; UEFA Champions League[football-data-org],
+1.00,37,Sevilla,La Liga[understat]; UEFA Champions League[football-data-org],331,Sevilla B,La Liga 2[football-data-couk],
+1.00,50,Villarreal,La Liga[understat]; UEFA Champions League[football-data-org],347,Villarreal B,La Liga 2[football-data-couk],

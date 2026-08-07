@@ -1,0 +1,50 @@
+score,team_id_a,name_a,leagues_a,team_id_b,name_b,leagues_b,MERGE(y/n)
+1.00,485,AFC Ajax,UEFA Champions League[football-data-org],231,Ajax,Eredivisie[football-data-couk],y
+1.00,496,AS Monaco FC,UEFA Champions League[football-data-org],145,Monaco,Ligue 1[understat],y
+1.00,165,Ajaccio,Ligue 1[understat]; Ligue 2[football-data-couk],444,Ajaccio GFCO,Ligue 2[football-data-couk],
+1.00,9,Arsenal,Premier League[understat],471,Arsenal FC,UEFA Champions League[football-data-org],y
+1.00,9,Arsenal,Premier League[understat],183,Arsenal Tula,Russian Premier League[understat],
+1.00,471,Arsenal FC,UEFA Champions League[football-data-org],183,Arsenal Tula,Russian Premier League[understat],
+1.00,1,Aston Villa,Championship[football-data-couk]; Premier League[understat],505,Aston Villa FC,UEFA Champions League[football-data-org],y
+1.00,109,Atalanta,Serie A[understat],490,Atalanta BC,UEFA Champions League[football-data-org],y
+1.00,46,Barcelona,La Liga[understat],312,Barcelona B,La Liga 2[football-data-couk],
+1.00,46,Barcelona,La Liga[understat],498,FC Barcelona,UEFA Champions League[football-data-org],y
+1.00,312,Barcelona B,La Liga 2[football-data-couk],498,FC Barcelona,UEFA Champions League[football-data-org],
+1.00,465,Bastia,Ligue 2[football-data-couk],137,SC Bastia,Ligue 1[understat],y
+1.00,494,Bayer 04 Leverkusen,UEFA Champions League[football-data-org],70,Bayer Leverkusen,Bundesliga[understat],y
+1.00,118,Bologna,Serie A[understat]; Serie B[football-data-couk],508,Bologna FC 1909,UEFA Champions League[football-data-org],y
+1.00,6,Chelsea,Premier League[understat],492,Chelsea FC,UEFA Champions League[football-data-org],y
+1.00,454,Clermont,Ligue 2[football-data-couk],164,Clermont Foot,Ligue 1[understat],y
+1.00,257,Club Brugge,Belgian Pro League[football-data-couk],495,Club Brugge KV,UEFA Champions League[football-data-org],y
+1.00,95,FC Heidenheim,Bundesliga[understat],360,Heidenheim,Bundesliga 2[football-data-couk],y
+1.00,521,FC Porto,UEFA Champions League[football-data-org],277,Porto,Primeira Liga[football-data-couk],y
+1.00,234,Feyenoord,Eredivisie[football-data-couk],515,Feyenoord Rotterdam,UEFA Champions League[football-data-org],y
+1.00,62,Girona,La Liga 2[football-data-couk]; La Liga[understat],512,Girona FC,UEFA Champions League[football-data-org],y
+1.00,369,Hannover,Bundesliga 2[football-data-couk],77,Hannover 96,Bundesliga[understat],y
+1.00,381,Hertha,Bundesliga 2[football-data-couk],73,Hertha Berlin,Bundesliga[understat],y
+1.00,325,Huesca,La Liga 2[football-data-couk],64,SD Huesca,La Liga[understat],y
+1.00,101,Juventus,Serie A[understat],474,Juventus FC,UEFA Champions League[football-data-org],y
+1.00,135,Lille,Ligue 1[understat],506,Lille OSC,UEFA Champions League[football-data-org],y
+1.00,11,Liverpool,Premier League[understat],487,Liverpool FC,UEFA Champions League[football-data-org],y
+1.00,12,Manchester City,Premier League[understat],499,Manchester City FC,UEFA Champions League[football-data-org],y
+1.00,13,Manchester United,Premier League[understat],527,Manchester United FC,UEFA Champions League[football-data-org],y
+1.00,268,Mouscron,Belgian Pro League[football-data-couk],261,Mouscron-Peruwelz,Belgian Pro League[football-data-couk],y
+1.00,401,Newcastle,Championship[football-data-couk],10,Newcastle United,Premier League[understat],y
+1.00,401,Newcastle,Championship[football-data-couk],497,Newcastle United FC,UEFA Champions League[football-data-org],y
+1.00,10,Newcastle United,Premier League[understat],497,Newcastle United FC,UEFA Champions League[football-data-org],y
+1.00,472,PSV,UEFA Champions League[football-data-org],238,PSV Eindhoven,Eredivisie[football-data-couk],y
+1.00,168,Paris FC,Ligue 1[understat]; Ligue 2[football-data-couk],136,Paris Saint Germain,Ligue 1[understat],
+1.00,168,Paris FC,Ligue 1[understat]; Ligue 2[football-data-couk],489,Paris Saint-Germain FC,UEFA Champions League[football-data-org],
+1.00,136,Paris Saint Germain,Ligue 1[understat],489,Paris Saint-Germain FC,UEFA Champions League[football-data-org],y
+1.00,117,Parma,Serie A[understat]; Serie B[football-data-couk],125,Parma Calcio 1913,Serie A[understat],y
+1.00,47,Real Madrid,La Liga[understat],479,Real Madrid CF,UEFA Champions League[football-data-org],y
+1.00,39,Real Sociedad,La Liga[understat],526,Real Sociedad de Fútbol,UEFA Champions League[football-data-org],y
+1.00,123,SPAL 2013,Serie A[understat],429,Spal,Serie B[football-data-couk],y
+1.00,37,Sevilla,La Liga[understat],331,Sevilla B,La Liga 2[football-data-couk],
+1.00,37,Sevilla,La Liga[understat],523,Sevilla FC,UEFA Champions League[football-data-org],y
+1.00,331,Sevilla B,La Liga 2[football-data-couk],523,Sevilla FC,UEFA Champions League[football-data-org],
+1.00,358,St Pauli,Bundesliga 2[football-data-couk],97,St. Pauli,Bundesliga[understat],y
+1.00,8,Tottenham,Premier League[understat],477,Tottenham Hotspur FC,UEFA Champions League[football-data-org],y
+1.00,50,Villarreal,La Liga[understat],347,Villarreal B,La Liga 2[football-data-couk],
+1.00,50,Villarreal,La Liga[understat],478,Villarreal CF,UEFA Champions League[football-data-org],y
+1.00,347,Villarreal B,La Liga 2[football-data-couk],478,Villarreal CF,UEFA Champions League[football-data-org],

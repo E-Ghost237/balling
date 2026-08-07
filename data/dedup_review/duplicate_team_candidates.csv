@@ -1,0 +1,13 @@
+score,team_id_a,name_a,leagues_a,team_id_b,name_b,leagues_b,MERGE(y/n)
+1.000,165,Ajaccio,Ligue 1[understat]; Ligue 2[football-data-couk],444,Ajaccio GFCO,Ligue 2[football-data-couk],
+1.000,348,Andorra,La Liga 2[football-data-couk],726,Andorra,FIFA World Cup Qualification[international_results]; UEFA European Championship Qualification[international_results],
+1.000,9,Arsenal,Premier League[understat]; UEFA Champions League[football-data-org],183,Arsenal Tula,Russian Premier League[understat],
+1.000,561,Austria,FIFA World Cup Qualification[international_results]; FIFA World Cup[international_results]; UEFA European Championship Qualification[international_results]; UEFA European Championship[international_results],210,Austria Vienna,Austrian Bundesliga[football-data-couk],
+1.000,46,Barcelona,La Liga[understat]; UEFA Champions League[football-data-org],312,Barcelona B,La Liga 2[football-data-couk],
+1.000,609,Guinea,Africa Cup of Nations Qualification[international_results]; Africa Cup of Nations[international_results]; FIFA World Cup Qualification[international_results],681,Guinea-Bissau,Africa Cup of Nations Qualification[international_results]; Africa Cup of Nations[international_results]; FIFA World Cup Qualification[international_results],
+1.000,168,Paris FC,Ligue 1[understat]; Ligue 2[football-data-couk],136,Paris Saint Germain,Ligue 1[understat]; UEFA Champions League[football-data-org],
+1.000,37,Sevilla,La Liga[understat]; UEFA Champions League[football-data-org],331,Sevilla B,La Liga 2[football-data-couk],
+1.000,536,United States,CONCACAF Gold Cup[international_results]; Copa América[international_results]; FIFA World Cup Qualification[international_results]; FIFA World Cup[international_results],733,United States Virgin Islands,CONCACAF Gold Cup Qualification[international_results]; FIFA World Cup Qualification[international_results],
+1.000,691,Vietnam,AFC Asian Cup Qualification[international_results]; AFC Asian Cup[international_results]; FIFA World Cup Qualification[international_results],580,Vietnam Republic,AFC Asian Cup Qualification[international_results]; AFC Asian Cup[international_results]; FIFA World Cup Qualification[international_results],
+1.000,50,Villarreal,La Liga[understat]; UEFA Champions League[football-data-org],347,Villarreal B,La Liga 2[football-data-couk],
+1.000,665,Yemen,AFC Asian Cup Qualification[international_results]; AFC Asian Cup[international_results]; FIFA World Cup Qualification[international_results],657,Yemen DPR,AFC Asian Cup Qualification[international_results]; AFC Asian Cup[international_results]; FIFA World Cup Qualification[international_results],
