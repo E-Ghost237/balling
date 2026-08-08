@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Job status — Admin{% endblock %}
+{% block content %}
+<h1 class="mb-8 text-2xl font-semibold text-slate-900">Job status</h1>
+
+<div id="job-status"
+     {% if not ready %}hx-get="/admin/jobs/{{ task_id }}" hx-trigger="every 2s" hx-select="#job-status" hx-swap="outerHTML"{% endif %}
+     class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <p class="mb-4 text-sm text-slate-500">Task <span class="font-mono text-slate-600">{{ task_id }}</span></p>
+
+  {% if not ready %}
+    <p class="text-amber-600">Running… ({{ state }})</p>
+  {% elif value.returncode == 0 %}
+    <p class="mb-4 text-emerald-600">Finished successfully.</p>
+  {% else %}
+    <p class="mb-4 text-red-600">Failed (exit code {{ value.returncode if value else "?" }}).</p>
+  {% endif %}
+
+  {% if ready and value %}
+    <details class="mt-4" open>
+      <summary class="cursor-pointer text-sm text-slate-500">Output</summary>
+      <pre class="mt-2 max-h-96 overflow-auto rounded-lg bg-slate-50 p-4 text-xs text-slate-700">{{ value.stdout }}</pre>
+      {% if value.stderr %}
+        <pre class="mt-2 max-h-96 overflow-auto rounded-lg bg-slate-50 p-4 text-xs text-red-600">{{ value.stderr }}</pre>
+      {% endif %}
+    </details>
+  {% endif %}
+</div>
+
+<a href="/admin/tools" class="mt-6 inline-block text-sm text-slate-500 hover:text-slate-900">← Back to tools</a>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% macro team_options(teams, selected) %}
+  {% if not teams %}
+    <option value="" disabled selected>Select a league first</option>
+  {% else %}
+    <option value="" disabled selected>Choose a team…</option>
+    {% for team in teams %}
+      <option value="{{ team }}" {% if team == selected %}selected{% endif %}>{{ team }}</option>
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
+
+<select id="home-select" name="home" required hx-swap-oob="true"
+  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+  {{ team_options(teams, None) }}
+</select>
+<select id="away-select" name="away" required hx-swap-oob="true"
+  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+  {{ team_options(teams, None) }}
+</select>

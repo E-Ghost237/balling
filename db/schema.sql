@@ -127,7 +127,8 @@ CREATE TABLE IF NOT EXISTS predictions (
     prob_draw       REAL NOT NULL,
     prob_away_win   REAL NOT NULL,
     most_likely_score TEXT,             -- e.g. "2-1"
-    confidence_flag TEXT                -- 'xg_based' | 'goals_only_fallback'
+    confidence_flag TEXT,               -- 'xg_based' | 'goals_only_fallback'
+    extra_json      TEXT                -- JSON blob of {"markets": ..., "best_picks": ...}, for webapp history detail
 );
 
 CREATE TABLE IF NOT EXISTS prediction_scorelines (

@@ -245,21 +245,23 @@ def load_global_avg(db_path):
         return None
 
 
-def save_prediction(conn, home_team_id, away_team_id, lambda_home, lambda_away, summary, confidence_flag):
+def save_prediction(conn, home_team_id, away_team_id, lambda_home, lambda_away, summary, confidence_flag, markets=None, best_picks=None):
+    import json
     from datetime import datetime, timezone
+    extra_json = json.dumps({"markets": markets, "best_picks": best_picks}) if markets is not None else None
     cur = conn.execute(
         """
         INSERT INTO predictions (
             generated_at, home_team_id, away_team_id, lambda_home, lambda_away,
             n_simulations, prob_home_win, prob_draw, prob_away_win,
-            most_likely_score, confidence_flag
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            most_likely_score, confidence_flag, extra_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             datetime.now(timezone.utc).isoformat(), home_team_id, away_team_id,
             lambda_home, lambda_away, summary["n_sims"],
             summary["prob_home_win"], summary["prob_draw"], summary["prob_away_win"],
-            summary["most_likely_score"], confidence_flag,
+            summary["most_likely_score"], confidence_flag, extra_json,
         ),
     )
     prediction_id = cur.lastrowid
@@ -313,7 +315,10 @@ def predict_match(conn, db_path, home_name, away_name, n_sims=DEFAULT_N_SIMS, sa
 
     prediction_id = None
     if save:
-        prediction_id = save_prediction(conn, home_id, away_id, lambda_home, lambda_away, summary, confidence_flag)
+        prediction_id = save_prediction(
+            conn, home_id, away_id, lambda_home, lambda_away, summary, confidence_flag,
+            markets=markets, best_picks=best_picks,
+        )
 
     return {
         "home_team": home_name, "away_team": away_name,

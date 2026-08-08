@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Finance — Admin{% endblock %}
+{% block content %}
+<h1 class="mb-8 text-2xl font-semibold text-slate-900">Finance</h1>
+
+<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="text-sm text-slate-500">All-time revenue</p>
+    <p class="text-3xl font-semibold text-slate-900">{{ "{:,}".format(total_revenue) }} <span class="text-base font-normal text-slate-400">FCFA</span></p>
+    <p class="mt-1 text-xs text-slate-400">{{ total_count }} approved payment{{ "s" if total_count != 1 else "" }}</p>
+  </div>
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="text-sm text-slate-500">This month</p>
+    <p class="text-3xl font-semibold text-slate-900">{{ "{:,}".format(month_revenue) }} <span class="text-base font-normal text-slate-400">FCFA</span></p>
+    <p class="mt-1 text-xs text-slate-400">{{ month_count }} approved payment{{ "s" if month_count != 1 else "" }}</p>
+  </div>
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="text-sm text-slate-500">Average per payment</p>
+    <p class="text-3xl font-semibold text-slate-900">
+      {{ "{:,}".format((total_revenue / total_count) | round(0) | int) if total_count else 0 }}
+      <span class="text-base font-normal text-slate-400">FCFA</span>
+    </p>
+  </div>
+</div>
+
+<div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="mb-4 font-semibold text-slate-900">Revenue by plan</h2>
+  {% if not by_plan %}
+    <p class="text-sm text-slate-400">No approved payments yet.</p>
+  {% else %}
+    <div class="space-y-4">
+      {% for row in by_plan %}
+      <div>
+        <div class="mb-1 flex items-center justify-between text-sm">
+          <span class="font-medium text-slate-700">{{ row.plan }}</span>
+          <span class="text-slate-500">{{ "{:,}".format(row.revenue) }} FCFA · {{ row.count }} payment{{ "s" if row.count != 1 else "" }}</span>
+        </div>
+        <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div class="h-full bg-emerald-600" style="width: {{ row.bar_pct }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="mb-4 font-semibold text-slate-900">Recent approved payments</h2>
+  {% if not recent %}
+    <p class="text-sm text-slate-400">Nothing yet.</p>
+  {% else %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="text-slate-400">
+          <tr><th class="pb-2">User</th><th class="pb-2">Plan</th><th class="pb-2">Amount</th><th class="pb-2">Approved</th></tr>
+        </thead>
+        <tbody class="text-slate-700">
+          {% for plan, amount_fcfa, reviewed_at, login in recent %}
+          <tr class="border-t border-slate-100">
+            <td class="py-2">{{ login }}</td>
+            <td class="py-2">{{ plan }}</td>
+            <td class="py-2">{{ "{:,}".format(amount_fcfa) }} FCFA</td>
+            <td class="py-2 text-slate-500">{{ reviewed_at.strftime("%d %b %Y, %H:%M") if reviewed_at else "—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

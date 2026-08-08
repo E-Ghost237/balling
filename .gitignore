@@ -1,0 +1,7 @@
+venv/
+webapp_venv/
+__pycache__/
+*.pyc
+.env
+bin/
+data/dedup_review/*.csv

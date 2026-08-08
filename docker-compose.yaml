@@ -1,0 +1,97 @@
+services:
+  api:
+    build: .
+    env_file: &default_env_files
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - ./data:/app/data
+    command:
+      - sh
+      - -c
+      - "python -m webapp.bootstrap_admin && exec uvicorn webapp.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/login')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - certbot-webroot:/var/www/certbot
+      - certbot-certs:/etc/letsencrypt
+    restart: unless-stopped
+
+  # Not started by `up -d` (see profiles). Run manually to (re)issue the
+  # cert: docker compose --profile tools run --rm certbot certonly
+  #   --webroot -w /var/www/certbot -d ballingpronostics.site -d www.ballingpronostics.site
+  #   --email <you>@example.com --agree-tos --non-interactive
+  certbot:
+    image: certbot/certbot
+    profiles: ["tools"]
+    volumes:
+      - certbot-webroot:/var/www/certbot
+      - certbot-certs:/etc/letsencrypt
+
+  worker:
+    build: .
+    env_file: *default_env_files
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+    command:
+      - celery
+      - -A
+      - webapp.jobs.celery_app
+      - worker
+      - --loglevel=INFO
+      - --concurrency=1
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: balling
+      POSTGRES_PASSWORD: balling
+      POSTGRES_DB: balling
+    volumes:
+      - balling-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U balling -d balling"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  balling-postgres-data:
+  certbot-webroot:
+  certbot-certs:

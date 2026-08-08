@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Admin — Balling Predictions{% endblock %}
+{% block content %}
+<h1 class="mb-8 text-2xl font-semibold text-slate-900">Admin</h1>
+<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <a href="/admin/payments" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:border-emerald-300">
+    <p class="text-sm text-slate-500">Pending payments</p>
+    <p class="text-3xl font-semibold text-slate-900">{{ pending_count }}</p>
+  </a>
+  <a href="/admin/users" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:border-emerald-300">
+    <p class="text-sm text-slate-500">Total users</p>
+    <p class="text-3xl font-semibold text-slate-900">{{ user_count }}</p>
+  </a>
+  <a href="/admin/finance" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:border-emerald-300">
+    <p class="text-sm text-slate-500">Total revenue</p>
+    <p class="text-3xl font-semibold text-slate-900">{{ "{:,}".format(total_revenue) }}</p>
+  </a>
+  <a href="/admin/feedback" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:border-emerald-300">
+    <p class="text-sm text-slate-500">Feedback received</p>
+    <p class="text-3xl font-semibold text-slate-900">{{ feedback_count }}</p>
+  </a>
+</div>
+<div class="flex flex-wrap gap-4">
+  <a href="/admin/payments" class="rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-200">Review payments</a>
+  <a href="/admin/users" class="rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-200">Manage users</a>
+  <a href="/admin/finance" class="rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-200">Finance</a>
+  <a href="/admin/feedback" class="rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-200">Feedback</a>
+  <a href="/admin/tools" class="rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-200">Data tools</a>
+</div>
+{% endblock %}

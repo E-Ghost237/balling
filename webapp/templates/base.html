@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-50">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Balling Predictions{% endblock %}</title>
+    <link rel="icon" href="/assets/favicon.png" />
+    <link rel="stylesheet" href="/static/css/app.css" />
+    <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+    <script>
+      function togglePasswordField(id, btn) {
+        const input = document.getElementById(id);
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        btn.textContent = isHidden ? "Hide" : "Show";
+      }
+      function toggleMobileNav() {
+        document.getElementById("mobile-nav").classList.toggle("hidden");
+      }
+    </script>
+  </head>
+  <body class="h-full min-h-screen bg-page {% block page_bg %}{% endblock %} bg-slate-50 text-slate-900 antialiased">
+    <nav class="border-b border-slate-200 bg-white shadow-sm">
+      <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+        <a href="/" class="relative z-10 flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
+          <img src="/assets/logo.png" alt="Balling Predictions" class="h-16 w-auto sm:h-24"
+               onerror="this.replaceWith(Object.assign(document.createElement('span'), {textContent: '⚽ Balling Predictions'}))" />
+        </a>
+
+        <div class="hidden items-center gap-6 text-sm text-slate-600 sm:flex">
+          {% if user %}
+            {% if user.is_admin %}
+              <a href="/admin" class="hover:text-slate-900">Admin</a>
+            {% else %}
+              <a href="/history" class="hover:text-slate-900">History</a>
+              <a href="/feedback" class="hover:text-slate-900">Feedback</a>
+            {% endif %}
+            <a href="/account" class="hover:text-slate-900">Account</a>
+            <a href="/logout" class="rounded-md bg-slate-100 px-3 py-1.5 text-slate-700 hover:bg-slate-200">Log out</a>
+          {% else %}
+            <a href="/login" class="rounded-md bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-500">Log in</a>
+          {% endif %}
+        </div>
+
+        <button type="button" onclick="toggleMobileNav()" aria-label="Menu"
+          class="relative z-10 flex h-10 w-10 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 sm:hidden">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="mobile-nav" class="hidden border-t border-slate-200 sm:hidden">
+        <div class="flex flex-col px-4 py-3 text-sm text-slate-600">
+          {% if user %}
+            {% if user.is_admin %}
+              <a href="/admin" class="rounded-md px-2 py-2.5 hover:bg-slate-50">Admin</a>
+            {% else %}
+              <a href="/history" class="rounded-md px-2 py-2.5 hover:bg-slate-50">History</a>
+              <a href="/feedback" class="rounded-md px-2 py-2.5 hover:bg-slate-50">Feedback</a>
+            {% endif %}
+            <a href="/account" class="rounded-md px-2 py-2.5 hover:bg-slate-50">Account</a>
+            <a href="/logout" class="rounded-md px-2 py-2.5 hover:bg-slate-50">Log out</a>
+          {% else %}
+            <a href="/login" class="rounded-md px-2 py-2.5 font-medium text-emerald-600 hover:bg-slate-50">Log in</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <main class="mx-auto max-w-5xl px-4 pb-10 pt-14 sm:px-6">
+      {% if request.query_params.get('error') %}
+        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{ request.query_params.get('error') }}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

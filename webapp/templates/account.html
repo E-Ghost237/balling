@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Account Balling Predictions{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-lg">
+  <h1 class="mb-8 text-2xl font-semibold text-slate-900">Account</h1>
+
+  <div class="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="mb-1 text-sm text-slate-500">Logged in as</p>
+    <p class="text-slate-900">{{ user.login }}</p>
+  </div>
+
+  {% if user.is_admin %}
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+      <p class="text-emerald-800">Superadmin account — unlimited access, no subscription needed.</p>
+    </div>
+  {% elif subscription and subscription.status == "ACTIVE" and subscription.expires_at %}
+    <div class="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="mb-1 text-sm text-slate-500">Subscription</p>
+          {% if subscription.plan == "free" %}
+            <p class="text-emerald-600">Free plan</p>
+          {% else %}
+            <p class="text-emerald-600">{{ plan.name if plan else "Active" }} — renews or expires {{ subscription.expires_at.strftime("%d %b %Y") }}</p>
+          {% endif %}
+        </div>
+        {% if subscription.plan == "free" %}
+          <a href="/payment" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500">Upgrade</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p class="mb-2 text-sm text-slate-500">Matchups analyzed this cycle</p>
+      <div class="mb-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div class="h-full bg-emerald-600" style="width: {{ (quota_used / quota_limit * 100) | round(1) }}%"></div>
+      </div>
+      <p class="text-sm text-slate-600">{{ quota_used }} / {{ quota_limit }} distinct matchups</p>
+    </div>
+  {% else %}
+    <div class="rounded-xl border border-amber-200 bg-amber-50 p-6">
+      <p class="mb-4 text-amber-800">No active subscription yet.</p>
+      <a href="/payment" class="inline-block rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+        Subscribe now
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

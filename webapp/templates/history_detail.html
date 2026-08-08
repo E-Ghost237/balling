@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ result.home_team }} vs {{ result.away_team }} — History — Balling Predictions{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-3xl">
+  <a href="/history" class="mb-6 inline-block text-sm font-medium text-emerald-600 hover:underline">← Back to history</a>
+  <p class="mb-6 text-xs text-slate-400">Simulated {{ simulated_at.strftime("%d %b %Y, %H:%M") }}</p>
+  {% include "_result_card.html" %}
+</div>
+{% endblock %}

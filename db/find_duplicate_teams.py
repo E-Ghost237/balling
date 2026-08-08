@@ -14,6 +14,7 @@ Usage:
 """
 
 import argparse
+import os
 import re
 import sqlite3
 import unicodedata
@@ -155,6 +156,7 @@ def main():
     print(f"Found {len(candidates)} candidate pairs (threshold={args.threshold})\n")
 
     import csv as csv_module
+    os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
     with open(args.output, "w", newline="") as f:
         writer = csv_module.writer(f)
         writer.writerow(["score", "team_id_a", "name_a", "leagues_a", "team_id_b", "name_b", "leagues_b", "MERGE(y/n)"])
