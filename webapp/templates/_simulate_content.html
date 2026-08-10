@@ -1,8 +1,8 @@
 {% macro team_options(teams, selected) %}
   {% if not teams %}
-    <option value="" disabled selected>Select a league first</option>
+    <option value="" disabled selected>{{ t(request, 'simulate.select_league_first') }}</option>
   {% else %}
-    <option value="" disabled {% if not selected %}selected{% endif %}>Choose a team…</option>
+    <option value="" disabled {% if not selected %}selected{% endif %}>{{ t(request, 'simulate.choose_team') }}</option>
     {% for team in teams %}
       <option value="{{ team }}" {% if team == selected %}selected{% endif %}>{{ team }}</option>
     {% endfor %}
@@ -13,21 +13,21 @@
 
 {% if not active %}
   <div class="mx-auto max-w-md text-center">
-    <h1 class="mb-3 text-2xl font-semibold text-slate-900">Subscribe to start predicting</h1>
-    <p class="mb-8 text-slate-500">You need an active subscription to run match simulations.</p>
-    <a href="/payment" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
-      Subscribe now
+    <h1 class="mb-3 text-2xl font-semibold text-slate-900">{{ t(request, 'simulate.subscribe_heading') }}</h1>
+    <p class="mb-8 text-slate-500">{{ t(request, 'simulate.subscribe_subtitle') }}</p>
+    <a href="{{ url(request, '/payment') }}" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+      {{ t(request, 'simulate.subscribe_now') }}
     </a>
   </div>
 {% else %}
 
   {% if quota_exceeded %}
     <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-      You've used all {{ quota_limit }} distinct matchups for this cycle. It resets when your subscription renews.
+      {{ t(request, 'simulate.quota_exceeded', limit=quota_limit) }}
     </div>
   {% elif quota_warning %}
     <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-      {{ quota_limit - quota_used }} matchups left this cycle.
+      {{ t(request, 'simulate.quota_warning', remaining=(quota_limit - quota_used)) }}
     </div>
   {% endif %}
 
@@ -36,15 +36,15 @@
   {% endif %}
 
   <div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-4 font-semibold text-slate-900">Pick a matchup</h2>
-    <form hx-post="/simulate" hx-target="#simulate-page" hx-swap="outerHTML" hx-indicator="#sim-spinner"
+    <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'simulate.pick_matchup') }}</h2>
+    <form hx-post="{{ url(request, '/simulate') }}" hx-target="#simulate-page" hx-swap="outerHTML" hx-indicator="#sim-spinner"
           class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="sm:col-span-2">
-        <label class="mb-1 block text-sm text-slate-600">League</label>
+        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.league_label') }}</label>
         <select name="league_id" required
-                hx-get="/simulate/teams-for-league" hx-include="this" hx-target="body" hx-swap="none"
+                hx-get="{{ url(request, '/simulate/teams-for-league') }}" hx-include="this" hx-target="body" hx-swap="none"
                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
-          <option value="" disabled {% if not selected_league_id %}selected{% endif %}>Choose a league…</option>
+          <option value="" disabled {% if not selected_league_id %}selected{% endif %}>{{ t(request, 'simulate.choose_league') }}</option>
           {% for group_label, group_leagues in leagues %}
             <optgroup label="{{ group_label }}">
               {% for league in group_leagues %}
@@ -53,17 +53,17 @@
             </optgroup>
           {% endfor %}
         </select>
-        <p class="mt-1 text-xs text-slate-400">Narrows the team lists below to clubs/countries that have played in this competition.</p>
+        <p class="mt-1 text-xs text-slate-400">{{ t(request, 'simulate.league_hint') }}</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">Home team</label>
+        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.home_team') }}</label>
         <select id="home-select" name="home" required
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
           {{ team_options(teams, selected_home) }}
         </select>
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">Away team</label>
+        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.away_team') }}</label>
         <select id="away-select" name="away" required
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
           {{ team_options(teams, selected_away) }}
@@ -71,17 +71,17 @@
       </div>
       <label class="flex items-center gap-2 text-sm text-slate-600 sm:col-span-2">
         <input type="checkbox" name="neutral" value="true" class="rounded border-slate-300" {% if neutral %}checked{% endif %} />
-        Neutral venue (no home advantage)
+        {{ t(request, 'simulate.neutral_venue') }}
       </label>
       <button type="submit"
         class="relative rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500 sm:col-span-2">
-        <span>Simulate match</span>
+        <span>{{ t(request, 'simulate.submit') }}</span>
         <span id="sim-spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-600">
-          Simulating…
+          {{ t(request, 'simulate.simulating') }}
         </span>
       </button>
     </form>
-    <p class="mt-3 text-xs text-slate-400">{{ quota_used }} / {{ quota_limit }} distinct matchups used this cycle.</p>
+    <p class="mt-3 text-xs text-slate-400">{{ t(request, 'simulate.quota_footer', used=quota_used, limit=quota_limit) }}</p>
   </div>
 
   {% if result %}

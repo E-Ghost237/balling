@@ -3,25 +3,29 @@ import sqlite3
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from uuid import uuid4
+from urllib.parse import quote
+from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, Form, Query, Request
+import httpx
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from webapp import monetbil
 from webapp.auth import (
+    activate_subscription_for_payment,
     authenticate,
     create_session,
     get_subscription,
+    reject_payment_request,
     subscription_is_active,
-    transaction_id_already_used,
 )
 from webapp.config import get_settings
 from webapp.deps import get_db, get_optional_user, require_login
 from webapp.email import send_email
-from webapp.i18n import redirect
+from webapp.i18n import redirect, t_locale, url_for_locale
 from webapp.models import PaymentRequest, Subscription, User
 from webapp.otp import (
     PURPOSE_EMAIL_VERIFY,
@@ -37,15 +41,26 @@ from webapp.templates import templates
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+# Cameroon Mobile Money operators Monetbil supports for this service — see
+# webapp/monetbil.py and the "Operators list" table in Monetbil's Payment
+# API v1 doc.
+MONETBIL_OPERATORS = {"CM_MTNMOBILEMONEY", "CM_ORANGEMONEY"}
 
-async def _send_verification_email(connection: AsyncConnection, user_id, login: str) -> bool:
+
+async def _send_verification_email(
+    connection: AsyncConnection, user_id, login: str, locale: str = "en"
+) -> bool:
     code = await create_verification_code(connection, user_id, PURPOSE_EMAIL_VERIFY)
     return send_email(
         login,
-        "Confirm your Balling Predictions account",
-        f"Enter this code to verify your account. It expires in "
-        f"{get_settings().verification_code_ttl_minutes} minutes.",
+        t_locale(locale, "email.verify.subject"),
+        t_locale(
+            locale,
+            "email.verify.body",
+            minutes=get_settings().verification_code_ttl_minutes,
+        ),
         code=code,
+        locale=locale,
     )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -83,7 +98,9 @@ async def login_submit(
     if user is None:
         return redirect(request, f"/login?error=Invalid+login+or+password&next={next}")
     if not user.is_admin and not user.email_verified:
-        sent = await _send_verification_email(connection, user.id, user.login)
+        sent = await _send_verification_email(
+            connection, user.id, user.login, request.state.locale
+        )
         suffix = "" if sent else "&error=Could+not+send+the+code+email+%E2%80%94+try+Resend"
         return redirect(request, f"/verify-email?login={user.login}{suffix}")
     token = generate_session_token()
@@ -137,7 +154,7 @@ async def register_submit(
             created_at=datetime.now(UTC),
         )
     )
-    sent = await _send_verification_email(connection, user_id, login)
+    sent = await _send_verification_email(connection, user_id, login, request.state.locale)
     suffix = "" if sent else "&error=Could+not+send+the+code+email+%E2%80%94+try+Resend"
     return redirect(request, f"/verify-email?login={login}{suffix}")
 
@@ -222,7 +239,9 @@ async def verify_email_resend(
     if user_id is not None:
         wait = await seconds_until_resend_allowed(connection, user_id, PURPOSE_EMAIL_VERIFY)
         if wait <= 0:
-            sent = await _send_verification_email(connection, user_id, login)
+            sent = await _send_verification_email(
+                connection, user_id, login, request.state.locale
+            )
             if not sent:
                 suffix = "&error=Could+not+send+the+code+email+%E2%80%94+please+try+again+shortly"
     return redirect(request, f"/verify-email?login={login}{suffix}")
@@ -246,11 +265,14 @@ async def forgot_password_submit(
         code = await create_verification_code(connection, user_id, PURPOSE_PASSWORD_RESET)
         send_email(
             login,
-            "Reset your Balling Predictions password",
-            f"Enter this code to reset your password. It expires in "
-            f"{get_settings().verification_code_ttl_minutes} minutes. "
-            "If you didn't request this, you can ignore this email.",
+            t_locale(request.state.locale, "email.reset.subject"),
+            t_locale(
+                request.state.locale,
+                "email.reset.body",
+                minutes=get_settings().verification_code_ttl_minutes,
+            ),
             code=code,
+            locale=request.state.locale,
         )
     # Same redirect whether or not the account exists, so this can't be used
     # to probe which emails are registered.
@@ -561,36 +583,133 @@ async def payment_form(request: Request, user: User = Depends(require_login)):
 async def payment_submit(
     request: Request,
     plan: str = Form(...),
-    transaction_id: str = Form(...),
     phone_number: str = Form(...),
-    amount_fcfa: int = Form(...),
+    operator: str = Form(...),
     user: User = Depends(require_login),
     connection: AsyncConnection = Depends(get_db),
 ):
     plans_by_key = {p.key: p for p in PAID_PLANS}
     if plan not in plans_by_key:
         return redirect(request, "/payment?error=Choose+a+plan")
-    if amount_fcfa != plans_by_key[plan].price_fcfa:
+    if operator not in MONETBIL_OPERATORS:
+        return redirect(request, "/payment?error=Choose+your+Mobile+Money+operator")
+
+    chosen_plan = plans_by_key[plan]
+    settings = get_settings()
+    payment_id = uuid4()
+    notify_url = f"{settings.public_base_url}/webhooks/monetbil/{settings.monetbil_webhook_path}"
+    try:
+        result = await monetbil.place_payment(
+            service=settings.monetbil_service_key,
+            amount=chosen_plan.price_fcfa,
+            phonenumber=phone_number,
+            operator=operator,
+            country=settings.monetbil_country,
+            currency=settings.monetbil_currency,
+            payment_ref=str(payment_id),
+            item_ref=plan,
+            user=str(user.id),
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.login,
+            notify_url=notify_url,
+        )
+    except httpx.HTTPError:
         return redirect(
             request,
-            "/payment?error=That+amount+doesn%27t+match+the+selected+plan%27s+price+"
-            "%E2%80%94+please+try+again",
+            "/payment?error=Could+not+reach+the+payment+provider+%E2%80%94+please+try+again",
         )
-    if await transaction_id_already_used(connection, transaction_id):
-        return redirect(request, "/payment?error=That+transaction+ID+has+already+been+used")
+
+    if result.get("status") != "REQUEST_ACCEPTED":
+        message = result.get("message") or "Payment could not be started"
+        return redirect(request, f"/payment?error={quote(message)}")
+
     await connection.execute(
         PaymentRequest.__table__.insert().values(
-            id=uuid4(),
+            id=payment_id,
             user_id=user.id,
-            transaction_id=transaction_id,
+            transaction_id=str(result["paymentId"]),
             phone_number=phone_number,
-            amount_fcfa=amount_fcfa,
+            operator=operator,
+            amount_fcfa=chosen_plan.price_fcfa,
             plan=plan,
             status="PENDING",
             submitted_at=datetime.now(UTC),
         )
     )
-    return templates.TemplateResponse(request, "payment_submitted.html", {"user": user})
+    return redirect(request, f"/payment/pending/{payment_id}")
+
+
+async def _get_own_payment(
+    connection: AsyncConnection, payment_id: UUID, user_id: UUID
+) -> dict:
+    result = await connection.execute(
+        select(PaymentRequest).where(
+            PaymentRequest.id == payment_id, PaymentRequest.user_id == user_id
+        )
+    )
+    payment = result.mappings().one_or_none()
+    if payment is None:
+        raise HTTPException(status_code=404)
+    return dict(payment)
+
+
+async def _reconcile_pending_payment(connection: AsyncConnection, payment: dict) -> dict:
+    """Called from the polling endpoint below as a fallback in case the
+    Monetbil webhook notification never arrives (network hiccup, etc.) —
+    actively asks Monetbil for the current status instead of waiting."""
+    try:
+        response = await monetbil.check_payment(payment["transaction_id"])
+    except httpx.HTTPError:
+        return payment
+    transaction = response.get("transaction")
+    if not transaction:
+        return payment
+    status = transaction.get("status")
+    if status == 1:
+        paid_amount = transaction.get("amount")
+        try:
+            underpaid = paid_amount is not None and float(paid_amount) < payment["amount_fcfa"]
+        except (TypeError, ValueError):
+            underpaid = False
+        if not underpaid:
+            await activate_subscription_for_payment(connection, payment)
+            return await _get_own_payment(connection, payment["id"], payment["user_id"])
+    elif status in (0, -1, -2):
+        await reject_payment_request(connection, payment["id"])
+        return await _get_own_payment(connection, payment["id"], payment["user_id"])
+    return payment
+
+
+@router.get("/payment/pending/{payment_id}", response_class=HTMLResponse)
+async def payment_pending(
+    request: Request,
+    payment_id: UUID,
+    user: User = Depends(require_login),
+    connection: AsyncConnection = Depends(get_db),
+):
+    payment = await _get_own_payment(connection, payment_id, user.id)
+    return templates.TemplateResponse(
+        request, "payment_pending.html", {"user": user, "payment": payment}
+    )
+
+
+@router.get("/payment/status/{payment_id}", response_class=HTMLResponse)
+async def payment_status(
+    request: Request,
+    payment_id: UUID,
+    user: User = Depends(require_login),
+    connection: AsyncConnection = Depends(get_db),
+):
+    payment = await _get_own_payment(connection, payment_id, user.id)
+    if payment["status"] == "PENDING":
+        payment = await _reconcile_pending_payment(connection, payment)
+    response = templates.TemplateResponse(
+        request, "_payment_status.html", {"user": user, "payment": payment}
+    )
+    if payment["status"] == "APPROVED":
+        response.headers["HX-Redirect"] = url_for_locale(request, "/simulate")
+    return response
 
 
 @router.get("/account", response_class=HTMLResponse)

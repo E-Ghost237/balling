@@ -2,7 +2,7 @@ import time
 
 from fastapi.templating import Jinja2Templates
 
-from webapp.i18n import localize_path, t, url_for_locale
+from webapp.i18n import localize_path, plan_t, t, url_for_locale
 
 # Sourced from process start time, so it changes on every deploy (deploy.sh
 # always recreates the api container = a fresh process). Used both to
@@ -15,3 +15,4 @@ templates.env.globals["asset_version"] = ASSET_VERSION
 templates.env.globals["t"] = t
 templates.env.globals["url"] = url_for_locale
 templates.env.globals["localize"] = localize_path
+templates.env.globals["plan_t"] = plan_t

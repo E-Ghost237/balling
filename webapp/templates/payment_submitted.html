@@ -1,15 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Submitted Balling Predictions{% endblock %}
+{% block title %}{{ t(request, 'submitted.title') }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-md text-center">
   <div class="mb-4 text-4xl">✅</div>
-  <h1 class="mb-3 text-2xl font-semibold text-slate-900">Submitted for review</h1>
-  <p class="mb-8 text-slate-500">
-    We'll verify your payment and activate your subscription within 24 hours.
-    You'll be able to use Simulate as soon as it's approved.
-  </p>
-  <a href="/account" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
-    View account status
+  <h1 class="mb-3 text-2xl font-semibold text-slate-900">{{ t(request, 'submitted.heading') }}</h1>
+  <p class="mb-8 text-slate-500">{{ t(request, 'submitted.subtitle') }}</p>
+  <a href="{{ url(request, '/account') }}" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+    {{ t(request, 'submitted.view_account') }}
   </a>
 </div>
 {% endblock %}

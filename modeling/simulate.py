@@ -36,6 +36,34 @@ HOME_GOAL_ADVANTAGE = 1.2  # multiplicative bump applied to the home side's base
 # Elo's influence is intentionally small — attack/defense strength is primary.
 ELO_INFLUENCE = 0.15  # max +/-15% swing to lambda from an Elo mismatch
 
+# Additional signals from rating_engine.py's compute_form_metrics, layered
+# on top the same way Elo is: small, capped, multiplicative nudges — never
+# the primary driver. All optional (None-guarded in compute_lambdas) so
+# this stays backward compatible with any caller that doesn't have them
+# yet, and so backtest.py can A/B test each one independently.
+#
+# NOT currently wired into predict_match()'s live call — deliberately.
+# Backtesting ppg/xppg/momentum (individually, combined, and swept down to
+# influence=0.02) against 2+ years of real results consistently made log
+# loss and Brier score slightly WORSE than the control (Elo + attack/
+# defense alone), at every strength tested, worst when combined. Most
+# likely cause: these are largely redundant with what Elo (built from the
+# same match results) and attack/defense (goals+xG) already encode, so the
+# nudge mostly adds noise rather than new information. Values below are
+# still meaningful as a starting point for future experiments (e.g. a
+# regression-style combination instead of independent multiplicative
+# nudges), but should stay off in production until a backtest run
+# (`python backtest.py --features ppg,xppg,momentum`) actually shows an
+# improvement over `--features ""`.
+PPG_INFLUENCE = 0.10
+PPG_SCALE = 1.5           # points/game gap that earns ~76% of the max nudge
+XPPG_INFLUENCE = 0.10
+XPPG_SCALE = 1.5
+MOMENTUM_INFLUENCE = 0.08
+MOMENTUM_SCALE = 0.5      # gap between two teams' (recent form / baseline) ratios
+SHOT_DIFF_INFLUENCE = 0.05
+SHOT_DIFF_SCALE = 6.0     # shots/game gap
+
 # --- Per-team unpredictability (variance) ---
 REFERENCE_ELO = 1500
 BASE_SIGMA = 0.12          # noise spread for an average-or-stronger team
@@ -68,14 +96,46 @@ def elo_adjustment_factor(elo_for: float, elo_against: float) -> float:
     return 1 + ELO_INFLUENCE * math.tanh(diff / 400)
 
 
+def _tanh_nudge(diff: float, scale: float, influence: float) -> float:
+    """Same shape as elo_adjustment_factor, generalized: a capped, smooth
+    multiplicative bump proportional to how far `diff` is from 0, saturating
+    toward +/-influence as diff grows past `scale`."""
+    return 1 + influence * math.tanh(diff / scale)
+
+
 def compute_lambdas(home_attack, away_defense, away_attack, home_defense,
-                     elo_home, elo_away, global_avg_for, neutral=False):
+                     elo_home, elo_away, global_avg_for, neutral=False,
+                     ppg_home=None, ppg_away=None,
+                     xppg_home=None, xppg_away=None,
+                     momentum_home=None, momentum_away=None,
+                     shot_diff_home=None, shot_diff_away=None):
     home_advantage = 1.0 if neutral else HOME_GOAL_ADVANTAGE
     base_home = global_avg_for * home_attack * away_defense * home_advantage
     base_away = global_avg_for * away_attack * home_defense
 
     lambda_home = base_home * elo_adjustment_factor(elo_home, elo_away)
     lambda_away = base_away * elo_adjustment_factor(elo_away, elo_home)
+
+    # Each signal below only applies when BOTH teams have it — half-applying
+    # a nudge (e.g. one team missing shot data) would bias the matchup
+    # rather than just skip an unavailable signal.
+    if ppg_home is not None and ppg_away is not None:
+        lambda_home *= _tanh_nudge(ppg_home - ppg_away, PPG_SCALE, PPG_INFLUENCE)
+        lambda_away *= _tanh_nudge(ppg_away - ppg_home, PPG_SCALE, PPG_INFLUENCE)
+
+    if xppg_home is not None and xppg_away is not None:
+        lambda_home *= _tanh_nudge(xppg_home - xppg_away, XPPG_SCALE, XPPG_INFLUENCE)
+        lambda_away *= _tanh_nudge(xppg_away - xppg_home, XPPG_SCALE, XPPG_INFLUENCE)
+
+    if momentum_home is not None and momentum_away is not None:
+        m_diff = momentum_home - momentum_away
+        lambda_home *= _tanh_nudge(m_diff, MOMENTUM_SCALE, MOMENTUM_INFLUENCE)
+        lambda_away *= _tanh_nudge(-m_diff, MOMENTUM_SCALE, MOMENTUM_INFLUENCE)
+
+    if shot_diff_home is not None and shot_diff_away is not None:
+        sd_diff = shot_diff_home - shot_diff_away
+        lambda_home *= _tanh_nudge(sd_diff, SHOT_DIFF_SCALE, SHOT_DIFF_INFLUENCE)
+        lambda_away *= _tanh_nudge(-sd_diff, SHOT_DIFF_SCALE, SHOT_DIFF_INFLUENCE)
 
     return lambda_home, lambda_away
 
@@ -222,7 +282,8 @@ def get_team_id(conn, name):
 def get_latest_rating(conn, team_id):
     row = conn.execute(
         """
-        SELECT elo, attack_strength, defense_weakness
+        SELECT elo, attack_strength, defense_weakness,
+               points_per_game, xpoints_per_game, momentum, shot_diff_avg
         FROM team_ratings
         WHERE team_id = ?
         ORDER BY as_of_date DESC
@@ -232,7 +293,11 @@ def get_latest_rating(conn, team_id):
     ).fetchone()
     if not row:
         return None
-    return {"elo": row[0], "attack_strength": row[1], "defense_weakness": row[2]}
+    return {
+        "elo": row[0], "attack_strength": row[1], "defense_weakness": row[2],
+        "points_per_game": row[3], "xpoints_per_game": row[4],
+        "momentum": row[5], "shot_diff_avg": row[6],
+    }
 
 
 def load_global_avg(db_path):

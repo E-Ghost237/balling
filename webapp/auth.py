@@ -1,12 +1,14 @@
 import uuid
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from webapp.models import PaymentRequest, Session, Subscription, User
+from webapp.plans import PLANS
 from webapp.security import hash_token, verify_password
 
 # The free plan has no payment to trigger a renewal, so there's no billing
@@ -106,3 +108,49 @@ async def transaction_id_already_used(connection: AsyncConnection, transaction_i
         select(PaymentRequest.id).where(PaymentRequest.transaction_id == transaction_id)
     )
     return result.scalar_one_or_none() is not None
+
+
+async def activate_subscription_for_payment(connection: AsyncConnection, payment: Mapping) -> None:
+    """Grants the plan on an approved PaymentRequest — shared by the admin's
+    manual approve button, the Monetbil webhook, and the /payment/status
+    reconciliation poll, so all three paths compute expiry/quota identically
+    from the same PLANS registry."""
+    plan = PLANS[payment["plan"]]
+    now = datetime.now(UTC)
+    expires_at = now + timedelta(days=plan.duration_days)
+    statement = (
+        pg_insert(Subscription)
+        .values(
+            id=uuid4(),
+            user_id=payment["user_id"],
+            status="ACTIVE",
+            plan=payment["plan"],
+            quota_limit=plan.quota,
+            cycle_started_at=now,
+            expires_at=expires_at,
+        )
+        .on_conflict_do_update(
+            index_elements=[Subscription.user_id],
+            set_={
+                "status": "ACTIVE",
+                "plan": payment["plan"],
+                "quota_limit": plan.quota,
+                "cycle_started_at": now,
+                "expires_at": expires_at,
+            },
+        )
+    )
+    await connection.execute(statement)
+    await connection.execute(
+        update(PaymentRequest)
+        .where(PaymentRequest.id == payment["id"])
+        .values(status="APPROVED", reviewed_at=now)
+    )
+
+
+async def reject_payment_request(connection: AsyncConnection, payment_id: UUID) -> None:
+    await connection.execute(
+        update(PaymentRequest)
+        .where(PaymentRequest.id == payment_id, PaymentRequest.status == "PENDING")
+        .values(status="REJECTED", reviewed_at=datetime.now(UTC))
+    )

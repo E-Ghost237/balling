@@ -1,34 +1,34 @@
 {% extends "base.html" %}
-{% block title %}History Balling Predictions{% endblock %}
+{% block title %}{{ t(request, 'history.title') }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-3xl">
-  <h1 class="mb-8 text-2xl font-semibold text-slate-900">Your prediction history</h1>
+  <h1 class="mb-8 text-2xl font-semibold text-slate-900">{{ t(request, 'history.heading') }}</h1>
 
   {% if not entries %}
     <div class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-      <p class="text-slate-500">You haven't simulated any matches yet.</p>
-      <a href="/simulate" class="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
-        Simulate a match
+      <p class="text-slate-500">{{ t(request, 'history.empty') }}</p>
+      <a href="{{ url(request, '/simulate') }}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+        {{ t(request, 'history.simulate_a_match') }}
       </a>
     </div>
   {% else %}
     <div class="space-y-3">
       {% for entry in entries %}
-        {% if entry.prediction_id %}<a href="/history/{{ entry.id }}" class="block">{% endif %}
+        {% if entry.prediction_id %}<a href="{{ url(request, '/history/' ~ entry.id) }}" class="block">{% endif %}
         <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm {% if entry.prediction_id %}hover:border-emerald-300 hover:shadow{% endif %} transition">
           <div>
             <p class="font-medium text-slate-900">{{ entry.home_team }} vs {{ entry.away_team }}</p>
             <p class="text-xs text-slate-400">
               {{ entry.simulated_at.strftime("%d %b %Y, %H:%M") }}
-              {% if entry.neutral %}· Neutral venue{% endif %}
+              {% if entry.neutral %}· {{ t(request, 'history.neutral_venue') }}{% endif %}
             </p>
           </div>
           <div class="text-right">
             {% if entry.most_likely_score %}
               <p class="text-sm font-semibold text-slate-900">{{ entry.most_likely_score }}</p>
-              <p class="text-xs text-slate-400">most likely score</p>
+              <p class="text-xs text-slate-400">{{ t(request, 'history.most_likely_score') }}</p>
             {% else %}
-              <p class="text-xs text-slate-400">Details unavailable</p>
+              <p class="text-xs text-slate-400">{{ t(request, 'history.details_unavailable') }}</p>
             {% endif %}
           </div>
         </div>
@@ -38,12 +38,12 @@
 
     <div class="mt-6 flex justify-between">
       {% if page > 1 %}
-        <a href="/history?page={{ page - 1 }}" class="text-sm font-medium text-emerald-600 hover:underline">← Newer</a>
+        <a href="{{ url(request, '/history') }}?page={{ page - 1 }}" class="text-sm font-medium text-emerald-600 hover:underline">{{ t(request, 'history.newer') }}</a>
       {% else %}
         <span></span>
       {% endif %}
       {% if has_next %}
-        <a href="/history?page={{ page + 1 }}" class="text-sm font-medium text-emerald-600 hover:underline">Older →</a>
+        <a href="{{ url(request, '/history') }}?page={{ page + 1 }}" class="text-sm font-medium text-emerald-600 hover:underline">{{ t(request, 'history.older') }}</a>
       {% endif %}
     </div>
   {% endif %}

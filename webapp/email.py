@@ -5,13 +5,16 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from webapp.config import get_settings
+from webapp.i18n import DEFAULT_LOCALE, t_locale
 
 logger = logging.getLogger(__name__)
 
 _LOGO_URL = "https://ballingpronostics.site/assets/logo.png"
 
 
-def send_email(to: str, subject: str, body: str, code: str | None = None) -> bool:
+def send_email(
+    to: str, subject: str, body: str, code: str | None = None, locale: str = DEFAULT_LOCALE
+) -> bool:
     settings = get_settings()
     if not settings.smtp_host or not settings.smtp_user or not settings.smtp_password:
         logger.warning("Email not sent to %s (SMTP not configured): %s", to, subject)
@@ -22,7 +25,7 @@ def send_email(to: str, subject: str, body: str, code: str | None = None) -> boo
     message["From"] = settings.smtp_from or settings.smtp_user
     message["To"] = to
     message.attach(MIMEText(body, "plain"))
-    message.attach(MIMEText(_render_html(subject, body, code), "html"))
+    message.attach(MIMEText(_render_html(subject, body, code, locale), "html"))
 
     try:
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=10) as server:
@@ -35,7 +38,7 @@ def send_email(to: str, subject: str, body: str, code: str | None = None) -> boo
         return False
 
 
-def _render_html(subject: str, body: str, code: str | None) -> str:
+def _render_html(subject: str, body: str, code: str | None, locale: str = DEFAULT_LOCALE) -> str:
     body_html = "".join(
         f'<p style="margin:0 0 12px;">{line}</p>' for line in body.strip().split("\n") if line.strip()
     )
@@ -70,7 +73,7 @@ def _render_html(subject: str, body: str, code: str | None) -> str:
           </tr>
           <tr>
             <td style="padding:16px 32px 24px;color:#94a3b8;font-size:12px;text-align:center;border-top:1px solid #e2e8f0;">
-              Balling Predictions — automated match predictions
+              {t_locale(locale, "email.footer")}
             </td>
           </tr>
         </table>

@@ -86,16 +86,360 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "register.submit": {"en": "Create account", "fr": "Créer le compte"},
     "register.already_have": {"en": "Already have an account?", "fr": "Vous avez déjà un compte ?"},
     "register.login_link": {"en": "Log in", "fr": "Connexion"},
+
+    # --- verify_email.html ---
+    "verify.title": {"en": "Confirm your email — Balling Predictions",
+                      "fr": "Confirmez votre e-mail — Balling Predictions"},
+    "verify.heading": {"en": "Check your inbox", "fr": "Consultez votre boîte de réception"},
+    "verify.subtitle_pre": {"en": "We sent a 6-digit code to", "fr": "Nous avons envoyé un code à 6 chiffres à"},
+    "verify.subtitle_post": {"en": "Enter it below to confirm your email and continue.",
+                              "fr": "Saisissez-le ci-dessous pour confirmer votre e-mail et continuer."},
+    "verify.code_label": {"en": "Verification code", "fr": "Code de vérification"},
+    "verify.confirm_submit": {"en": "Confirm email", "fr": "Confirmer l'e-mail"},
+    "verify.resend_wait": {"en": "You can request a new code in {s}s.",
+                            "fr": "Vous pourrez demander un nouveau code dans {s}s."},
+    "verify.resend": {"en": "Resend code", "fr": "Renvoyer le code"},
+
+    # --- forgot_password.html ---
+    "forgot.title": {"en": "Forgot password — Balling Predictions",
+                      "fr": "Mot de passe oublié — Balling Predictions"},
+    "forgot.heading": {"en": "Reset your password", "fr": "Réinitialisez votre mot de passe"},
+    "forgot.subtitle": {
+        "en": "Enter your account email and we'll send you a code to reset your password.",
+        "fr": "Saisissez l'e-mail de votre compte et nous vous enverrons un code pour "
+              "réinitialiser votre mot de passe.",
+    },
+    "forgot.submit": {"en": "Send reset code", "fr": "Envoyer le code"},
+    "forgot.back_to_login": {"en": "Back to log in", "fr": "Retour à la connexion"},
+
+    # --- reset_password.html ---
+    "reset.title": {"en": "Reset password — Balling Predictions",
+                     "fr": "Réinitialiser le mot de passe — Balling Predictions"},
+    "reset.heading": {"en": "Enter your reset code", "fr": "Saisissez votre code de réinitialisation"},
+    "reset.subtitle_pre": {"en": "If an account exists for", "fr": "Si un compte existe pour"},
+    "reset.subtitle_post": {"en": "we've emailed a 6-digit code.",
+                             "fr": "nous vous avons envoyé un code à 6 chiffres par e-mail."},
+    "reset.new_password": {"en": "New password", "fr": "Nouveau mot de passe"},
+    "reset.submit": {"en": "Reset password", "fr": "Réinitialiser le mot de passe"},
+
+    # --- simulate ---
+    "simulate.title": {"en": "Simulate a Match — Balling Predictions",
+                        "fr": "Simuler un match — Balling Predictions"},
+    "simulate.subscribe_heading": {"en": "Subscribe to start predicting",
+                                    "fr": "Abonnez-vous pour commencer à pronostiquer"},
+    "simulate.subscribe_subtitle": {"en": "You need an active subscription to run match simulations.",
+                                     "fr": "Un abonnement actif est nécessaire pour simuler des matchs."},
+    "simulate.subscribe_now": {"en": "Subscribe now", "fr": "S'abonner maintenant"},
+    "simulate.quota_exceeded": {
+        "en": "You've used all {limit} distinct matchups for this cycle. It resets when your subscription renews.",
+        "fr": "Vous avez utilisé les {limit} confrontations de ce cycle. Le quota se réinitialise "
+              "au renouvellement de votre abonnement.",
+    },
+    "simulate.quota_warning": {"en": "{remaining} matchups left this cycle.",
+                                "fr": "Il vous reste {remaining} confrontations ce cycle."},
+    "simulate.pick_matchup": {"en": "Pick a matchup", "fr": "Choisissez un match"},
+    "simulate.league_label": {"en": "League", "fr": "Championnat"},
+    "simulate.choose_league": {"en": "Choose a league…", "fr": "Choisissez un championnat…"},
+    "simulate.league_hint": {
+        "en": "Narrows the team lists below to clubs/countries that have played in this competition.",
+        "fr": "Limite les listes d'équipes ci-dessous aux clubs/pays ayant joué dans cette compétition.",
+    },
+    "simulate.home_team": {"en": "Home team", "fr": "Équipe à domicile"},
+    "simulate.away_team": {"en": "Away team", "fr": "Équipe à l'extérieur"},
+    "simulate.select_league_first": {"en": "Select a league first", "fr": "Choisissez d'abord un championnat"},
+    "simulate.choose_team": {"en": "Choose a team…", "fr": "Choisissez une équipe…"},
+    "simulate.neutral_venue": {"en": "Neutral venue (no home advantage)",
+                                "fr": "Terrain neutre (pas d'avantage à domicile)"},
+    "simulate.submit": {"en": "Simulate match", "fr": "Simuler le match"},
+    "simulate.simulating": {"en": "Simulating…", "fr": "Simulation en cours…"},
+    "simulate.quota_footer": {"en": "{used} / {limit} distinct matchups used this cycle.",
+                               "fr": "{used} / {limit} confrontations utilisées ce cycle."},
+
+    # --- _result_card.html ---
+    "result.elo_line": {"en": "Elo {home_elo} vs {away_elo} · {n_sims} simulations",
+                         "fr": "Elo {home_elo} vs {away_elo} · {n_sims} simulations"},
+    "result.win_suffix": {"en": "win", "fr": "victoire"},
+    "result.draw": {"en": "Draw", "fr": "Nul"},
+    "result.expected_goals": {"en": "Expected goals", "fr": "Buts attendus"},
+    "result.most_likely_score": {"en": "Most likely score", "fr": "Score le plus probable"},
+    "result.saved_as": {"en": "Saved as", "fr": "Enregistré sous"},
+    "result.best_picks": {"en": "Best picks", "fr": "Meilleurs pronostics"},
+    "result.not_available_older": {"en": "Not available for this older prediction.",
+                                    "fr": "Non disponible pour cet ancien pronostic."},
+    "result.no_selection_cleared": {
+        "en": "No selection cleared the 60% confidence bar for this match.",
+        "fr": "Aucune sélection n'a atteint le seuil de confiance de 60% pour ce match.",
+    },
+    "result.scoreline_probabilities": {"en": "Scoreline probabilities", "fr": "Probabilités de score"},
+    "result.rows_cols": {"en": "Rows: {home} goals · Columns: {away} goals",
+                          "fr": "Lignes : buts {home} · Colonnes : buts {away}"},
+    "result.btts": {"en": "Both teams to score", "fr": "Les deux équipes marquent"},
+    "result.yes": {"en": "Yes", "fr": "Oui"},
+    "result.no": {"en": "No", "fr": "Non"},
+    "result.top_scorelines": {"en": "Top scorelines", "fr": "Meilleurs scores"},
+    "result.total_goals": {"en": "Total goals", "fr": "Total de buts"},
+    "result.line": {"en": "Line", "fr": "Ligne"},
+    "result.over": {"en": "Over", "fr": "Plus de"},
+    "result.under": {"en": "Under", "fr": "Moins de"},
+
+    # --- payment.html ---
+    "payment.title": {"en": "Subscribe — Balling Predictions", "fr": "Abonnement — Balling Predictions"},
+    "payment.heading": {"en": "Upgrade your plan", "fr": "Améliorez votre abonnement"},
+    "payment.subtitle": {
+        "en": "Every account already gets the Free plan (20 matchups/month) automatically — "
+              "no card, no risk. Ready for more? Pick a plan, enter your Mobile Money number "
+              "below, and approve the prompt on your phone — your plan activates automatically, "
+              "no waiting on manual review.",
+        "fr": "Chaque compte reçoit automatiquement le plan Gratuit (20 confrontations/mois) — "
+              "sans carte, sans risque. Prêt pour plus ? Choisissez un plan, saisissez votre "
+              "numéro Mobile Money ci-dessous et validez la demande sur votre téléphone — votre "
+              "abonnement s'active automatiquement, sans attendre de validation manuelle.",
+    },
+    "payment.selected": {"en": "Selected", "fr": "Sélectionné"},
+    "payment.operator_label": {"en": "Mobile Money operator", "fr": "Opérateur Mobile Money"},
+    "payment.phone_label": {"en": "Mobile Money number to charge", "fr": "Numéro Mobile Money à débiter"},
+    "payment.charge_notice_pre": {"en": "You'll be charged", "fr": "Vous serez débité de"},
+    "payment.pay_button": {"en": "Pay with Mobile Money", "fr": "Payer avec Mobile Money"},
+
+    # --- payment_submitted.html ---
+    "submitted.title": {"en": "Submitted — Balling Predictions", "fr": "Envoyé — Balling Predictions"},
+    "submitted.heading": {"en": "Submitted for review", "fr": "Envoyé pour vérification"},
+    "submitted.subtitle": {
+        "en": "We'll verify your payment and activate your subscription within 24 hours. "
+              "You'll be able to use Simulate as soon as it's approved.",
+        "fr": "Nous vérifierons votre paiement et activerons votre abonnement sous 24 heures. "
+              "Vous pourrez utiliser Simuler dès son approbation.",
+    },
+    "submitted.view_account": {"en": "View account status", "fr": "Voir l'état du compte"},
+
+    # --- account.html ---
+    "account.title": {"en": "Account — Balling Predictions", "fr": "Compte — Balling Predictions"},
+    "account.heading": {"en": "Account", "fr": "Compte"},
+    "account.logged_in_as": {"en": "Logged in as", "fr": "Connecté en tant que"},
+    "account.superadmin": {"en": "Superadmin account — unlimited access, no subscription needed.",
+                            "fr": "Compte super-administrateur — accès illimité, aucun abonnement requis."},
+    "account.subscription": {"en": "Subscription", "fr": "Abonnement"},
+    "account.free_plan": {"en": "Free plan", "fr": "Plan gratuit"},
+    "account.active_plan": {"en": "{plan} — renews or expires {date}",
+                             "fr": "{plan} — se renouvelle ou expire le {date}"},
+    "account.active_fallback": {"en": "Active", "fr": "Actif"},
+    "account.upgrade": {"en": "Upgrade", "fr": "Améliorer"},
+    "account.matchups_analyzed": {"en": "Matchups analyzed this cycle", "fr": "Confrontations analysées ce cycle"},
+    "account.distinct_matchups": {"en": "{used} / {limit} distinct matchups",
+                                   "fr": "{used} / {limit} confrontations distinctes"},
+    "account.no_subscription": {"en": "No active subscription yet.", "fr": "Aucun abonnement actif pour le moment."},
+    "account.subscribe_now": {"en": "Subscribe now", "fr": "S'abonner maintenant"},
+
+    # --- forbidden.html ---
+    "forbidden.title": {"en": "Not available — Balling Predictions", "fr": "Non disponible — Balling Predictions"},
+    "forbidden.heading": {"en": "Not available", "fr": "Non disponible"},
+    "forbidden.needs_subscription": {
+        "en": "This needs an active subscription, or you don't have access to this page.",
+        "fr": "Un abonnement actif est requis, ou vous n'avez pas accès à cette page.",
+    },
+    "forbidden.no_access": {"en": "You don't have access to this page.",
+                             "fr": "Vous n'avez pas accès à cette page."},
+    "forbidden.back_to_simulate": {"en": "Back to Simulate", "fr": "Retour à Simuler"},
+
+    # --- history_list.html / history_detail.html ---
+    "history.title": {"en": "History — Balling Predictions", "fr": "Historique — Balling Predictions"},
+    "history.heading": {"en": "Your prediction history", "fr": "Votre historique de pronostics"},
+    "history.empty": {"en": "You haven't simulated any matches yet.",
+                       "fr": "Vous n'avez encore simulé aucun match."},
+    "history.simulate_a_match": {"en": "Simulate a match", "fr": "Simuler un match"},
+    "history.neutral_venue": {"en": "Neutral venue", "fr": "Terrain neutre"},
+    "history.most_likely_score": {"en": "most likely score", "fr": "score le plus probable"},
+    "history.details_unavailable": {"en": "Details unavailable", "fr": "Détails indisponibles"},
+    "history.newer": {"en": "← Newer", "fr": "← Plus récent"},
+    "history.older": {"en": "Older →", "fr": "Plus ancien →"},
+    "history.back_to_history": {"en": "← Back to history", "fr": "← Retour à l'historique"},
+    "history.simulated_at": {"en": "Simulated {date}", "fr": "Simulé le {date}"},
+    "history.detail_title": {"en": "{home} vs {away} — History — Balling Predictions",
+                              "fr": "{home} vs {away} — Historique — Balling Predictions"},
+
+    # --- feedback.html ---
+    "feedback.title": {"en": "Feedback — Balling Predictions", "fr": "Avis — Balling Predictions"},
+    "feedback.heading": {"en": "Share your feedback", "fr": "Partagez votre avis"},
+    "feedback.subtitle": {
+        "en": "Still early days — tell us what's working, what's confusing, or what you'd want next.",
+        "fr": "C'est encore le début — dites-nous ce qui fonctionne, ce qui prête à confusion, "
+              "ou ce que vous aimeriez voir ensuite.",
+    },
+    "feedback.thanks": {"en": "Thanks — your feedback was sent.", "fr": "Merci — votre avis a bien été envoyé."},
+    "feedback.back_to_simulate": {"en": "Back to Simulate", "fr": "Retour à Simuler"},
+    "feedback.rating_label": {"en": "How's it going so far? (optional)",
+                               "fr": "Comment ça se passe jusqu'ici ? (facultatif)"},
+    "feedback.rough": {"en": "Rough", "fr": "Difficile"},
+    "feedback.great": {"en": "Great", "fr": "Excellent"},
+    "feedback.message_label": {"en": "Your feedback", "fr": "Votre avis"},
+    "feedback.message_placeholder": {"en": "What did you like? What would make this more useful?",
+                                      "fr": "Qu'avez-vous aimé ? Qu'est-ce qui rendrait ceci plus utile ?"},
+    "feedback.send": {"en": "Send feedback", "fr": "Envoyer l'avis"},
+
+    # --- payment_pending.html / _payment_status.html ---
+    "pending.title": {"en": "Payment pending — Balling Predictions",
+                       "fr": "Paiement en attente — Balling Predictions"},
+    "pending.check_phone": {"en": "Check your phone", "fr": "Vérifiez votre téléphone"},
+    "pending.prompt_sent": {
+        "en": "We sent a {operator} payment prompt to {phone} for {amount} FCFA. "
+              "Enter your Mobile Money PIN on your phone to approve it.",
+        "fr": "Nous avons envoyé une demande de paiement {operator} au {phone} pour "
+              "{amount} FCFA. Entrez votre code PIN Mobile Money sur votre téléphone pour l'approuver.",
+    },
+    "pending.waiting": {"en": "Waiting for confirmation — this page updates automatically.",
+                         "fr": "En attente de confirmation — cette page se met à jour automatiquement."},
+    "pending.confirmed": {"en": "Payment confirmed", "fr": "Paiement confirmé"},
+    "pending.active_redirect": {"en": "Your plan is now active. Redirecting…",
+                                 "fr": "Votre plan est maintenant actif. Redirection…"},
+    "pending.not_completed": {"en": "Payment not completed", "fr": "Paiement non abouti"},
+    "pending.not_completed_detail": {
+        "en": "The payment was cancelled, failed, or wasn't approved in time.",
+        "fr": "Le paiement a été annulé, a échoué, ou n'a pas été approuvé à temps.",
+    },
+    "pending.try_again": {"en": "Try again", "fr": "Réessayer"},
+
+    # --- transactional emails (webapp/email.py, customer.py send_email calls) ---
+    "email.verify.subject": {"en": "Confirm your Balling Predictions account",
+                              "fr": "Confirmez votre compte Balling Predictions"},
+    "email.verify.body": {
+        "en": "Enter this code to verify your account. It expires in {minutes} minutes.",
+        "fr": "Entrez ce code pour vérifier votre compte. Il expire dans {minutes} minutes.",
+    },
+    "email.reset.subject": {"en": "Reset your Balling Predictions password",
+                             "fr": "Réinitialisez votre mot de passe Balling Predictions"},
+    "email.reset.body": {
+        "en": "Enter this code to reset your password. It expires in {minutes} minutes. "
+              "If you didn't request this, you can ignore this email.",
+        "fr": "Entrez ce code pour réinitialiser votre mot de passe. Il expire dans {minutes} "
+              "minutes. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.",
+    },
+    "email.footer": {"en": "Balling Predictions — automated match predictions",
+                      "fr": "Balling Predictions — pronostics de match automatisés"},
 }
 
 
-def t(request: Request, key: str, **kwargs) -> str:
+# Per-plan copy (name / highlight badge / feature bullets) for the pricing
+# cards on /payment. Kept separate from webapp/plans.py — that module is the
+# source of truth for price/quota/duration (never translated), this is just
+# its display copy. Keyed by Plan.key so a plan's numbers and its copy stay
+# linked without either module importing the other.
+PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
+    "free": {
+        "en": {
+            "name": "Free",
+            "highlight": None,
+            "features": (
+                "20 distinct matchups / month",
+                "All markets: WDL, BTTS, over/under, scorelines",
+                "Full prediction history",
+                "No payment required",
+            ),
+        },
+        "fr": {
+            "name": "Gratuit",
+            "highlight": None,
+            "features": (
+                "20 confrontations distinctes / mois",
+                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Historique complet des pronostics",
+                "Aucun paiement requis",
+            ),
+        },
+    },
+    "monthly": {
+        "en": {
+            "name": "Monthly",
+            "highlight": None,
+            "features": (
+                "150 distinct matchups / month",
+                "All markets: WDL, BTTS, over/under, scorelines",
+                "Full prediction history",
+            ),
+        },
+        "fr": {
+            "name": "Mensuel",
+            "highlight": None,
+            "features": (
+                "150 confrontations distinctes / mois",
+                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Historique complet des pronostics",
+            ),
+        },
+    },
+    "semiannual": {
+        "en": {
+            "name": "6 Months",
+            "highlight": "Most popular",
+            "features": (
+                "1,200 distinct matchups (200/month)",
+                "All markets: WDL, BTTS, over/under, scorelines",
+                "Full prediction history",
+                "20% cheaper than paying monthly",
+            ),
+        },
+        "fr": {
+            "name": "6 mois",
+            "highlight": "Le plus populaire",
+            "features": (
+                "1 200 confrontations distinctes (200/mois)",
+                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Historique complet des pronostics",
+                "20 % moins cher qu'un paiement mensuel",
+            ),
+        },
+    },
+    "annual": {
+        "en": {
+            "name": "Yearly",
+            "highlight": "Best value",
+            "features": (
+                "3,000 distinct matchups (250/month)",
+                "All markets: WDL, BTTS, over/under, scorelines",
+                "Full prediction history",
+                "30% cheaper than paying monthly — best value",
+            ),
+        },
+        "fr": {
+            "name": "Annuel",
+            "highlight": "Meilleure offre",
+            "features": (
+                "3 000 confrontations distinctes (250/mois)",
+                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Historique complet des pronostics",
+                "30 % moins cher qu'un paiement mensuel — meilleure offre",
+            ),
+        },
+    },
+}
+
+
+def plan_t(request: Request, plan_key: str, field: str, default=None):
+    """Locale-aware plan copy, falling back to `default` (typically the
+    plain-English value already on the Plan dataclass) if a key or locale
+    entry is missing — so a new plan added to plans.py without matching
+    copy here still renders instead of breaking the page."""
     locale = getattr(request.state, "locale", DEFAULT_LOCALE)
+    entry = PLAN_TRANSLATIONS.get(plan_key, {})
+    copy = entry.get(locale) or entry.get(DEFAULT_LOCALE)
+    if copy is None:
+        return default
+    return copy.get(field, default)
+
+
+def t_locale(locale: str, key: str, **kwargs) -> str:
+    """Locale keyed directly by string rather than by Request — for call
+    sites with no request in scope, e.g. building an email body from a
+    user's stored locale preference."""
     entry = TRANSLATIONS.get(key)
     if entry is None:
         return key  # missing translation — loud on purpose, easy to spot
     text = entry.get(locale) or entry.get(DEFAULT_LOCALE, key)
     return text.format(**kwargs) if kwargs else text
+
+
+def t(request: Request, key: str, **kwargs) -> str:
+    locale = getattr(request.state, "locale", DEFAULT_LOCALE)
+    return t_locale(locale, key, **kwargs)
 
 
 def _strip_locale(path: str) -> str:

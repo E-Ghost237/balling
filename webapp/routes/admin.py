@@ -1,14 +1,14 @@
-from datetime import UTC, datetime, timedelta
-from uuid import UUID, uuid4
+from datetime import UTC, datetime
+from uuid import UUID
 
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import delete, func, select, update
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from webapp.admin_registry import ADMIN_JOBS, UNDERSTAT_LEAGUES
+from webapp.auth import activate_subscription_for_payment, reject_payment_request
 from webapp.deps import get_db, require_admin
 from webapp.jobs import celery_app, run_script_task
 from webapp.models import (
@@ -69,6 +69,7 @@ async def payments_queue(
             PaymentRequest.id,
             PaymentRequest.transaction_id,
             PaymentRequest.phone_number,
+            PaymentRequest.operator,
             PaymentRequest.amount_fcfa,
             PaymentRequest.plan,
             PaymentRequest.submitted_at,
@@ -97,37 +98,7 @@ async def approve_payment(
     if payment is None or payment["status"] != "PENDING":
         return RedirectResponse("/admin/payments", status_code=303)
 
-    plan = PLANS[payment["plan"]]
-    now = datetime.now(UTC)
-    expires_at = now + timedelta(days=plan.duration_days)
-    statement = (
-        pg_insert(Subscription)
-        .values(
-            id=uuid4(),
-            user_id=payment["user_id"],
-            status="ACTIVE",
-            plan=payment["plan"],
-            quota_limit=plan.quota,
-            cycle_started_at=now,
-            expires_at=expires_at,
-        )
-        .on_conflict_do_update(
-            index_elements=[Subscription.user_id],
-            set_={
-                "status": "ACTIVE",
-                "plan": payment["plan"],
-                "quota_limit": plan.quota,
-                "cycle_started_at": now,
-                "expires_at": expires_at,
-            },
-        )
-    )
-    await connection.execute(statement)
-    await connection.execute(
-        update(PaymentRequest)
-        .where(PaymentRequest.id == payment_id)
-        .values(status="APPROVED", reviewed_at=now)
-    )
+    await activate_subscription_for_payment(connection, payment)
     return RedirectResponse("/admin/payments", status_code=303)
 
 
@@ -137,11 +108,7 @@ async def reject_payment(
     user: User = Depends(require_admin),
     connection: AsyncConnection = Depends(get_db),
 ):
-    await connection.execute(
-        update(PaymentRequest)
-        .where(PaymentRequest.id == payment_id, PaymentRequest.status == "PENDING")
-        .values(status="REJECTED", reviewed_at=datetime.now(UTC))
-    )
+    await reject_payment_request(connection, payment_id)
     return RedirectResponse("/admin/payments", status_code=303)
 
 

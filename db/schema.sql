@@ -110,6 +110,14 @@ CREATE TABLE IF NOT EXISTS team_ratings (
     xg_against_avg  REAL,
     goals_for_avg   REAL,               -- fallback for matches/competitions with no xG
     goals_against_avg REAL,
+    points_per_game REAL,               -- decay-weighted avg points earned (3/1/0)
+    xpoints_per_game REAL,              -- same, but from each match's own xG-implied W/D/L odds
+                                         -- instead of the actual result — "deserved" points
+    momentum        REAL,               -- short-term (30d) vs long-term (180d) performance ratio;
+                                         -- >1 means trending up in form, <1 trending down
+    shot_diff_avg   REAL,               -- decay-weighted avg (shots for - shots against);
+    sot_diff_avg    REAL,               -- same for shots on target. NULL where a team has no
+                                         -- Understat shot data — coverage isn't universal
     UNIQUE(team_id, as_of_date)
 );
 

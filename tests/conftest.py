@@ -4,6 +4,9 @@ import tempfile
 from pathlib import Path
 
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://postgres:test@localhost:55432/balling_test")
+os.environ["MONETBIL_SERVICE_KEY"] = "test-service-key"
+os.environ["MONETBIL_SERVICE_SECRET"] = "test-service-secret"
+os.environ["MONETBIL_WEBHOOK_PATH"] = "test-webhook-secret"
 
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 _REAL_FOOTBALL_DB = _DATA_DIR / "football.db"

@@ -1,17 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Not available Balling Predictions{% endblock %}
+{% block title %}{{ t(request, 'forbidden.title') }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-md text-center">
-  <h1 class="mb-3 text-2xl font-semibold text-slate-900">Not available</h1>
+  <div class="mb-4 text-4xl">🔒</div>
+  <h1 class="mb-3 text-2xl font-semibold text-slate-900">{{ t(request, 'forbidden.heading') }}</h1>
   <p class="mb-8 text-slate-500">
     {% if user and not user.is_admin %}
-      This needs an active subscription, or you don't have access to this page.
+      {{ t(request, 'forbidden.needs_subscription') }}
     {% else %}
-      You don't have access to this page.
+      {{ t(request, 'forbidden.no_access') }}
     {% endif %}
   </p>
-  <a href="/simulate" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
-    Back to Simulate
+  <a href="{{ url(request, '/simulate') }}" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+    {{ t(request, 'forbidden.back_to_simulate') }}
   </a>
 </div>
 {% endblock %}

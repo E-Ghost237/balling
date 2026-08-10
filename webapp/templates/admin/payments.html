@@ -6,13 +6,13 @@
   <p class="text-slate-400">Nothing pending.</p>
 {% else %}
 <div class="space-y-4">
-  {% for id, transaction_id, phone_number, amount_fcfa, plan, submitted_at, login in rows %}
+  {% for id, transaction_id, phone_number, operator, amount_fcfa, plan, submitted_at, login in rows %}
   <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="mb-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-5">
+    <div class="mb-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-6">
       <div><p class="text-slate-500">User</p><p class="text-slate-900">{{ login }}</p></div>
       <div><p class="text-slate-500">Plan</p><p class="text-slate-900">{{ plan }}</p></div>
-      <div><p class="text-slate-500">Transaction ID</p><p class="text-slate-900">{{ transaction_id }}</p></div>
-      <div><p class="text-slate-500">Phone</p><p class="text-slate-900">{{ phone_number }}</p></div>
+      <div><p class="text-slate-500">Monetbil ID</p><p class="text-slate-900">{{ transaction_id }}</p></div>
+      <div><p class="text-slate-500">Phone</p><p class="text-slate-900">{{ phone_number }} {% if operator %}({{ "MTN" if operator == "CM_MTNMOBILEMONEY" else "Orange" }}){% endif %}</p></div>
       <div><p class="text-slate-500">Amount</p><p class="text-slate-900">{{ amount_fcfa }} FCFA</p></div>
     </div>
     <p class="mb-4 text-xs text-slate-400">Submitted {{ submitted_at.strftime("%d %b %Y, %H:%M") }}</p>

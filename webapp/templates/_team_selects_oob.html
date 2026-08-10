@@ -1,8 +1,8 @@
 {% macro team_options(teams, selected) %}
   {% if not teams %}
-    <option value="" disabled selected>Select a league first</option>
+    <option value="" disabled selected>{{ t(request, 'simulate.select_league_first') }}</option>
   {% else %}
-    <option value="" disabled selected>Choose a team…</option>
+    <option value="" disabled selected>{{ t(request, 'simulate.choose_team') }}</option>
     {% for team in teams %}
       <option value="{{ team }}" {% if team == selected %}selected{% endif %}>{{ team }}</option>
     {% endfor %}

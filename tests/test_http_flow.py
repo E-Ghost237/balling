@@ -7,8 +7,9 @@ from sqlalchemy import select, update
 
 from webapp.db import get_engine
 from webapp.main import app
-from webapp.models import Subscription, User
+from webapp.models import PaymentRequest, Subscription, User
 from webapp.otp import PURPOSE_EMAIL_VERIFY, PURPOSE_PASSWORD_RESET, create_verification_code
+from webapp.plans import PLANS
 from webapp.security import hash_password
 
 
@@ -440,13 +441,268 @@ async def test_payment_rejects_the_free_plan_key() -> None:
             "/payment",
             data={
                 "plan": "free",
-                "transaction_id": "TXN-FREE-1",
+                "operator": "CM_MTNMOBILEMONEY",
                 "phone_number": "670000000",
-                "amount_fcfa": 0,
             },
             follow_redirects=True,
         )
     assert "Choose a plan" in response.text
+
+
+async def test_payment_rejects_unknown_operator() -> None:
+    await _create_user("badoperator@example.com")
+    async with await _client() as client:
+        await client.post(
+            "/login", data={"login": "badoperator@example.com", "password": "hunter22"}
+        )
+        response = await client.post(
+            "/payment",
+            data={
+                "plan": "monthly",
+                "operator": "US_VENMO",
+                "phone_number": "670000000",
+            },
+            follow_redirects=True,
+        )
+    assert "Choose your Mobile Money operator" in response.text
+
+
+async def test_payment_submit_starts_a_monetbil_charge_for_the_exact_plan_price(
+    monkeypatch,
+) -> None:
+    """The amount charged comes from the PLANS registry (server-side), not
+    anything the user submits — this is what prevents someone picking the
+    yearly plan while only actually being charged the monthly price."""
+    from webapp import monetbil
+
+    captured = {}
+
+    async def fake_place_payment(**kwargs):
+        captured.update(kwargs)
+        return {"status": "REQUEST_ACCEPTED", "paymentId": "MB-PID-1"}
+
+    monkeypatch.setattr(monetbil, "place_payment", fake_place_payment)
+
+    await _create_user("payer-annual@example.com")
+    async with await _client() as client:
+        await client.post(
+            "/login", data={"login": "payer-annual@example.com", "password": "hunter22"}
+        )
+        response = await client.post(
+            "/payment",
+            data={"plan": "annual", "operator": "CM_MTNMOBILEMONEY", "phone_number": "670000001"},
+        )
+    assert response.status_code == 303
+    assert "/payment/pending/" in response.headers["location"]
+    assert captured["amount"] == PLANS["annual"].price_fcfa
+
+    async with get_engine().begin() as connection:
+        result = await connection.execute(
+            select(PaymentRequest.transaction_id, PaymentRequest.amount_fcfa, PaymentRequest.status)
+            .where(PaymentRequest.transaction_id == "MB-PID-1")
+        )
+        row = result.one()
+    assert row.amount_fcfa == PLANS["annual"].price_fcfa
+    assert row.status == "PENDING"
+
+
+async def test_payment_submit_surfaces_monetbil_rejection_without_creating_a_payment_row(
+    monkeypatch,
+) -> None:
+    from webapp import monetbil
+
+    async def fake_place_payment(**kwargs):
+        return {"status": "INVALID_MSISDN", "message": "invalid phonenumber"}
+
+    monkeypatch.setattr(monetbil, "place_payment", fake_place_payment)
+
+    await _create_user("badphone@example.com")
+    async with await _client() as client:
+        await client.post(
+            "/login", data={"login": "badphone@example.com", "password": "hunter22"}
+        )
+        response = await client.post(
+            "/payment",
+            data={"plan": "monthly", "operator": "CM_MTNMOBILEMONEY", "phone_number": "1"},
+            follow_redirects=True,
+        )
+    assert "invalid phonenumber" in response.text
+
+    async with get_engine().begin() as connection:
+        result = await connection.execute(select(PaymentRequest.id))
+        assert result.first() is None
+
+
+async def test_monetbil_webhook_activates_subscription_on_success() -> None:
+    from webapp.monetbil import sign
+
+    user_id = await _create_user("webhook-user@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="MB-PID-WEBHOOK",
+                phone_number="670000000", operator="CM_MTNMOBILEMONEY",
+                amount_fcfa=PLANS["monthly"].price_fcfa, plan="monthly",
+                status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+
+    params = {
+        "status": "success",
+        "amount": str(PLANS["monthly"].price_fcfa),
+        "payment_ref": str(payment_id),
+        "transaction_id": "op-txn-1",
+    }
+    params["sign"] = sign("test-service-secret", params)
+
+    async with await _client() as client:
+        response = await client.post(
+            "/webhooks/monetbil/test-webhook-secret", data=params
+        )
+    assert response.status_code == 200
+    assert response.text == "received"
+
+    async with get_engine().begin() as connection:
+        payment_row = (
+            await connection.execute(
+                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
+            )
+        ).scalar_one()
+        sub_row = (
+            await connection.execute(
+                select(Subscription.status, Subscription.plan, Subscription.quota_limit)
+                .where(Subscription.user_id == user_id)
+            )
+        ).one()
+    assert payment_row == "APPROVED"
+    assert sub_row.status == "ACTIVE"
+    assert sub_row.plan == "monthly"
+    assert sub_row.quota_limit == PLANS["monthly"].quota
+
+
+async def test_monetbil_webhook_rejects_wrong_secret_path() -> None:
+    async with await _client() as client:
+        response = await client.post("/webhooks/monetbil/not-the-real-secret", data={})
+    assert response.status_code == 404
+
+
+async def test_monetbil_webhook_rejects_bad_signature() -> None:
+    user_id = await _create_user("webhook-badsign@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="MB-PID-BADSIGN",
+                phone_number="670000000", amount_fcfa=PLANS["monthly"].price_fcfa,
+                plan="monthly", status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+    params = {
+        "status": "success", "amount": str(PLANS["monthly"].price_fcfa),
+        "payment_ref": str(payment_id), "sign": "not-a-real-signature",
+    }
+    async with await _client() as client:
+        response = await client.post("/webhooks/monetbil/test-webhook-secret", data=params)
+    assert response.status_code == 403
+
+    async with get_engine().begin() as connection:
+        status = (
+            await connection.execute(
+                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
+            )
+        ).scalar_one()
+    assert status == "PENDING"
+
+
+async def test_monetbil_webhook_does_not_activate_an_underpaid_notification() -> None:
+    """If the paid amount comes back lower than what we charged for the
+    plan, don't grant the plan — leave it PENDING for manual review."""
+    from webapp.monetbil import sign
+
+    user_id = await _create_user("underpaid@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="MB-PID-UNDERPAID",
+                phone_number="670000000", amount_fcfa=PLANS["annual"].price_fcfa,
+                plan="annual", status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+    params = {
+        "status": "success",
+        "amount": str(PLANS["monthly"].price_fcfa),  # much less than the annual price charged
+        "payment_ref": str(payment_id),
+    }
+    params["sign"] = sign("test-service-secret", params)
+    async with await _client() as client:
+        response = await client.post("/webhooks/monetbil/test-webhook-secret", data=params)
+    assert response.status_code == 200
+
+    async with get_engine().begin() as connection:
+        payment_status_, sub_row = (
+            await connection.execute(
+                select(PaymentRequest.status, Subscription.status)
+                .select_from(PaymentRequest)
+                .join(Subscription, Subscription.user_id == PaymentRequest.user_id, isouter=True)
+                .where(PaymentRequest.id == payment_id)
+            )
+        ).one()
+    assert payment_status_ == "PENDING"
+    assert sub_row is None
+
+
+async def test_payment_status_polling_reconciles_and_redirects_when_monetbil_confirms(
+    monkeypatch,
+) -> None:
+    from webapp import monetbil
+
+    async def fake_check_payment(payment_id: str):
+        return {"transaction": {"status": 1, "amount": PLANS["monthly"].price_fcfa}}
+
+    monkeypatch.setattr(monetbil, "check_payment", fake_check_payment)
+
+    user_id = await _create_user("polling-user@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="MB-PID-POLL",
+                phone_number="670000000", operator="CM_MTNMOBILEMONEY",
+                amount_fcfa=PLANS["monthly"].price_fcfa, plan="monthly",
+                status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+
+    async with await _client() as client:
+        await client.post(
+            "/login", data={"login": "polling-user@example.com", "password": "hunter22"}
+        )
+        response = await client.get(f"/payment/status/{payment_id}")
+    assert response.status_code == 200
+    assert "Payment confirmed" in response.text
+    assert response.headers.get("hx-redirect") is not None
+
+
+async def test_payment_pending_page_is_not_visible_to_another_user() -> None:
+    owner_id = await _create_user("pending-owner@example.com")
+    await _create_user("pending-intruder@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=owner_id, transaction_id="MB-PID-OWNERSHIP",
+                phone_number="670000000", amount_fcfa=PLANS["monthly"].price_fcfa,
+                plan="monthly", status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+    async with await _client() as client:
+        await client.post(
+            "/login", data={"login": "pending-intruder@example.com", "password": "hunter22"}
+        )
+        response = await client.get(f"/payment/pending/{payment_id}")
+    assert response.status_code == 404
 
 
 async def test_teams_for_league_returns_only_teams_in_that_league() -> None:
@@ -935,7 +1191,8 @@ async def test_failed_french_login_redirects_within_french_section() -> None:
         )
     assert response.status_code == 200
     assert str(response.url).startswith("http://test/fr/login")
-    assert "Content de vous revoir" in response.text  # still on the French page, not bounced to English
+    # still on the French page, not bounced to English
+    assert "Content de vous revoir" in response.text
 
 
 async def test_hreflang_alternate_links_present() -> None:

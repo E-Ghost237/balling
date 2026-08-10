@@ -8,7 +8,7 @@ from webapp.db import get_engine
 from webapp.deps import NotAuthenticated, NotAuthorized
 from webapp.i18n import LocaleMiddleware, localize_path
 from webapp.models import Base
-from webapp.routes import admin, customer, feedback, history
+from webapp.routes import admin, customer, feedback, history, webhooks
 from webapp.templates import ASSET_VERSION
 
 SITE_URL = "https://ballingpronostics.site"
@@ -102,3 +102,4 @@ app.include_router(customer.router)
 app.include_router(admin.router)
 app.include_router(history.router)
 app.include_router(feedback.router)
+app.include_router(webhooks.router)

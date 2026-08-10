@@ -22,6 +22,15 @@ class Settings(BaseSettings):
     smtp_from: str = ""
     verification_code_ttl_minutes: int = 10
     verification_resend_cooldown_seconds: int = 60
+    public_base_url: str = "https://ballingpronostics.site"
+    monetbil_service_key: str = ""
+    monetbil_service_secret: str = ""
+    # Random, hard-to-guess path segment for the notification webhook (in
+    # addition to signature verification) — Monetbil's own docs recommend
+    # an unguessable URL as a first layer before the signature check.
+    monetbil_webhook_path: str = ""
+    monetbil_country: str = "CM"
+    monetbil_currency: str = "XAF"
 
 
 @lru_cache(maxsize=1)
