@@ -7,7 +7,6 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -33,13 +32,14 @@ from webapp.otp import (
 from webapp.plans import PAID_PLANS, PLANS
 from webapp.quota import check_quota, distinct_matchup_count, record_usage
 from webapp.security import generate_session_token, hash_password
+from webapp.templates import templates
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-async def _send_verification_email(connection: AsyncConnection, user_id, login: str) -> None:
+async def _send_verification_email(connection: AsyncConnection, user_id, login: str) -> bool:
     code = await create_verification_code(connection, user_id, PURPOSE_EMAIL_VERIFY)
-    send_email(
+    return send_email(
         login,
         "Confirm your Balling Predictions account",
         f"Enter this code to verify your account. It expires in "
@@ -55,7 +55,6 @@ sys.path.insert(0, str(BASE_DIR))
 from flags import flag_code_for_country  # noqa: E402
 
 router = APIRouter()
-templates = Jinja2Templates(directory="webapp/templates")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -78,14 +77,16 @@ async def login_submit(
     next: str = Form("/simulate"),
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     user = await authenticate(connection, login, password)
     if user is None:
         return RedirectResponse(
             f"/login?error=Invalid+login+or+password&next={next}", status_code=303
         )
     if not user.is_admin and not user.email_verified:
-        await _send_verification_email(connection, user.id, user.login)
-        return RedirectResponse(f"/verify-email?login={user.login}", status_code=303)
+        sent = await _send_verification_email(connection, user.id, user.login)
+        suffix = "" if sent else "&error=Could+not+send+the+code+email+%E2%80%94+try+Resend"
+        return RedirectResponse(f"/verify-email?login={user.login}{suffix}", status_code=303)
     token = generate_session_token()
     await create_session(connection, user.id, token)
     response = RedirectResponse(next or "/simulate", status_code=303)
@@ -114,6 +115,7 @@ async def register_submit(
     confirm_password: str = Form(...),
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     if not first_name.strip() or not last_name.strip():
         return RedirectResponse(
             "/register?error=Enter+your+first+and+last+name", status_code=303
@@ -138,8 +140,9 @@ async def register_submit(
             created_at=datetime.now(UTC),
         )
     )
-    await _send_verification_email(connection, user_id, login)
-    return RedirectResponse(f"/verify-email?login={login}", status_code=303)
+    sent = await _send_verification_email(connection, user_id, login)
+    suffix = "" if sent else "&error=Could+not+send+the+code+email+%E2%80%94+try+Resend"
+    return RedirectResponse(f"/verify-email?login={login}{suffix}", status_code=303)
 
 
 @router.get("/verify-email", response_class=HTMLResponse)
@@ -148,6 +151,7 @@ async def verify_email_form(
     login: str,
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     user_result = await connection.execute(select(User.id).where(User.login == login))
     user_id = user_result.scalar_one_or_none()
     resend_wait_seconds = 0
@@ -169,6 +173,7 @@ async def verify_email_submit(
     code: str = Form(...),
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     user_result = await connection.execute(select(User).where(User.login == login))
     row = user_result.mappings().one_or_none()
     if row is None:
@@ -215,13 +220,17 @@ async def verify_email_resend(
     login: str = Form(...),
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     user_result = await connection.execute(select(User.id).where(User.login == login))
     user_id = user_result.scalar_one_or_none()
+    suffix = ""
     if user_id is not None:
         wait = await seconds_until_resend_allowed(connection, user_id, PURPOSE_EMAIL_VERIFY)
         if wait <= 0:
-            await _send_verification_email(connection, user_id, login)
-    return RedirectResponse(f"/verify-email?login={login}", status_code=303)
+            sent = await _send_verification_email(connection, user_id, login)
+            if not sent:
+                suffix = "&error=Could+not+send+the+code+email+%E2%80%94+please+try+again+shortly"
+    return RedirectResponse(f"/verify-email?login={login}{suffix}", status_code=303)
 
 
 @router.get("/forgot-password", response_class=HTMLResponse)
@@ -235,6 +244,7 @@ async def forgot_password_submit(
     login: str = Form(...),
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     user_result = await connection.execute(select(User.id).where(User.login == login))
     user_id = user_result.scalar_one_or_none()
     if user_id is not None:
@@ -255,7 +265,7 @@ async def forgot_password_submit(
 @router.get("/reset-password", response_class=HTMLResponse)
 async def reset_password_form(request: Request, login: str):
     return templates.TemplateResponse(
-        request, "reset_password.html", {"user": None, "login": login}
+        request, "reset_password.html", {"user": None, "login": login.strip().lower()}
     )
 
 
@@ -267,6 +277,7 @@ async def reset_password_submit(
     password: str = Form(...),
     connection: AsyncConnection = Depends(get_db),
 ):
+    login = login.strip().lower()
     user_result = await connection.execute(select(User.id).where(User.login == login))
     user_id = user_result.scalar_one_or_none()
     if user_id is None:

@@ -6,13 +6,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from webapp.config import get_settings
 from webapp.deps import get_db, require_login
 from webapp.models import UsageLog, User
+from webapp.templates import templates
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR / "modeling"))
@@ -22,7 +22,6 @@ sys.path.insert(0, str(BASE_DIR))
 from flags import flag_code_for_country  # noqa: E402
 
 router = APIRouter()
-templates = Jinja2Templates(directory="webapp/templates")
 
 PAGE_SIZE = 20
 

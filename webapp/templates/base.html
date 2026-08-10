@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Balling Predictions{% endblock %}</title>
-    <link rel="icon" href="/assets/favicon.png" />
-    <link rel="stylesheet" href="/static/css/app.css" />
+    <link rel="icon" href="/assets/favicon.png?v={{ asset_version }}" />
+    <link rel="stylesheet" href="/static/css/app.css?v={{ asset_version }}" />
     <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
     <script>
       function togglePasswordField(id, btn) {
@@ -17,13 +17,65 @@
       function toggleMobileNav() {
         document.getElementById("mobile-nav").classList.toggle("hidden");
       }
+
+      // App-styled replacement for window.confirm(), driven entirely by
+      // data-confirm-* attributes on the triggering button — see
+      // admin/users.html for usage.
+      let __confirmModalFormId = null;
+      function openConfirmModal(trigger) {
+        document.getElementById("confirm-modal-title").textContent = trigger.dataset.confirmTitle;
+        document.getElementById("confirm-modal-message").textContent = trigger.dataset.confirmMessage;
+        const confirmBtn = document.getElementById("confirm-modal-confirm-btn");
+        confirmBtn.textContent = trigger.dataset.confirmLabel;
+        confirmBtn.className = "rounded-lg px-4 py-2 text-sm font-medium text-white " + trigger.dataset.confirmButtonClass;
+        __confirmModalFormId = trigger.dataset.confirmForm;
+        document.getElementById("confirm-modal").classList.remove("hidden");
+      }
+      function closeConfirmModal() {
+        document.getElementById("confirm-modal").classList.add("hidden");
+        __confirmModalFormId = null;
+      }
+      function confirmModalAction() {
+        if (__confirmModalFormId) {
+          document.getElementById(__confirmModalFormId).submit();
+        }
+        closeConfirmModal();
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeConfirmModal();
+      });
+
+      // Detects a new deploy (the api process restarts on every deploy,
+      // which changes /__version__) and reloads automatically, so users
+      // never need to hard-refresh to pick up updated pages/styles.
+      (function watchForDeploy() {
+        let baseline = null;
+        async function check() {
+          try {
+            const res = await fetch("/__version__", { cache: "no-store" });
+            const { version } = await res.json();
+            if (baseline === null) {
+              baseline = version;
+            } else if (version !== baseline) {
+              location.reload();
+            }
+          } catch (err) {
+            // Offline or a deploy is mid-flight — just try again next tick.
+          }
+        }
+        check();
+        setInterval(check, 60000);
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) check();
+        });
+      })();
     </script>
   </head>
   <body class="h-full min-h-screen bg-page {% block page_bg %}{% endblock %} bg-slate-50 text-slate-900 antialiased">
     <nav class="border-b border-slate-200 bg-white shadow-sm">
       <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
         <a href="/" class="relative z-10 flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
-          <img src="/assets/logo.png" alt="Balling Predictions" class="h-16 w-auto sm:h-24"
+          <img src="/assets/logo.png?v={{ asset_version }}" alt="Balling Predictions" class="h-16 w-auto sm:h-24"
                onerror="this.replaceWith(Object.assign(document.createElement('span'), {textContent: '⚽ Balling Predictions'}))" />
         </a>
 
@@ -76,5 +128,19 @@
       {% endif %}
       {% block content %}{% endblock %}
     </main>
+
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+         onclick="if (event.target === this) closeConfirmModal()">
+      <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
+        <h2 id="confirm-modal-title" class="mb-2 text-lg font-semibold text-slate-900"></h2>
+        <p id="confirm-modal-message" class="mb-6 text-sm text-slate-600"></p>
+        <div class="flex justify-end gap-3">
+          <button type="button" onclick="closeConfirmModal()"
+            class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="button" id="confirm-modal-confirm-btn" onclick="confirmModalAction()"
+            class="rounded-lg px-4 py-2 text-sm font-medium text-white"></button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

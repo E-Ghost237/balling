@@ -3,14 +3,13 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from webapp.deps import get_db, require_login
 from webapp.models import Feedback, User
+from webapp.templates import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="webapp/templates")
 
 
 @router.get("/feedback", response_class=HTMLResponse)

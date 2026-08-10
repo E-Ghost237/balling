@@ -3,12 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 from webapp.db import get_engine
 from webapp.deps import NotAuthenticated, NotAuthorized
 from webapp.models import Base
 from webapp.routes import admin, customer, feedback, history
+from webapp.templates import ASSET_VERSION
 
 
 @asynccontextmanager
@@ -23,7 +23,12 @@ app = FastAPI(title="Balling Predictions", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="webapp/static"), name="static")
 app.mount("/assets", StaticFiles(directory="static"), name="assets")
 
-templates = Jinja2Templates(directory="webapp/templates")
+
+@app.get("/__version__")
+async def app_version() -> dict[str, str]:
+    """Polled client-side (see base.html) so an open tab notices a deploy
+    happened and reloads itself instead of showing stale markup/CSS."""
+    return {"version": ASSET_VERSION}
 
 
 @app.exception_handler(NotAuthenticated)

@@ -649,8 +649,8 @@ async def test_admin_cannot_deactivate_or_delete_another_admin_or_self() -> None
             f"/admin/users/{other_admin_id}/deactivate", follow_redirects=True
         )
         self_response = await client.post(f"/admin/users/{boss_id}/delete", follow_redirects=True)
-    assert "Can't deactivate that account" in other_admin_response.text
-    assert "Can't delete that account" in self_response.text
+    assert "Cannot deactivate that account" in other_admin_response.text
+    assert "Cannot delete that account" in self_response.text
 
     async with get_engine().begin() as connection:
         still_admin = (
@@ -716,3 +716,108 @@ async def test_users_list_shows_plan_and_quota_used() -> None:
     assert response.status_code == 200
     assert "Monthly" in response.text
     assert "0 / 150" in response.text
+
+
+async def test_users_list_quota_used_is_scoped_per_user_not_shared() -> None:
+    """Regression test: a broken correlated subquery once computed the same
+    (wrong) quota_used for every row instead of scoping it to each user's
+    own usage_log rows — this needs at least two users with different
+    usage counts to catch, which the single-user test above cannot."""
+    from webapp.models import UsageLog
+
+    now = datetime.now(UTC)
+    heavy_user_id = await _create_user("heavy-user@example.com")
+    light_user_id = await _create_user("light-user@example.com")
+    async with get_engine().begin() as connection:
+        for user_id, quota_limit in ((heavy_user_id, 150), (light_user_id, 150)):
+            await connection.execute(
+                Subscription.__table__.insert().values(
+                    id=uuid4(), user_id=user_id, status="ACTIVE", plan="monthly",
+                    quota_limit=quota_limit, cycle_started_at=now,
+                    expires_at=now + timedelta(days=30),
+                )
+            )
+        for i in range(3):
+            await connection.execute(
+                UsageLog.__table__.insert().values(
+                    id=uuid4(), user_id=heavy_user_id, home_team=f"H{i}", away_team=f"A{i}",
+                    neutral=False, simulated_at=now,
+                )
+            )
+        await connection.execute(
+            UsageLog.__table__.insert().values(
+                id=uuid4(), user_id=light_user_id, home_team="X", away_team="Y",
+                neutral=False, simulated_at=now,
+            )
+        )
+    await _seed_admin()
+    async with await _client() as client:
+        await client.post("/login", data={"login": "boss", "password": "hunter22"})
+        response = await client.get("/admin/users")
+    assert response.status_code == 200
+    assert "3 / 150" in response.text
+    assert "1 / 150" in response.text
+
+
+async def test_register_normalizes_whitespace_and_casing_in_email() -> None:
+    async with await _client() as client:
+        await client.post(
+            "/register",
+            data={
+                "first_name": "New", "last_name": "User",
+                "login": "  MixedCase@Example.com  ",
+                "password": "hunter22", "confirm_password": "hunter22",
+            },
+            follow_redirects=True,
+        )
+    async with get_engine().begin() as connection:
+        result = await connection.execute(
+            select(User.login).where(User.login == "mixedcase@example.com")
+        )
+        stored_login = result.scalar_one_or_none()
+    assert stored_login == "mixedcase@example.com"
+
+
+async def test_login_is_case_and_whitespace_insensitive() -> None:
+    await _create_user("caseinsensitive@example.com")
+    async with await _client() as client:
+        response = await client.post(
+            "/login",
+            data={"login": "  CaseInsensitive@Example.com  ", "password": "hunter22"},
+            follow_redirects=True,
+        )
+    assert "Subscribe to start predicting" in response.text  # reached the app, not bounced
+
+
+async def test_failed_verification_email_surfaces_error_instead_of_silence(monkeypatch) -> None:
+    import webapp.routes.customer as customer_module
+
+    monkeypatch.setattr(customer_module, "send_email", lambda *a, **k: False)
+    async with await _client() as client:
+        response = await client.post(
+            "/register",
+            data={
+                "first_name": "New", "last_name": "User",
+                "login": "emailfails@example.com",
+                "password": "hunter22", "confirm_password": "hunter22",
+            },
+            follow_redirects=True,
+        )
+    assert "Could not send the code email" in response.text
+
+
+async def test_resend_reports_failure_when_smtp_fails(monkeypatch) -> None:
+    import webapp.routes.customer as customer_module
+
+    # No prior verification code exists for this user, so the 60s resend
+    # cooldown (otp.seconds_until_resend_allowed) is not in play here —
+    # isolates the SMTP-failure path from the cooldown path.
+    await _create_user("resendfails@example.com", email_verified=False)
+    monkeypatch.setattr(customer_module, "send_email", lambda *a, **k: False)
+    async with await _client() as client:
+        response = await client.post(
+            "/verify-email/resend",
+            data={"login": "resendfails@example.com"},
+            follow_redirects=True,
+        )
+    assert "Could not send the code email" in response.text

@@ -4,7 +4,6 @@ from uuid import UUID, uuid4
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -22,9 +21,9 @@ from webapp.models import (
     VerificationCode,
 )
 from webapp.plans import PLANS
+from webapp.templates import templates
 
 router = APIRouter(prefix="/admin")
-templates = Jinja2Templates(directory="webapp/templates")
 
 
 @router.get("", response_class=HTMLResponse)
@@ -244,19 +243,22 @@ async def users_list(
     user: User = Depends(require_admin),
     connection: AsyncConnection = Depends(get_db),
 ):
-    quota_used_subq = (
-        select(func.count())
-        .select_from(
-            select(UsageLog.home_team, UsageLog.away_team, UsageLog.neutral)
-            .where(
-                UsageLog.user_id == User.id,
-                UsageLog.simulated_at >= Subscription.cycle_started_at,
-            )
-            .distinct()
-            .subquery()
+    # .correlate() must be called on the inner DISTINCT select (the one
+    # that actually references User.id / Subscription.cycle_started_at) —
+    # calling it on the outer count()-wrapper instead silently produces an
+    # UNcorrelated subquery (usage_log CROSS JOIN users CROSS JOIN
+    # subscriptions), which computed the same wrong total for every row.
+    quota_used_inner = (
+        select(UsageLog.home_team, UsageLog.away_team, UsageLog.neutral)
+        .where(
+            UsageLog.user_id == User.id,
+            UsageLog.simulated_at >= Subscription.cycle_started_at,
         )
+        .distinct()
         .correlate(User, Subscription)
-        .scalar_subquery()
+    )
+    quota_used_subq = (
+        select(func.count()).select_from(quota_used_inner.subquery()).scalar_subquery()
     )
     result = await connection.execute(
         select(
@@ -291,7 +293,7 @@ async def deactivate_user(
     is_target_admin = result.scalar_one_or_none()
     if is_target_admin is None or is_target_admin or target_id == user.id:
         return RedirectResponse(
-            "/admin/users?error=Can%27t+deactivate+that+account", status_code=303
+            "/admin/users?error=Cannot+deactivate+that+account", status_code=303
         )
     await connection.execute(update(User).where(User.id == target_id).values(is_active=False))
     await connection.execute(delete(Session).where(Session.user_id == target_id))
@@ -317,7 +319,9 @@ async def delete_user(
     result = await connection.execute(select(User.is_admin).where(User.id == target_id))
     is_target_admin = result.scalar_one_or_none()
     if is_target_admin is None or is_target_admin or target_id == user.id:
-        return RedirectResponse("/admin/users?error=Can%27t+delete+that+account", status_code=303)
+        return RedirectResponse(
+            "/admin/users?error=Cannot+delete+that+account", status_code=303
+        )
     await connection.execute(delete(UsageLog).where(UsageLog.user_id == target_id))
     await connection.execute(delete(Feedback).where(Feedback.user_id == target_id))
     await connection.execute(delete(PaymentRequest).where(PaymentRequest.user_id == target_id))
