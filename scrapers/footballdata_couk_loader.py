@@ -187,7 +187,21 @@ def load_main_league(conn, league_key, cfg, from_season, to_season):
 
         season_id = get_or_create_season(conn, league_id, year)
         count = 0
+        div_mismatches = 0
         for i, row in enumerate(rows):
+            # Seen in practice for an early-season file (SP2 served SC2's
+            # Scottish League One rows instead of Spain's Segunda División)
+            # — the URL's own code is not a guarantee of what's actually in
+            # the file, especially early in a season when the real file may
+            # not be published yet. Trust the CSV's own "Div" column over
+            # the URL and skip anything that doesn't match, rather than
+            # silently loading another league/country's data under this
+            # league's id.
+            div = row.get("Div")
+            if div and div != cfg["code"]:
+                div_mismatches += 1
+                continue
+
             home_name = resolve_column(row, "home_team")
             away_name = resolve_column(row, "away_team")
             home_goals_raw = resolve_column(row, "home_goals")
@@ -213,7 +227,15 @@ def load_main_league(conn, league_key, cfg, from_season, to_season):
 
         conn.commit()
         loaded_total += count
-        print(f"    {cfg['name']} {year}/{year+1}: {count} matches loaded")
+        if div_mismatches:
+            print(
+                f"    {cfg['name']} {year}/{year+1}: {count} matches loaded, "
+                f"{div_mismatches} rows SKIPPED (Div code mismatch — source "
+                f"served the wrong league's data for this URL, likely a "
+                f"placeholder before {cfg['code']}'s real file is published)"
+            )
+        else:
+            print(f"    {cfg['name']} {year}/{year+1}: {count} matches loaded")
 
     return loaded_total
 
@@ -227,7 +249,15 @@ def load_extra_league(conn, league_key, cfg):
         return 0
 
     count_by_season = {}
+    country_mismatches = 0
     for i, row in enumerate(rows):
+        # Same defensive check as load_main_league's "Div" validation, for
+        # this format's equivalent column — see the comment there.
+        row_country = row.get("Country")
+        if row_country and row_country != cfg["country"]:
+            country_mismatches += 1
+            continue
+
         home_name = resolve_column(row, "home_team")
         away_name = resolve_column(row, "away_team")
         home_goals_raw = resolve_column(row, "home_goals")
@@ -261,7 +291,9 @@ def load_extra_league(conn, league_key, cfg):
 
     conn.commit()
     total = sum(count_by_season.values())
-    print(f"    {cfg['name']}: {total} matches loaded across {len(count_by_season)} seasons")
+    suffix = f", {country_mismatches} rows SKIPPED (Country mismatch)" if country_mismatches else ""
+    print(f"    {cfg['name']}: {total} matches loaded across "
+          f"{len(count_by_season)} seasons{suffix}")
     return total
 
 
