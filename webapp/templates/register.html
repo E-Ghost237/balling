@@ -1,56 +1,58 @@
 {% extends "base.html" %}
-{% block title %}Create a Free Account — Balling Predictions{% endblock %}
-{% block description %}Create a free Balling Predictions account and get 20 free football match predictions every month — win/draw/loss, correct score, BTTS and over/under, no card required.{% endblock %}
+{% block title %}{{ t(request, 'register.title') }}{% endblock %}
+{% block description %}{{ t(request, 'register.description') }}{% endblock %}
 {% block page_bg %}bg-page-register{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-  <h1 class="mb-2 text-2xl font-semibold text-slate-900">Create your account</h1>
-  <p class="mb-8 text-sm text-slate-500">We'll email you a code to confirm it's really you before you can subscribe.</p>
-  <form method="post" action="/register" class="space-y-4" onsubmit="return checkPasswordsMatch()">
+  <h1 class="mb-2 text-2xl font-semibold text-slate-900">{{ t(request, 'register.heading') }}</h1>
+  <p class="mb-8 text-sm text-slate-500">{{ t(request, 'register.subtitle') }}</p>
+  <form method="post" action="{{ url(request, '/register') }}" class="space-y-4" onsubmit="return checkPasswordsMatch()">
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm text-slate-600">First name</label>
+        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'register.first_name') }}</label>
         <input name="first_name" type="text" required autofocus
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">Last name</label>
+        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'register.last_name') }}</label>
         <input name="last_name" type="text" required
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
       </div>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">Email</label>
+      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'common.email') }}</label>
       <input name="login" type="email" required
         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">Password</label>
+      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'common.password') }}</label>
       <div class="relative">
         <input id="password" name="password" type="password" required minlength="8"
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-16 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
         <button type="button" onclick="togglePasswordField('password', this)"
-          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">Show</button>
+          data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
+          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">{{ t(request, 'common.show') }}</button>
       </div>
-      <p class="mt-1 text-xs text-slate-400">At least 8 characters.</p>
+      <p class="mt-1 text-xs text-slate-400">{{ t(request, 'register.password_hint') }}</p>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">Confirm password</label>
+      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'register.confirm_password') }}</label>
       <div class="relative">
         <input id="confirm_password" name="confirm_password" type="password" required minlength="8"
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-16 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
         <button type="button" onclick="togglePasswordField('confirm_password', this)"
-          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">Show</button>
+          data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
+          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">{{ t(request, 'common.show') }}</button>
       </div>
-      <p id="mismatch-warning" class="mt-1 hidden text-xs text-red-600">Passwords do not match.</p>
+      <p id="mismatch-warning" class="mt-1 hidden text-xs text-red-600">{{ t(request, 'register.mismatch') }}</p>
     </div>
     <button type="submit"
       class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
-      Create account
+      {{ t(request, 'register.submit') }}
     </button>
   </form>
   <p class="mt-6 text-center text-sm text-slate-500">
-    Already have an account? <a href="/login" class="font-medium text-emerald-600 hover:underline">Log in</a>
+    {{ t(request, 'register.already_have') }} <a href="{{ url(request, '/login') }}" class="font-medium text-emerald-600 hover:underline">{{ t(request, 'register.login_link') }}</a>
   </p>
 </div>
 <script>

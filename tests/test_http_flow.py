@@ -900,3 +900,47 @@ async def test_users_list_shows_never_for_free_plan_instead_of_the_100_year_date
     assert response.status_code == 200
     assert "Never" in response.text
     assert "2126" not in response.text
+
+
+async def test_french_login_page_renders_in_french() -> None:
+    async with await _client() as client:
+        response = await client.get("/fr/login")
+    assert response.status_code == 200
+    assert "Content de vous revoir" in response.text
+    assert "Connexion" in response.text
+    assert 'lang="fr"' in response.text
+
+
+async def test_french_register_page_renders_in_french() -> None:
+    async with await _client() as client:
+        response = await client.get("/fr/register")
+    assert response.status_code == 200
+    assert "Créez votre compte" in response.text
+
+
+async def test_english_login_page_unaffected_by_french_route() -> None:
+    async with await _client() as client:
+        response = await client.get("/login")
+    assert response.status_code == 200
+    assert "Welcome back" in response.text
+    assert 'lang="en"' in response.text
+
+
+async def test_failed_french_login_redirects_within_french_section() -> None:
+    async with await _client() as client:
+        response = await client.post(
+            "/fr/login",
+            data={"login": "nobody@example.com", "password": "wrong"},
+            follow_redirects=True,
+        )
+    assert response.status_code == 200
+    assert str(response.url).startswith("http://test/fr/login")
+    assert "Content de vous revoir" in response.text  # still on the French page, not bounced to English
+
+
+async def test_hreflang_alternate_links_present() -> None:
+    async with await _client() as client:
+        response = await client.get("/login")
+    assert 'hreflang="en"' in response.text
+    assert 'hreflang="fr"' in response.text
+    assert 'href="http://test/fr/login"' in response.text

@@ -1,37 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Log in — Balling Predictions | Free Football Match Predictions{% endblock %}
-{% block description %}Log in to Balling Predictions for free, data-driven football match predictions — win/draw/loss probabilities, correct scorelines, BTTS and over/under across 700+ teams in Europe's top leagues.{% endblock %}
+{% block title %}{{ t(request, 'login.title') }}{% endblock %}
+{% block description %}{{ t(request, 'login.description') }}{% endblock %}
 {% block page_bg %}bg-page-login{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-  <h1 class="mb-2 text-2xl font-semibold text-slate-900">Welcome back</h1>
-  <p class="mb-8 text-sm text-slate-500">Log in to run predictions on any matchup.</p>
-  <form method="post" action="/login" class="space-y-4">
-    <input type="hidden" name="next" value="{{ next }}" />
+  <h1 class="mb-2 text-2xl font-semibold text-slate-900">{{ t(request, 'login.heading') }}</h1>
+  <p class="mb-8 text-sm text-slate-500">{{ t(request, 'login.subtitle') }}</p>
+  <form method="post" action="{{ url(request, '/login') }}" class="space-y-4">
+    <input type="hidden" name="next" value="{{ url(request, next) }}" />
     <div>
-      <label class="mb-1 block text-sm text-slate-600">Email</label>
+      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'common.email') }}</label>
       <input name="login" type="email" required autofocus
         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
     </div>
     <div>
       <div class="mb-1 flex items-center justify-between">
-        <label class="block text-sm text-slate-600">Password</label>
-        <a href="/forgot-password" class="text-xs text-emerald-600 hover:underline">Forgot password?</a>
+        <label class="block text-sm text-slate-600">{{ t(request, 'common.password') }}</label>
+        <a href="{{ url(request, '/forgot-password') }}" class="text-xs text-emerald-600 hover:underline">{{ t(request, 'login.forgot_password') }}</a>
       </div>
       <div class="relative">
         <input id="password" name="password" type="password" required
           class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-16 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
         <button type="button" onclick="togglePasswordField('password', this)"
-          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">Show</button>
+          data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
+          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">{{ t(request, 'common.show') }}</button>
       </div>
     </div>
     <button type="submit"
       class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
-      Log in
+      {{ t(request, 'login.submit') }}
     </button>
   </form>
   <p class="mt-6 text-center text-sm text-slate-500">
-    New here? <a href="/register" class="font-medium text-emerald-600 hover:underline">Create an account</a>
+    {{ t(request, 'login.new_here') }} <a href="{{ url(request, '/register') }}" class="font-medium text-emerald-600 hover:underline">{{ t(request, 'login.create_account') }}</a>
   </p>
 </div>
 {% endblock %}

@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from webapp.db import get_engine
 from webapp.deps import NotAuthenticated, NotAuthorized
+from webapp.i18n import LocaleMiddleware, localize_path
 from webapp.models import Base
 from webapp.routes import admin, customer, feedback, history
 from webapp.templates import ASSET_VERSION
@@ -22,6 +23,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Balling Predictions", lifespan=lifespan)
+app.add_middleware(LocaleMiddleware)
 app.mount("/static", StaticFiles(directory="webapp/static"), name="static")
 app.mount("/assets", StaticFiles(directory="static"), name="assets")
 
@@ -61,19 +63,39 @@ async def robots_txt() -> PlainTextResponse:
 @app.get("/sitemap.xml", include_in_schema=False)
 async def sitemap_xml() -> Response:
     pages = ["/", "/login", "/register"]
-    urls = "".join(f"<url><loc>{SITE_URL}{p}</loc></url>" for p in pages)
-    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
+    entries = []
+    for p in pages:
+        en_url, fr_url = f"{SITE_URL}{p}", f"{SITE_URL}{localize_path(p, 'fr')}"
+        entries.append(
+            f'<url><loc>{en_url}</loc>'
+            f'<xhtml:link rel="alternate" hreflang="en" href="{en_url}"/>'
+            f'<xhtml:link rel="alternate" hreflang="fr" href="{fr_url}"/></url>'
+        )
+        entries.append(
+            f'<url><loc>{fr_url}</loc>'
+            f'<xhtml:link rel="alternate" hreflang="en" href="{en_url}"/>'
+            f'<xhtml:link rel="alternate" hreflang="fr" href="{fr_url}"/></url>'
+        )
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(entries) + "</urlset>"
+    )
     return Response(content=xml, media_type="application/xml")
 
 
 @app.exception_handler(NotAuthenticated)
 async def handle_not_authenticated(request: Request, exc: NotAuthenticated) -> RedirectResponse:
-    return RedirectResponse(url=f"/login?next={request.url.path}", status_code=303)
+    next_path = localize_path(request.url.path, getattr(request.state, "locale", "en"))
+    login_path = localize_path("/login", getattr(request.state, "locale", "en"))
+    return RedirectResponse(url=f"{login_path}?next={next_path}", status_code=303)
 
 
 @app.exception_handler(NotAuthorized)
 async def handle_not_authorized(request: Request, exc: NotAuthorized) -> RedirectResponse:
-    return RedirectResponse(url="/forbidden", status_code=303)
+    return RedirectResponse(
+        url=localize_path("/forbidden", getattr(request.state, "locale", "en")), status_code=303
+    )
 
 
 app.include_router(customer.router)

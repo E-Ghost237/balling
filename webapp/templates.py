@@ -2,6 +2,8 @@ import time
 
 from fastapi.templating import Jinja2Templates
 
+from webapp.i18n import localize_path, t, url_for_locale
+
 # Sourced from process start time, so it changes on every deploy (deploy.sh
 # always recreates the api container = a fresh process). Used both to
 # cache-bust static assets in base.html and to let the browser detect "the
@@ -10,3 +12,6 @@ ASSET_VERSION = str(int(time.time()))
 
 templates = Jinja2Templates(directory="webapp/templates")
 templates.env.globals["asset_version"] = ASSET_VERSION
+templates.env.globals["t"] = t
+templates.env.globals["url"] = url_for_locale
+templates.env.globals["localize"] = localize_path

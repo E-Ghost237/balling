@@ -6,7 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Form, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -21,6 +21,7 @@ from webapp.auth import (
 from webapp.config import get_settings
 from webapp.deps import get_db, get_optional_user, require_login
 from webapp.email import send_email
+from webapp.i18n import redirect
 from webapp.models import PaymentRequest, Subscription, User
 from webapp.otp import (
     PURPOSE_EMAIL_VERIFY,
@@ -60,8 +61,8 @@ router = APIRouter()
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, user: User | None = Depends(get_optional_user)):
     if user is None:
-        return RedirectResponse("/login")
-    return RedirectResponse("/simulate")
+        return redirect(request, "/login")
+    return redirect(request, "/simulate")
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -80,16 +81,14 @@ async def login_submit(
     login = login.strip().lower()
     user = await authenticate(connection, login, password)
     if user is None:
-        return RedirectResponse(
-            f"/login?error=Invalid+login+or+password&next={next}", status_code=303
-        )
+        return redirect(request, f"/login?error=Invalid+login+or+password&next={next}")
     if not user.is_admin and not user.email_verified:
         sent = await _send_verification_email(connection, user.id, user.login)
         suffix = "" if sent else "&error=Could+not+send+the+code+email+%E2%80%94+try+Resend"
-        return RedirectResponse(f"/verify-email?login={user.login}{suffix}", status_code=303)
+        return redirect(request, f"/verify-email?login={user.login}{suffix}")
     token = generate_session_token()
     await create_session(connection, user.id, token)
-    response = RedirectResponse(next or "/simulate", status_code=303)
+    response = redirect(request, next or "/simulate")
     response.set_cookie(
         get_settings().session_cookie_name,
         token,
@@ -117,16 +116,14 @@ async def register_submit(
 ):
     login = login.strip().lower()
     if not first_name.strip() or not last_name.strip():
-        return RedirectResponse(
-            "/register?error=Enter+your+first+and+last+name", status_code=303
-        )
+        return redirect(request, "/register?error=Enter+your+first+and+last+name")
     if not _EMAIL_RE.match(login):
-        return RedirectResponse("/register?error=Enter+a+valid+email+address", status_code=303)
+        return redirect(request, "/register?error=Enter+a+valid+email+address")
     if password != confirm_password:
-        return RedirectResponse("/register?error=Passwords+do+not+match", status_code=303)
+        return redirect(request, "/register?error=Passwords+do+not+match")
     existing = await connection.execute(select(User.id).where(User.login == login))
     if existing.first() is not None:
-        return RedirectResponse("/register?error=That+login+is+already+registered", status_code=303)
+        return redirect(request, "/register?error=That+login+is+already+registered")
     user_id = uuid4()
     await connection.execute(
         User.__table__.insert().values(
@@ -142,7 +139,7 @@ async def register_submit(
     )
     sent = await _send_verification_email(connection, user_id, login)
     suffix = "" if sent else "&error=Could+not+send+the+code+email+%E2%80%94+try+Resend"
-    return RedirectResponse(f"/verify-email?login={login}{suffix}", status_code=303)
+    return redirect(request, f"/verify-email?login={login}{suffix}")
 
 
 @router.get("/verify-email", response_class=HTMLResponse)
@@ -177,12 +174,10 @@ async def verify_email_submit(
     user_result = await connection.execute(select(User).where(User.login == login))
     row = user_result.mappings().one_or_none()
     if row is None:
-        return RedirectResponse("/register", status_code=303)
+        return redirect(request, "/register")
     ok = await verify_code(connection, row["id"], PURPOSE_EMAIL_VERIFY, code)
     if not ok:
-        return RedirectResponse(
-            f"/verify-email?login={login}&error=Invalid+or+expired+code", status_code=303
-        )
+        return redirect(request, f"/verify-email?login={login}&error=Invalid+or+expired+code")
     await connection.execute(
         User.__table__.update().where(User.id == row["id"]).values(email_verified=True)
     )
@@ -203,7 +198,7 @@ async def verify_email_submit(
     )
     token = generate_session_token()
     await create_session(connection, row["id"], token)
-    response = RedirectResponse("/simulate", status_code=303)
+    response = redirect(request, "/simulate")
     response.set_cookie(
         get_settings().session_cookie_name,
         token,
@@ -230,7 +225,7 @@ async def verify_email_resend(
             sent = await _send_verification_email(connection, user_id, login)
             if not sent:
                 suffix = "&error=Could+not+send+the+code+email+%E2%80%94+please+try+again+shortly"
-    return RedirectResponse(f"/verify-email?login={login}{suffix}", status_code=303)
+    return redirect(request, f"/verify-email?login={login}{suffix}")
 
 
 @router.get("/forgot-password", response_class=HTMLResponse)
@@ -259,7 +254,7 @@ async def forgot_password_submit(
         )
     # Same redirect whether or not the account exists, so this can't be used
     # to probe which emails are registered.
-    return RedirectResponse(f"/reset-password?login={login}", status_code=303)
+    return redirect(request, f"/reset-password?login={login}")
 
 
 @router.get("/reset-password", response_class=HTMLResponse)
@@ -281,25 +276,21 @@ async def reset_password_submit(
     user_result = await connection.execute(select(User.id).where(User.login == login))
     user_id = user_result.scalar_one_or_none()
     if user_id is None:
-        return RedirectResponse(
-            f"/reset-password?login={login}&error=Invalid+or+expired+code", status_code=303
-        )
+        return redirect(request, f"/reset-password?login={login}&error=Invalid+or+expired+code")
     ok = await verify_code(connection, user_id, PURPOSE_PASSWORD_RESET, code)
     if not ok:
-        return RedirectResponse(
-            f"/reset-password?login={login}&error=Invalid+or+expired+code", status_code=303
-        )
+        return redirect(request, f"/reset-password?login={login}&error=Invalid+or+expired+code")
     await connection.execute(
         User.__table__.update()
         .where(User.id == user_id)
         .values(password_hash=hash_password(password))
     )
-    return RedirectResponse("/login?error=Password+updated,+log+in+below", status_code=303)
+    return redirect(request, "/login?error=Password+updated,+log+in+below")
 
 
 @router.get("/logout")
-async def logout():
-    response = RedirectResponse("/login", status_code=303)
+async def logout(request: Request):
+    response = redirect(request, "/login")
     response.delete_cookie(get_settings().session_cookie_name)
     return response
 
@@ -476,7 +467,7 @@ async def simulate_submit(
     settings = get_settings()
     subscription = await get_subscription(connection, user.id)
     if not user.is_admin and not subscription_is_active(subscription, datetime.now(UTC)):
-        return RedirectResponse("/payment", status_code=303)
+        return redirect(request, "/payment")
 
     leagues = _load_leagues(settings.football_db_path)
     teams = _load_teams_for_league(settings.football_db_path, league_id)
@@ -578,17 +569,15 @@ async def payment_submit(
 ):
     plans_by_key = {p.key: p for p in PAID_PLANS}
     if plan not in plans_by_key:
-        return RedirectResponse("/payment?error=Choose+a+plan", status_code=303)
+        return redirect(request, "/payment?error=Choose+a+plan")
     if amount_fcfa != plans_by_key[plan].price_fcfa:
-        return RedirectResponse(
+        return redirect(
+            request,
             "/payment?error=That+amount+doesn%27t+match+the+selected+plan%27s+price+"
             "%E2%80%94+please+try+again",
-            status_code=303,
         )
     if await transaction_id_already_used(connection, transaction_id):
-        return RedirectResponse(
-            "/payment?error=That+transaction+ID+has+already+been+used", status_code=303
-        )
+        return redirect(request, "/payment?error=That+transaction+ID+has+already+been+used")
     await connection.execute(
         PaymentRequest.__table__.insert().values(
             id=uuid4(),
