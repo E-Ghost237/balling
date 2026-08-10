@@ -264,6 +264,8 @@ async def users_list(
         select(
             User.id,
             User.login,
+            User.first_name,
+            User.last_name,
             User.is_admin,
             User.is_active,
             User.email_verified,
@@ -307,6 +309,25 @@ async def reactivate_user(
     connection: AsyncConnection = Depends(get_db),
 ):
     await connection.execute(update(User).where(User.id == target_id).values(is_active=True))
+    return RedirectResponse("/admin/users", status_code=303)
+
+
+@router.post("/users/{target_id}/reset-quota")
+async def reset_quota(
+    target_id: UUID,
+    user: User = Depends(require_admin),
+    connection: AsyncConnection = Depends(get_db),
+):
+    """Rolls a subscription's cycle forward to now — the same mechanism
+    the free plan already uses to auto-renew monthly (see
+    auth.get_subscription) — so quota_used reads back as 0 immediately,
+    letting the user simulate matchups again without waiting out the
+    natural cycle."""
+    await connection.execute(
+        update(Subscription)
+        .where(Subscription.user_id == target_id)
+        .values(cycle_started_at=datetime.now(UTC))
+    )
     return RedirectResponse("/admin/users", status_code=303)
 
 

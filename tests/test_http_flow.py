@@ -821,3 +821,82 @@ async def test_resend_reports_failure_when_smtp_fails(monkeypatch) -> None:
             follow_redirects=True,
         )
     assert "Could not send the code email" in response.text
+
+
+async def test_users_list_shows_name_below_email() -> None:
+    user_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            User.__table__.insert().values(
+                id=user_id, login="named-user@example.com", password_hash=hash_password("hunter22"),
+                first_name="Ada", last_name="Lovelace", is_admin=False, email_verified=True,
+                created_at=datetime.now(UTC),
+            )
+        )
+    await _seed_admin()
+    async with await _client() as client:
+        await client.post("/login", data={"login": "boss", "password": "hunter22"})
+        response = await client.get("/admin/users")
+    assert response.status_code == 200
+    assert "Ada Lovelace" in response.text
+    assert "named-user@example.com" in response.text
+
+
+async def test_admin_can_reset_a_users_quota() -> None:
+    from webapp.models import UsageLog
+
+    user_id = await _create_user("quota-reset@example.com")
+    old_cycle_start = datetime.now(UTC) - timedelta(days=10)
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            Subscription.__table__.insert().values(
+                id=uuid4(), user_id=user_id, status="ACTIVE", plan="monthly", quota_limit=150,
+                cycle_started_at=old_cycle_start, expires_at=datetime.now(UTC) + timedelta(days=30),
+            )
+        )
+        await connection.execute(
+            UsageLog.__table__.insert().values(
+                id=uuid4(), user_id=user_id, home_team="A", away_team="B", neutral=False,
+                simulated_at=old_cycle_start + timedelta(hours=1),
+            )
+        )
+    await _seed_admin()
+    async with await _client() as client:
+        await client.post("/login", data={"login": "boss", "password": "hunter22"})
+        before = await client.get("/admin/users")
+        assert "1 / 150" in before.text
+
+        response = await client.post(f"/admin/users/{user_id}/reset-quota", follow_redirects=True)
+    assert response.status_code == 200
+    assert "0 / 150" in response.text
+
+    async with get_engine().begin() as connection:
+        new_cycle_start = (
+            await connection.execute(
+                select(Subscription.cycle_started_at).where(Subscription.user_id == user_id)
+            )
+        ).scalar_one()
+    assert new_cycle_start > old_cycle_start
+
+
+async def test_users_list_shows_never_for_free_plan_instead_of_the_100_year_date() -> None:
+    """The free plan's expires_at is deliberately set ~100 years out (it
+    renews itself — see auth.get_subscription) so it never actually lapses.
+    Showing that raw date in the admin table reads as a data bug, not as
+    "never expires" — this locks in the friendlier label."""
+    user_id = await _create_user("free-forever@example.com")
+    now = datetime.now(UTC)
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            Subscription.__table__.insert().values(
+                id=uuid4(), user_id=user_id, status="ACTIVE", plan="free", quota_limit=20,
+                cycle_started_at=now, expires_at=now + timedelta(days=365 * 100),
+            )
+        )
+    await _seed_admin()
+    async with await _client() as client:
+        await client.post("/login", data={"login": "boss", "password": "hunter22"})
+        response = await client.get("/admin/users")
+    assert response.status_code == 200
+    assert "Never" in response.text
+    assert "2126" not in response.text

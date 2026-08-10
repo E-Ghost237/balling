@@ -3,9 +3,36 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Balling Predictions{% endblock %}</title>
-    <link rel="icon" href="/assets/favicon.png?v={{ asset_version }}" />
+    <title>{% block title %}Balling Predictions — Free Football Match Predictions{% endblock %}</title>
+    <meta name="description" content="{% block description %}Free AI-powered football predictions: win/draw/loss odds, correct scorelines, BTTS and over/under for 700+ teams across Europe's top leagues. 20 free predictions every month, no card required.{% endblock %}" />
+    <link rel="canonical" href="{{ request.url.scheme }}://{{ request.url.netloc }}{{ request.url.path }}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Balling Predictions" />
+    <meta property="og:title" content="{% block og_title %}Balling Predictions — Free Football Match Predictions{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Free AI-powered football predictions: win/draw/loss odds, correct scorelines, BTTS and over/under for 700+ teams across Europe's top leagues.{% endblock %}" />
+    <meta property="og:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}/assets/logo.png" />
+    <meta property="og:url" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ request.url.path }}" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{% block twitter_title %}Balling Predictions{% endblock %}" />
+    <meta name="twitter:description" content="{% block twitter_description %}Free AI-powered football match predictions.{% endblock %}" />
+    <meta name="twitter:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}/assets/logo.png" />
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/assets/favicon.png?v={{ asset_version }}" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v={{ asset_version }}" />
     <link rel="stylesheet" href="/static/css/app.css?v={{ asset_version }}" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Balling Predictions",
+        "url": "https://ballingpronostics.site",
+        "applicationCategory": "SportsApplication",
+        "description": "Free AI-powered football match predictions: win/draw/loss odds, correct scorelines, BTTS and over/under for 700+ teams across Europe's top leagues.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "XAF" }
+      }
+    </script>
     <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
     <script>
       function togglePasswordField(id, btn) {
@@ -75,7 +102,7 @@
     <nav class="border-b border-slate-200 bg-white shadow-sm">
       <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
         <a href="/" class="relative z-10 flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
-          <img src="/assets/logo.png?v={{ asset_version }}" alt="Balling Predictions" class="h-16 w-auto sm:h-24"
+          <img src="/assets/logo.png?v={{ asset_version }}" alt="Balling Predictions" class="h-20 w-auto sm:h-32"
                onerror="this.replaceWith(Object.assign(document.createElement('span'), {textContent: '⚽ Balling Predictions'}))" />
         </a>
 
@@ -120,7 +147,7 @@
       </div>
     </nav>
 
-    <main class="mx-auto max-w-5xl px-4 pb-10 pt-14 sm:px-6">
+    <main class="mx-auto {% block main_class %}max-w-5xl{% endblock %} px-4 pb-10 pt-14 sm:px-6">
       {% if request.query_params.get('error') %}
         <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {{ request.query_params.get('error') }}

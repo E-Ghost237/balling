@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Users — Admin{% endblock %}
+{% block main_class %}max-w-7xl{% endblock %}
 {% block content %}
 <h1 class="mb-8 text-2xl font-semibold text-slate-900">Users</h1>
 <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
   <table class="w-full text-left text-sm">
     <thead class="bg-slate-50 text-slate-500">
       <tr>
-        <th class="px-4 py-3">Email</th>
+        <th class="px-4 py-3">User</th>
         <th class="px-4 py-3">Role</th>
         <th class="px-4 py-3">Verified</th>
         <th class="px-4 py-3">Account</th>
@@ -17,9 +18,17 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100 text-slate-700">
-      {% for id, login, is_admin, is_active, email_verified, status, plan_key, quota_limit, expires_at, quota_used in rows %}
+      {% for id, login, first_name, last_name, is_admin, is_active, email_verified, status, plan_key, quota_limit, expires_at, quota_used in rows %}
+      {% set full_name = (first_name ~ " " ~ last_name).strip() %}
       <tr>
-        <td class="px-4 py-3 whitespace-nowrap">{{ login }}</td>
+        <td class="px-4 py-3">
+          {% if full_name %}
+            <div class="font-medium text-slate-900 whitespace-nowrap">{{ full_name }}</div>
+            <div class="text-xs text-slate-500 whitespace-nowrap">{{ login }}</div>
+          {% else %}
+            <div class="text-slate-900 whitespace-nowrap">{{ login }}</div>
+          {% endif %}
+        </td>
         <td class="px-4 py-3 whitespace-nowrap">{{ "Admin" if is_admin else "User" }}</td>
         <td class="px-4 py-3 whitespace-nowrap">
           {% if email_verified %}
@@ -46,12 +55,23 @@
         <td class="px-4 py-3 whitespace-nowrap">
           {% if quota_limit %}{{ quota_used }} / {{ quota_limit }}{% else %}<span class="text-slate-400">—</span>{% endif %}
         </td>
-        <td class="px-4 py-3 whitespace-nowrap text-slate-500">{{ expires_at.strftime("%d %b %Y") if expires_at else "—" }}</td>
-        <td class="px-4 py-3 whitespace-nowrap">
+        <td class="px-4 py-3 whitespace-nowrap text-slate-500">
+          {% if plan_key == "free" %}
+            Never
+          {% else %}
+            {{ expires_at.strftime("%d %b %Y") if expires_at else "—" }}
+          {% endif %}
+        </td>
+        <td class="px-4 py-3">
           {% if is_admin %}
             <span class="text-xs text-slate-400">—</span>
           {% else %}
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
+              {% if plan_key %}
+                <form method="post" action="/admin/users/{{ id }}/reset-quota">
+                  <button type="submit" class="whitespace-nowrap rounded-md bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100">Reset quota</button>
+                </form>
+              {% endif %}
               {% if is_active %}
                 <form id="deactivate-form-{{ id }}" method="post" action="/admin/users/{{ id }}/deactivate">
                   <button type="button"
@@ -61,11 +81,11 @@
                     data-confirm-button-class="bg-amber-600 hover:bg-amber-500"
                     data-confirm-form="deactivate-form-{{ id }}"
                     onclick="openConfirmModal(this)"
-                    class="rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100">Deactivate</button>
+                    class="whitespace-nowrap rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100">Deactivate</button>
                 </form>
               {% else %}
                 <form method="post" action="/admin/users/{{ id }}/reactivate">
-                  <button type="submit" class="rounded-md bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">Reactivate</button>
+                  <button type="submit" class="whitespace-nowrap rounded-md bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">Reactivate</button>
                 </form>
               {% endif %}
               <form id="delete-form-{{ id }}" method="post" action="/admin/users/{{ id }}/delete">
@@ -76,7 +96,7 @@
                   data-confirm-button-class="bg-red-600 hover:bg-red-500"
                   data-confirm-form="delete-form-{{ id }}"
                   onclick="openConfirmModal(this)"
-                  class="rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100">Delete</button>
+                  class="whitespace-nowrap rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100">Delete</button>
               </form>
             </div>
           {% endif %}
