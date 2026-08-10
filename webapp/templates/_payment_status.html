@@ -5,7 +5,7 @@
   <h1 class="mb-2 text-xl font-semibold text-slate-900">{{ t(request, 'pending.check_phone') }}</h1>
   <p class="text-slate-500">
     {{ t(request, 'pending.prompt_sent',
-         operator=("MTN Mobile Money" if payment.operator == "CM_MTNMOBILEMONEY" else "Orange Money"),
+         operator=("MTN Mobile Money" if payment.operator == "MTN_MOMO_CMR" else "Orange Money"),
          phone=payment.phone_number,
          amount="{:,}".format(payment.amount_fcfa)) }}
   </p>

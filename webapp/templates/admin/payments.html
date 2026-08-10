@@ -11,8 +11,8 @@
     <div class="mb-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-6">
       <div><p class="text-slate-500">User</p><p class="text-slate-900">{{ login }}</p></div>
       <div><p class="text-slate-500">Plan</p><p class="text-slate-900">{{ plan }}</p></div>
-      <div><p class="text-slate-500">Monetbil ID</p><p class="text-slate-900">{{ transaction_id }}</p></div>
-      <div><p class="text-slate-500">Phone</p><p class="text-slate-900">{{ phone_number }} {% if operator %}({{ "MTN" if operator == "CM_MTNMOBILEMONEY" else "Orange" }}){% endif %}</p></div>
+      <div><p class="text-slate-500">Payment ID</p><p class="text-slate-900">{{ transaction_id }}</p></div>
+      <div><p class="text-slate-500">Phone</p><p class="text-slate-900">{{ phone_number }} {% if operator %}({{ "MTN" if operator == "MTN_MOMO_CMR" else "Orange" }}){% endif %}</p></div>
       <div><p class="text-slate-500">Amount</p><p class="text-slate-900">{{ amount_fcfa }} FCFA</p></div>
     </div>
     <p class="mb-4 text-xs text-slate-400">Submitted {{ submitted_at.strftime("%d %b %Y, %H:%M") }}</p>

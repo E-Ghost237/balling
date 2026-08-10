@@ -441,7 +441,7 @@ async def test_payment_rejects_the_free_plan_key() -> None:
             "/payment",
             data={
                 "plan": "free",
-                "operator": "CM_MTNMOBILEMONEY",
+                "operator": "MTN_MOMO_CMR",
                 "phone_number": "670000000",
             },
             follow_redirects=True,
@@ -467,21 +467,21 @@ async def test_payment_rejects_unknown_operator() -> None:
     assert "Choose your Mobile Money operator" in response.text
 
 
-async def test_payment_submit_starts_a_monetbil_charge_for_the_exact_plan_price(
+async def test_payment_submit_starts_a_kpay_charge_for_the_exact_plan_price(
     monkeypatch,
 ) -> None:
     """The amount charged comes from the PLANS registry (server-side), not
     anything the user submits — this is what prevents someone picking the
     yearly plan while only actually being charged the monthly price."""
-    from webapp import monetbil
+    from webapp import kpay
 
     captured = {}
 
     async def fake_place_payment(**kwargs):
         captured.update(kwargs)
-        return {"status": "REQUEST_ACCEPTED", "paymentId": "MB-PID-1"}
+        return {"id": "pay_test_1", "status": "PENDING"}
 
-    monkeypatch.setattr(monetbil, "place_payment", fake_place_payment)
+    monkeypatch.setattr(kpay, "place_payment", fake_place_payment)
 
     await _create_user("payer-annual@example.com")
     async with await _client() as client:
@@ -490,7 +490,7 @@ async def test_payment_submit_starts_a_monetbil_charge_for_the_exact_plan_price(
         )
         response = await client.post(
             "/payment",
-            data={"plan": "annual", "operator": "CM_MTNMOBILEMONEY", "phone_number": "670000001"},
+            data={"plan": "annual", "operator": "MTN_MOMO_CMR", "phone_number": "670000001"},
         )
     assert response.status_code == 303
     assert "/payment/pending/" in response.headers["location"]
@@ -499,22 +499,22 @@ async def test_payment_submit_starts_a_monetbil_charge_for_the_exact_plan_price(
     async with get_engine().begin() as connection:
         result = await connection.execute(
             select(PaymentRequest.transaction_id, PaymentRequest.amount_fcfa, PaymentRequest.status)
-            .where(PaymentRequest.transaction_id == "MB-PID-1")
+            .where(PaymentRequest.transaction_id == "pay_test_1")
         )
         row = result.one()
     assert row.amount_fcfa == PLANS["annual"].price_fcfa
     assert row.status == "PENDING"
 
 
-async def test_payment_submit_surfaces_monetbil_rejection_without_creating_a_payment_row(
+async def test_payment_submit_surfaces_kpay_rejection_without_creating_a_payment_row(
     monkeypatch,
 ) -> None:
-    from webapp import monetbil
+    from webapp import kpay
 
     async def fake_place_payment(**kwargs):
-        return {"status": "INVALID_MSISDN", "message": "invalid phonenumber"}
+        return {"statusCode": 400, "message": "invalid phonenumber", "error": "Bad Request"}
 
-    monkeypatch.setattr(monetbil, "place_payment", fake_place_payment)
+    monkeypatch.setattr(kpay, "place_payment", fake_place_payment)
 
     await _create_user("badphone@example.com")
     async with await _client() as client:
@@ -523,7 +523,7 @@ async def test_payment_submit_surfaces_monetbil_rejection_without_creating_a_pay
         )
         response = await client.post(
             "/payment",
-            data={"plan": "monthly", "operator": "CM_MTNMOBILEMONEY", "phone_number": "1"},
+            data={"plan": "monthly", "operator": "MTN_MOMO_CMR", "phone_number": "1"},
             follow_redirects=True,
         )
     assert "invalid phonenumber" in response.text
@@ -653,23 +653,233 @@ async def test_monetbil_webhook_does_not_activate_an_underpaid_notification() ->
     assert sub_row is None
 
 
-async def test_payment_status_polling_reconciles_and_redirects_when_monetbil_confirms(
+def _kpay_signed_request(secret: str, body: dict) -> tuple[bytes, str]:
+    import hashlib
+    import hmac as hmac_module
+    import json
+
+    raw = json.dumps(body).encode()
+    signature = hmac_module.new(secret.encode(), raw, hashlib.sha256).hexdigest()
+    return raw, signature
+
+
+async def test_kpay_webhook_ignores_intermediate_pending_event() -> None:
+    """Regression test: KPay sends an undocumented "payment.initiated"
+    event with status PENDING before the real payment.completed one. An
+    early implementation treated "not COMPLETED" as "reject", which wrongly
+    rejected the payment on the very first event and left it stuck that
+    way once the real COMPLETED notification arrived (no longer PENDING,
+    so the idempotency guard skipped it). A PENDING event must be a no-op."""
+    user_id = await _create_user("kpay-webhook-pending-event@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="pay_webhook_pending",
+                phone_number="670000000", operator="MTN_MOMO_CMR",
+                amount_fcfa=PLANS["monthly"].price_fcfa, plan="monthly",
+                status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+
+    initiated_body = {
+        "event": "payment.initiated",
+        "status": "PENDING",
+        "amount": PLANS["monthly"].price_fcfa,
+        "externalId": str(payment_id),
+    }
+    raw, signature = _kpay_signed_request("test-kpay-webhook-signing-secret", initiated_body)
+    async with await _client() as client:
+        response = await client.post(
+            "/webhooks/kpay/test-kpay-webhook-secret",
+            content=raw,
+            headers={"Content-Type": "application/json", "X-KPAY-Signature": signature},
+        )
+    assert response.status_code == 200
+
+    async with get_engine().begin() as connection:
+        status_after_pending_event = (
+            await connection.execute(
+                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
+            )
+        ).scalar_one()
+    assert status_after_pending_event == "PENDING"
+
+    completed_body = {
+        "event": "payment.completed",
+        "status": "COMPLETED",
+        "amount": PLANS["monthly"].price_fcfa,
+        "externalId": str(payment_id),
+    }
+    raw, signature = _kpay_signed_request("test-kpay-webhook-signing-secret", completed_body)
+    async with await _client() as client:
+        response = await client.post(
+            "/webhooks/kpay/test-kpay-webhook-secret",
+            content=raw,
+            headers={"Content-Type": "application/json", "X-KPAY-Signature": signature},
+        )
+    assert response.status_code == 200
+
+    async with get_engine().begin() as connection:
+        final_status = (
+            await connection.execute(
+                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
+            )
+        ).scalar_one()
+    assert final_status == "APPROVED"
+
+
+async def test_kpay_webhook_activates_subscription_on_success() -> None:
+    user_id = await _create_user("kpay-webhook-user@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="pay_webhook_1",
+                phone_number="670000000", operator="MTN_MOMO_CMR",
+                amount_fcfa=PLANS["monthly"].price_fcfa, plan="monthly",
+                status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+
+    body = {
+        "event": "payment.completed",
+        "paymentId": "pay_webhook_1",
+        "status": "COMPLETED",
+        "amount": PLANS["monthly"].price_fcfa,
+        "externalId": str(payment_id),
+    }
+    raw, signature = _kpay_signed_request("test-kpay-webhook-signing-secret", body)
+
+    async with await _client() as client:
+        response = await client.post(
+            "/webhooks/kpay/test-kpay-webhook-secret",
+            content=raw,
+            headers={"Content-Type": "application/json", "X-KPAY-Signature": signature},
+        )
+    assert response.status_code == 200
+    assert response.text == "received"
+
+    async with get_engine().begin() as connection:
+        payment_row = (
+            await connection.execute(
+                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
+            )
+        ).scalar_one()
+        sub_row = (
+            await connection.execute(
+                select(Subscription.status, Subscription.plan, Subscription.quota_limit)
+                .where(Subscription.user_id == user_id)
+            )
+        ).one()
+    assert payment_row == "APPROVED"
+    assert sub_row.status == "ACTIVE"
+    assert sub_row.plan == "monthly"
+    assert sub_row.quota_limit == PLANS["monthly"].quota
+
+
+async def test_kpay_webhook_rejects_wrong_secret_path() -> None:
+    async with await _client() as client:
+        response = await client.post("/webhooks/kpay/not-the-real-secret", content=b"{}")
+    assert response.status_code == 404
+
+
+async def test_kpay_webhook_rejects_bad_signature() -> None:
+    user_id = await _create_user("kpay-webhook-badsign@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="pay_webhook_badsign",
+                phone_number="670000000", amount_fcfa=PLANS["monthly"].price_fcfa,
+                plan="monthly", status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+    body = {
+        "status": "COMPLETED",
+        "amount": PLANS["monthly"].price_fcfa,
+        "externalId": str(payment_id),
+    }
+    raw, _ = _kpay_signed_request("test-kpay-webhook-signing-secret", body)
+
+    async with await _client() as client:
+        response = await client.post(
+            "/webhooks/kpay/test-kpay-webhook-secret",
+            content=raw,
+            headers={
+                "Content-Type": "application/json",
+                "X-KPAY-Signature": "not-a-real-signature",
+            },
+        )
+    assert response.status_code == 403
+
+    async with get_engine().begin() as connection:
+        status = (
+            await connection.execute(
+                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
+            )
+        ).scalar_one()
+    assert status == "PENDING"
+
+
+async def test_kpay_webhook_does_not_activate_an_underpaid_notification() -> None:
+    """Same guard as Monetbil's: don't auto-activate if the confirmed
+    amount is less than what was charged for the selected plan."""
+    user_id = await _create_user("kpay-underpaid@example.com")
+    payment_id = uuid4()
+    async with get_engine().begin() as connection:
+        await connection.execute(
+            PaymentRequest.__table__.insert().values(
+                id=payment_id, user_id=user_id, transaction_id="pay_webhook_underpaid",
+                phone_number="670000000", amount_fcfa=PLANS["annual"].price_fcfa,
+                plan="annual", status="PENDING", submitted_at=datetime.now(UTC),
+            )
+        )
+    body = {
+        "status": "COMPLETED",
+        "amount": PLANS["monthly"].price_fcfa,  # much less than the annual price charged
+        "externalId": str(payment_id),
+    }
+    raw, signature = _kpay_signed_request("test-kpay-webhook-signing-secret", body)
+
+    async with await _client() as client:
+        response = await client.post(
+            "/webhooks/kpay/test-kpay-webhook-secret",
+            content=raw,
+            headers={"Content-Type": "application/json", "X-KPAY-Signature": signature},
+        )
+    assert response.status_code == 200
+
+    async with get_engine().begin() as connection:
+        payment_status_, sub_row = (
+            await connection.execute(
+                select(PaymentRequest.status, Subscription.status)
+                .select_from(PaymentRequest)
+                .join(Subscription, Subscription.user_id == PaymentRequest.user_id, isouter=True)
+                .where(PaymentRequest.id == payment_id)
+            )
+        ).one()
+    assert payment_status_ == "PENDING"
+    assert sub_row is None
+
+
+async def test_payment_status_polling_reconciles_and_redirects_when_kpay_confirms(
     monkeypatch,
 ) -> None:
-    from webapp import monetbil
+    from webapp import kpay
 
-    async def fake_check_payment(payment_id: str):
-        return {"transaction": {"status": 1, "amount": PLANS["monthly"].price_fcfa}}
+    async def fake_check_payment(**kwargs):
+        return {"status": "COMPLETED", "amount": PLANS["monthly"].price_fcfa}
 
-    monkeypatch.setattr(monetbil, "check_payment", fake_check_payment)
+    monkeypatch.setattr(kpay, "check_payment", fake_check_payment)
 
     user_id = await _create_user("polling-user@example.com")
     payment_id = uuid4()
     async with get_engine().begin() as connection:
         await connection.execute(
             PaymentRequest.__table__.insert().values(
-                id=payment_id, user_id=user_id, transaction_id="MB-PID-POLL",
-                phone_number="670000000", operator="CM_MTNMOBILEMONEY",
+                id=payment_id, user_id=user_id, transaction_id="pay_test_poll",
+                phone_number="670000000", operator="MTN_MOMO_CMR",
                 amount_fcfa=PLANS["monthly"].price_fcfa, plan="monthly",
                 status="PENDING", submitted_at=datetime.now(UTC),
             )

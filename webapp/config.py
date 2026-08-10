@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     monetbil_webhook_path: str = ""
     monetbil_country: str = "CM"
     monetbil_currency: str = "XAF"
+    kpay_api_key: str = ""
+    kpay_secret_key: str = ""
+    # Separate from kpay_secret_key — KPay's dashboard has a distinct
+    # "Webhook Secret" specifically for X-KPAY-Signature verification.
+    kpay_webhook_secret: str = ""
+    # Same unguessable-path-plus-signature pattern as Monetbil's webhook —
+    # see webapp/routes/webhooks.py.
+    kpay_webhook_path: str = ""
 
 
 @lru_cache(maxsize=1)

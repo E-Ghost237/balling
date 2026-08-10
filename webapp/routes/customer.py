@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from webapp import monetbil
+from webapp import kpay
 from webapp.auth import (
     activate_subscription_for_payment,
     authenticate,
@@ -41,10 +41,9 @@ from webapp.templates import templates
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
-# Cameroon Mobile Money operators Monetbil supports for this service — see
-# webapp/monetbil.py and the "Operators list" table in Monetbil's Payment
-# API v1 doc.
-MONETBIL_OPERATORS = {"CM_MTNMOBILEMONEY", "CM_ORANGEMONEY"}
+# Cameroon Mobile Money operators for this service — exact provider codes
+# from KPay's "Pays couverts et catalogue des providers" table.
+KPAY_OPERATORS = {"MTN_MOMO_CMR", "ORANGE_CMR"}
 
 
 async def _send_verification_email(
@@ -591,28 +590,23 @@ async def payment_submit(
     plans_by_key = {p.key: p for p in PAID_PLANS}
     if plan not in plans_by_key:
         return redirect(request, "/payment?error=Choose+a+plan")
-    if operator not in MONETBIL_OPERATORS:
+    if operator not in KPAY_OPERATORS:
         return redirect(request, "/payment?error=Choose+your+Mobile+Money+operator")
 
     chosen_plan = plans_by_key[plan]
     settings = get_settings()
     payment_id = uuid4()
-    notify_url = f"{settings.public_base_url}/webhooks/monetbil/{settings.monetbil_webhook_path}"
     try:
-        result = await monetbil.place_payment(
-            service=settings.monetbil_service_key,
+        result = await kpay.place_payment(
+            api_key=settings.kpay_api_key,
+            secret_key=settings.kpay_secret_key,
             amount=chosen_plan.price_fcfa,
-            phonenumber=phone_number,
-            operator=operator,
-            country=settings.monetbil_country,
-            currency=settings.monetbil_currency,
-            payment_ref=str(payment_id),
-            item_ref=plan,
-            user=str(user.id),
-            first_name=user.first_name,
-            last_name=user.last_name,
-            email=user.login,
-            notify_url=notify_url,
+            provider=operator,
+            phone_number=phone_number,
+            external_id=str(payment_id),
+            description=f"Balling Predictions — {plan} plan",
+            customer_name=f"{user.first_name} {user.last_name}".strip(),
+            customer_email=user.login,
         )
     except httpx.HTTPError:
         return redirect(
@@ -620,7 +614,7 @@ async def payment_submit(
             "/payment?error=Could+not+reach+the+payment+provider+%E2%80%94+please+try+again",
         )
 
-    if result.get("status") != "REQUEST_ACCEPTED":
+    if "id" not in result:
         message = result.get("message") or "Payment could not be started"
         return redirect(request, f"/payment?error={quote(message)}")
 
@@ -628,7 +622,7 @@ async def payment_submit(
         PaymentRequest.__table__.insert().values(
             id=payment_id,
             user_id=user.id,
-            transaction_id=str(result["paymentId"]),
+            transaction_id=str(result["id"]),
             phone_number=phone_number,
             operator=operator,
             amount_fcfa=chosen_plan.price_fcfa,
@@ -656,18 +650,20 @@ async def _get_own_payment(
 
 async def _reconcile_pending_payment(connection: AsyncConnection, payment: dict) -> dict:
     """Called from the polling endpoint below as a fallback in case the
-    Monetbil webhook notification never arrives (network hiccup, etc.) —
-    actively asks Monetbil for the current status instead of waiting."""
+    KPay webhook notification never arrives (network hiccup, etc.) —
+    actively asks KPay for the current status instead of waiting."""
+    settings = get_settings()
     try:
-        response = await monetbil.check_payment(payment["transaction_id"])
+        result = await kpay.check_payment(
+            api_key=settings.kpay_api_key,
+            secret_key=settings.kpay_secret_key,
+            payment_id=payment["transaction_id"],
+        )
     except httpx.HTTPError:
         return payment
-    transaction = response.get("transaction")
-    if not transaction:
-        return payment
-    status = transaction.get("status")
-    if status == 1:
-        paid_amount = transaction.get("amount")
+    status = result.get("status")
+    if status == "COMPLETED":
+        paid_amount = result.get("amount")
         try:
             underpaid = paid_amount is not None and float(paid_amount) < payment["amount_fcfa"]
         except (TypeError, ValueError):
@@ -675,7 +671,7 @@ async def _reconcile_pending_payment(connection: AsyncConnection, payment: dict)
         if not underpaid:
             await activate_subscription_for_payment(connection, payment)
             return await _get_own_payment(connection, payment["id"], payment["user_id"])
-    elif status in (0, -1, -2):
+    elif status in ("FAILED", "CANCELLED"):
         await reject_payment_request(connection, payment["id"])
         return await _get_own_payment(connection, payment["id"], payment["user_id"])
     return payment
