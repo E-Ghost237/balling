@@ -62,7 +62,7 @@ async def robots_txt() -> PlainTextResponse:
 
 @app.get("/sitemap.xml", include_in_schema=False)
 async def sitemap_xml() -> Response:
-    pages = ["/", "/login", "/register"]
+    pages = ["/", "/login", "/register", "/privacy", "/terms"]
     entries = []
     for p in pages:
         en_url, fr_url = f"{SITE_URL}{p}", f"{SITE_URL}{localize_path(p, 'fr')}"

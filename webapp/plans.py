@@ -26,7 +26,7 @@ PLANS: dict[str, Plan] = {
             quota=20,
             features=(
                 "20 distinct matchups / month",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
                 "No payment required",
             ),
@@ -39,7 +39,7 @@ PLANS: dict[str, Plan] = {
             quota=150,
             features=(
                 "150 distinct matchups / month",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
             ),
         ),
@@ -51,7 +51,7 @@ PLANS: dict[str, Plan] = {
             quota=1_200,
             features=(
                 "1,200 distinct matchups (200/month)",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
                 "20% cheaper than paying monthly",
             ),
@@ -65,7 +65,7 @@ PLANS: dict[str, Plan] = {
             quota=3_000,
             features=(
                 "3,000 distinct matchups (250/month)",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
                 "30% cheaper than paying monthly — best value",
             ),

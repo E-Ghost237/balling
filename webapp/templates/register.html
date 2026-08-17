@@ -51,6 +51,12 @@
       {{ t(request, 'register.submit') }}
     </button>
   </form>
+  <p class="mt-4 text-center text-xs text-slate-400">
+    {{ t(request, 'consent.register_pre') }}
+    <a href="{{ url(request, '/terms') }}" class="underline hover:text-slate-600">{{ t(request, 'footer.terms') }}</a>
+    {{ t(request, 'consent.and') }}
+    <a href="{{ url(request, '/privacy') }}" class="underline hover:text-slate-600">{{ t(request, 'footer.privacy') }}</a>.
+  </p>
   <p class="mt-6 text-center text-sm text-slate-500">
     {{ t(request, 'register.already_have') }} <a href="{{ url(request, '/login') }}" class="font-medium text-emerald-600 hover:underline">{{ t(request, 'register.login_link') }}</a>
   </p>

@@ -103,7 +103,7 @@
       })();
     </script>
   </head>
-  <body class="h-full min-h-screen bg-page {% block page_bg %}{% endblock %} bg-slate-50 text-slate-900 antialiased">
+  <body class="flex h-full min-h-screen flex-col bg-page {% block page_bg %}{% endblock %} bg-slate-50 text-slate-900 antialiased">
     <nav class="border-b border-slate-200 bg-white shadow-sm">
       <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
         <a href="{{ url(request, '/') }}" class="relative z-10 flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
@@ -157,7 +157,7 @@
       </div>
     </nav>
 
-    <main class="mx-auto {% block main_class %}max-w-5xl{% endblock %} px-4 pb-10 pt-14 sm:px-6">
+    <main class="mx-auto {% block main_class %}max-w-5xl{% endblock %} w-full flex-1 px-4 pb-10 pt-14 sm:px-6">
       {% if request.query_params.get('error') %}
         <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {{ request.query_params.get('error') }}
@@ -165,6 +165,16 @@
       {% endif %}
       {% block content %}{% endblock %}
     </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:justify-between sm:px-6">
+        <p>&copy; {{ current_year() }} Balling Predictions. {{ t(request, 'footer.rights') }}</p>
+        <div class="flex items-center gap-4">
+          <a href="{{ url(request, '/terms') }}" class="hover:text-slate-700">{{ t(request, 'footer.terms') }}</a>
+          <a href="{{ url(request, '/privacy') }}" class="hover:text-slate-700">{{ t(request, 'footer.privacy') }}</a>
+        </div>
+      </div>
+    </footer>
 
     <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
          onclick="if (event.target === this) closeConfirmModal()">

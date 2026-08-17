@@ -176,6 +176,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "result.btts": {"en": "Both teams to score", "fr": "Les deux équipes marquent"},
     "result.yes": {"en": "Yes", "fr": "Oui"},
     "result.no": {"en": "No", "fr": "Non"},
+    "result.double_chance": {"en": "Double chance", "fr": "Double chance"},
+    "result.or_draw": {"en": "or Draw", "fr": "ou Nul"},
+    "result.or": {"en": "or", "fr": "ou"},
     "result.top_scorelines": {"en": "Top scorelines", "fr": "Meilleurs scores"},
     "result.total_goals": {"en": "Total goals", "fr": "Total de buts"},
     "result.line": {"en": "Line", "fr": "Ligne"},
@@ -298,6 +301,34 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     "pending.try_again": {"en": "Try again", "fr": "Réessayer"},
 
+    # --- footer (base.html) ---
+    "footer.terms": {"en": "Terms of Service", "fr": "Conditions générales d'utilisation"},
+    "footer.privacy": {"en": "Privacy Policy", "fr": "Politique de confidentialité"},
+    "footer.rights": {"en": "All rights reserved.", "fr": "Tous droits réservés."},
+
+    # --- privacy_policy.html ---
+    "privacy.title": {"en": "Privacy Policy — Balling Predictions",
+                       "fr": "Politique de confidentialité — Balling Predictions"},
+    "privacy.description": {
+        "en": "How Balling Predictions collects, uses, and protects your personal data.",
+        "fr": "Comment Balling Predictions collecte, utilise et protège vos données personnelles.",
+    },
+
+    # --- terms.html ---
+    "terms.title": {"en": "Terms of Service — Balling Predictions",
+                     "fr": "Conditions générales d'utilisation — Balling Predictions"},
+    "terms.description": {
+        "en": "The terms that govern your use of Balling Predictions.",
+        "fr": "Les conditions qui régissent votre utilisation de Balling Predictions.",
+    },
+
+    # --- consent notices (register.html, payment.html) ---
+    "consent.register_pre": {"en": "By creating an account, you agree to our",
+                              "fr": "En créant un compte, vous acceptez nos"},
+    "consent.payment_pre": {"en": "By paying, you agree to our",
+                             "fr": "En payant, vous acceptez nos"},
+    "consent.and": {"en": "and our", "fr": "et notre"},
+
     # --- transactional emails (webapp/email.py, customer.py send_email calls) ---
     "email.verify.subject": {"en": "Confirm your Balling Predictions account",
                               "fr": "Confirmez votre compte Balling Predictions"},
@@ -330,7 +361,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": None,
             "features": (
                 "20 distinct matchups / month",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
                 "No payment required",
             ),
@@ -340,7 +371,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": None,
             "features": (
                 "20 confrontations distinctes / mois",
-                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Tous les marchés : 1N2, double chance, BTTS, plus/moins, scores exacts",
                 "Historique complet des pronostics",
                 "Aucun paiement requis",
             ),
@@ -352,7 +383,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": None,
             "features": (
                 "150 distinct matchups / month",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
             ),
         },
@@ -361,7 +392,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": None,
             "features": (
                 "150 confrontations distinctes / mois",
-                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Tous les marchés : 1N2, double chance, BTTS, plus/moins, scores exacts",
                 "Historique complet des pronostics",
             ),
         },
@@ -372,7 +403,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": "Most popular",
             "features": (
                 "1,200 distinct matchups (200/month)",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
                 "20% cheaper than paying monthly",
             ),
@@ -382,7 +413,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": "Le plus populaire",
             "features": (
                 "1 200 confrontations distinctes (200/mois)",
-                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Tous les marchés : 1N2, double chance, BTTS, plus/moins, scores exacts",
                 "Historique complet des pronostics",
                 "20 % moins cher qu'un paiement mensuel",
             ),
@@ -394,7 +425,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": "Best value",
             "features": (
                 "3,000 distinct matchups (250/month)",
-                "All markets: WDL, BTTS, over/under, scorelines",
+                "All markets: WDL, double chance, BTTS, over/under, scorelines",
                 "Full prediction history",
                 "30% cheaper than paying monthly — best value",
             ),
@@ -404,7 +435,7 @@ PLAN_TRANSLATIONS: dict[str, dict[str, dict]] = {
             "highlight": "Meilleure offre",
             "features": (
                 "3 000 confrontations distinctes (250/mois)",
-                "Tous les marchés : 1N2, BTTS, plus/moins, scores exacts",
+                "Tous les marchés : 1N2, double chance, BTTS, plus/moins, scores exacts",
                 "Historique complet des pronostics",
                 "30 % moins cher qu'un paiement mensuel — meilleure offre",
             ),

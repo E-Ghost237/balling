@@ -132,6 +132,26 @@
 
   {% if result.markets %}
   <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.double_chance') }}</h2>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="rounded-lg bg-slate-50 p-4 text-center">
+        <p class="text-xs text-slate-500">1X — {{ result.home_team }} {{ t(request, 'result.or_draw') }}</p>
+        <p class="text-xl font-semibold text-slate-900">{{ (result.markets.double_chance['1X']*100) | round(1) }}%</p>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-4 text-center">
+        <p class="text-xs text-slate-500">12 — {{ result.home_team }} {{ t(request, 'result.or') }} {{ result.away_team }}</p>
+        <p class="text-xl font-semibold text-slate-900">{{ (result.markets.double_chance['12']*100) | round(1) }}%</p>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-4 text-center">
+        <p class="text-xs text-slate-500">2X — {{ result.away_team }} {{ t(request, 'result.or_draw') }}</p>
+        <p class="text-xl font-semibold text-slate-900">{{ (result.markets.double_chance['2X']*100) | round(1) }}%</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if result.markets %}
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
     <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.total_goals') }}</h2>
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm">

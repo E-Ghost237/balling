@@ -135,6 +135,15 @@ def render_btts(result):
     c2.metric("BTTS — No", f"{btts['no'] * 100:.1f}%")
 
 
+def render_double_chance(result):
+    dc = result["markets"]["double_chance"]
+    home, away = result["home_team"], result["away_team"]
+    c1, c2, c3 = st.columns(3)
+    c1.metric(f"1X ({home} or Draw)", f"{dc['1X'] * 100:.1f}%")
+    c2.metric(f"12 ({home} or {away})", f"{dc['12'] * 100:.1f}%")
+    c3.metric(f"2X ({away} or Draw)", f"{dc['2X'] * 100:.1f}%")
+
+
 def render_over_under_table(result):
     ou = result["markets"]["over_under"]
     rows = [
@@ -272,9 +281,11 @@ def main():
 
         st.divider()
         st.subheader("Markets")
-        tab_btts, tab_ou, tab_hc = st.tabs(["BTTS", "Total goals", "Handicap"])
+        tab_btts, tab_dc, tab_ou, tab_hc = st.tabs(["BTTS", "Double chance", "Total goals", "Handicap"])
         with tab_btts:
             render_btts(result)
+        with tab_dc:
+            render_double_chance(result)
         with tab_ou:
             render_over_under_table(result)
         with tab_hc:

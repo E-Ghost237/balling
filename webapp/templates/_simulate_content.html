@@ -1,12 +1,12 @@
-{% macro team_options(teams, selected) %}
-  {% if not teams %}
-    <option value="" disabled selected>{{ t(request, 'simulate.select_league_first') }}</option>
-  {% else %}
-    <option value="" disabled {% if not selected %}selected{% endif %}>{{ t(request, 'simulate.choose_team') }}</option>
-    {% for team in teams %}
-      <option value="{{ team }}" {% if team == selected %}selected{% endif %}>{{ team }}</option>
-    {% endfor %}
-  {% endif %}
+{% macro team_input(side, teams, selected) %}
+  <input type="text" id="{{ side }}-select" name="{{ side }}" list="{{ side }}-teams-list" required
+    autocomplete="off" value="{{ selected or '' }}"
+    placeholder="{{ t(request, 'simulate.choose_team') if teams else t(request, 'simulate.select_league_first') }}"
+    {% if not teams %}disabled{% endif %}
+    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+  <datalist id="{{ side }}-teams-list">
+    {% for team in teams %}<option value="{{ team }}"></option>{% endfor %}
+  </datalist>
 {% endmacro %}
 
 <div id="simulate-page">
@@ -57,17 +57,11 @@
       </div>
       <div>
         <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.home_team') }}</label>
-        <select id="home-select" name="home" required
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
-          {{ team_options(teams, selected_home) }}
-        </select>
+        {{ team_input('home', teams, selected_home) }}
       </div>
       <div>
         <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.away_team') }}</label>
-        <select id="away-select" name="away" required
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
-          {{ team_options(teams, selected_away) }}
-        </select>
+        {{ team_input('away', teams, selected_away) }}
       </div>
       <label class="flex items-center gap-2 text-sm text-slate-600 sm:col-span-2">
         <input type="checkbox" name="neutral" value="true" class="rounded border-slate-300" {% if neutral %}checked{% endif %} />

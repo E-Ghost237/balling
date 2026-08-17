@@ -321,11 +321,32 @@ async def forbidden(request: Request, user: User | None = Depends(get_optional_u
     return templates.TemplateResponse(request, "forbidden.html", {"user": user}, status_code=403)
 
 
+# --- legal pages: public, indexable, no login required (see main.py's
+# sitemap/robots.txt — deliberately not in the private-paths disallow list) ---
+
+
+@router.get("/privacy", response_class=HTMLResponse)
+async def privacy_policy(request: Request, user: User | None = Depends(get_optional_user)):
+    return templates.TemplateResponse(request, "privacy_policy.html", {"user": user})
+
+
+@router.get("/terms", response_class=HTMLResponse)
+async def terms_of_service(request: Request, user: User | None = Depends(get_optional_user)):
+    return templates.TemplateResponse(request, "terms.html", {"user": user})
+
+
 def _load_leagues(db_path: str) -> list[tuple[str, list[dict]]]:
     """Leagues grouped for the <optgroup> dropdown: a "Friendly" group with
     one synthetic entry (any two teams, unconstrained by league — the
     simulation engine itself has no notion of league anyway), then one
-    group per country for domestic club leagues, plus "International"."""
+    group per country for domestic club leagues, "UEFA Club Competitions"
+    for countryless club competitions (Champions/Europa/Conference League +
+    qualifiers), and "International" for national-team competitions. Club
+    and national-team competitions both have country=NULL, so `kind` (not
+    country) is what tells them apart — grouping by country alone put e.g.
+    "UEFA Europa League" and "UEFA European Championship" in the same
+    "International" bucket, reading like duplicate/inconsistent naming for
+    what are actually unrelated club vs national-team competitions."""
     conn = sqlite3.connect(db_path)
     try:
         rows = conn.execute(
@@ -338,7 +359,12 @@ def _load_leagues(db_path: str) -> list[tuple[str, list[dict]]]:
     }
     groups: dict[str, list[dict]] = {"Friendly": [friendly_entry]}
     for league_id, name, country, kind in rows:
-        group_label = country if country else "International"
+        if country:
+            group_label = country
+        elif kind == "club":
+            group_label = "UEFA Club Competitions"
+        else:
+            group_label = "International"
         groups.setdefault(group_label, []).append({"id": league_id, "name": name, "kind": kind})
     return list(groups.items())
 

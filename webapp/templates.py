@@ -1,4 +1,5 @@
 import time
+from datetime import UTC, datetime
 
 from fastapi.templating import Jinja2Templates
 
@@ -16,3 +17,6 @@ templates.env.globals["t"] = t
 templates.env.globals["url"] = url_for_locale
 templates.env.globals["localize"] = localize_path
 templates.env.globals["plan_t"] = plan_t
+# Called (not a bare value) so the footer's copyright year stays correct
+# across a long-lived process instead of freezing at process-start time.
+templates.env.globals["current_year"] = lambda: datetime.now(UTC).year

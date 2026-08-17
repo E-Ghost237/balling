@@ -102,6 +102,23 @@ LEAGUE_WEIGHTS = {
     "CONCACAF Gold Cup Qualification": 0.6,
     "AFC Asian Cup": 0.9,
     "AFC Asian Cup Qualification": 0.6,
+    # AFC-confederation domestic leagues (see leagues_config.SOFASCORE_LEAGUES)
+    # — no direct prior comparison point in this table, so weighted below the
+    # weakest European domestic league here and roughly in line with the AFC
+    # Asian Cup qualifiers above. An estimate, easy to revisit once there's
+    # real predictive-accuracy feedback for these two leagues.
+    "Persian Gulf Pro League": 0.6,
+    "Iraq Stars League": 0.6,
+    # 14-league expansion (see leagues_config.SOFASCORE_LEAGUES). All are
+    # top flights left at DEFAULT_LEAGUE_WEIGHT (1.0) — same bucket this
+    # table already puts Eredivisie/Primeira Liga/Belgian Pro
+    # League/Austrian Bundesliga/Russian Premier League in without finer
+    # distinctions between them, and there's no real predictive-accuracy
+    # evidence yet to justify picking precise values apart for these
+    # either. The one exception needs an explicit entry: Superettan is
+    # Sweden's second tier (below Allsvenskan), not a top flight — same
+    # 0.8 already used for Championship/2.Bundesliga/etc. above.
+    "Superettan": 0.8,
 }
 DEFAULT_LEAGUE_WEIGHT = 1.0
 

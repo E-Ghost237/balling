@@ -11,6 +11,17 @@ have: the country of the league(s) a team has actually played matches in
 points at exactly one country that disagrees with the stored value —
 ambiguous/multi-country teams are left untouched and reported.
 
+That "league's country = team's country" assumption is itself wrong for a
+known handful of real cross-border clubs — a league's own country tag is
+about where the COMPETITION is run, not where every member club is based.
+Caught during the 14-league expansion: MLS is tagged country="USA" but
+includes three genuinely Canadian franchises, and Switzerland's Super
+League includes FC Vaduz, genuinely based in Liechtenstein (which has no
+top-flight league of its own). Applying this script's normal "unambiguous"
+logic to them would silently overwrite a correct country with a wrong one
+— excluded by name below rather than trusted just because the query found
+only one candidate country.
+
 Usage:
     python fix_team_countries.py --db ../data/football.db          # dry run
     python fix_team_countries.py --db ../data/football.db --apply
@@ -18,6 +29,14 @@ Usage:
 
 import argparse
 import sqlite3
+
+# Real clubs based in a different country than the league they play in —
+# see module docstring. Keyed by name since that's what's visible in the
+# dry-run output; a name collision with an unrelated same-named club
+# elsewhere is exactly the kind of ambiguity this script already reports
+# rather than guesses at, so a name-only match is as safe here as anywhere
+# else in this script.
+KNOWN_CROSS_BORDER_CLUBS = {"Vancouver Whitecaps", "CF Montréal", "Toronto FC", "FC Vaduz"}
 
 
 def find_mismatches(conn: sqlite3.Connection) -> tuple[list[tuple], list[tuple]]:
@@ -40,7 +59,10 @@ def find_mismatches(conn: sqlite3.Connection) -> tuple[list[tuple], list[tuple]]
     for (team_id, name, stored), countries in by_team.items():
         if stored in countries:
             continue
-        if len(countries) == 1:
+        if name in KNOWN_CROSS_BORDER_CLUBS:
+            note = "<cross-border club, see KNOWN_CROSS_BORDER_CLUBS>"
+            ambiguous.append((team_id, name, stored, sorted(countries) + [note]))
+        elif len(countries) == 1:
             clean.append((team_id, name, stored, next(iter(countries))))
         else:
             ambiguous.append((team_id, name, stored, sorted(countries)))

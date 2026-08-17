@@ -14,7 +14,7 @@ import os
 import sqlite3
 import time
 
-import requests
+import cloudscraper
 
 from flags import flag_code_for_country
 
@@ -23,17 +23,23 @@ LOGOS_DIR = os.path.join(BASE_DIR, "static", "logos")
 FLAGS_DIR = os.path.join(BASE_DIR, "static", "flags")
 REQUEST_DELAY_SECONDS = 0.3
 
+# cloudscraper (not plain requests) since api.sofascore.com's logo URLs sit
+# behind the same Cloudflare TLS/JS-challenge that blocks a plain client —
+# see scrapers/sofascore_scraper.py. Works fine against non-Cloudflare
+# hosts (TheSportsDB, flagcdn.com) too, so this is a safe blanket swap.
+_scraper = cloudscraper.create_scraper()
+
 
 def download(url, dest_path, max_retries=3):
     for attempt in range(1, max_retries + 1):
         try:
-            resp = requests.get(url, timeout=15)
+            resp = _scraper.get(url, timeout=15)
             if resp.ok and resp.content:
                 with open(dest_path, "wb") as f:
                     f.write(resp.content)
                 return True
             return False
-        except requests.exceptions.RequestException:
+        except Exception:
             if attempt == max_retries:
                 return False
             time.sleep(2 * attempt)

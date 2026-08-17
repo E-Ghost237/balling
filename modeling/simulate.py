@@ -200,6 +200,16 @@ def compute_btts(goals_home, goals_away):
     return {"yes": prob_yes, "no": 1 - prob_yes}
 
 
+def compute_double_chance(goals_home, goals_away):
+    """1X = home win or draw, 12 = home or away win (i.e. not a draw),
+    2X = away win or draw."""
+    return {
+        "1X": float(np.mean(goals_home >= goals_away)),
+        "12": float(np.mean(goals_home != goals_away)),
+        "2X": float(np.mean(goals_home <= goals_away)),
+    }
+
+
 def compute_over_under(goals_home, goals_away, lines=OU_LINES):
     total = goals_home + goals_away
     return {
@@ -234,6 +244,7 @@ def compute_markets(goals_home, goals_away):
     handicap = compute_handicap(goals_home, goals_away)
     return {
         "btts": compute_btts(goals_home, goals_away),
+        "double_chance": compute_double_chance(goals_home, goals_away),
         "over_under": over_under,
         "handicap": handicap,
         "fair_ou_line": closest_to_even(over_under, "over"),
@@ -251,10 +262,14 @@ def compute_best_picks(summary, markets, home_team, away_team,
     ou = markets["over_under"][fair_ou]
     hc = markets["handicap"][fair_hc]
 
+    dc = markets["double_chance"]
     candidates = [
         ("Match result", f"{home_team} win", summary["prob_home_win"]),
         ("Match result", "Draw", summary["prob_draw"]),
         ("Match result", f"{away_team} win", summary["prob_away_win"]),
+        ("Double chance", f"{home_team} or Draw (1X)", dc["1X"]),
+        ("Double chance", f"{home_team} or {away_team} (12)", dc["12"]),
+        ("Double chance", f"{away_team} or Draw (2X)", dc["2X"]),
         ("BTTS", "Yes", markets["btts"]["yes"]),
         ("BTTS", "No", markets["btts"]["no"]),
         ("Total goals", f"Over {fair_ou}", ou["over"]),
@@ -310,7 +325,8 @@ def load_global_avg(db_path):
         return None
 
 
-def save_prediction(conn, home_team_id, away_team_id, lambda_home, lambda_away, summary, confidence_flag, markets=None, best_picks=None):
+def save_prediction(conn, home_team_id, away_team_id, lambda_home, lambda_away, summary,
+                     confidence_flag, markets=None, best_picks=None):
     import json
     from datetime import datetime, timezone
     extra_json = json.dumps({"markets": markets, "best_picks": best_picks}) if markets is not None else None
@@ -410,6 +426,9 @@ def print_prediction(result):
 
     btts = result["markets"]["btts"]
     print(f"\nBTTS: Yes {btts['yes']*100:.1f}% / No {btts['no']*100:.1f}%")
+
+    dc = result["markets"]["double_chance"]
+    print(f"\nDouble chance: 1X {dc['1X']*100:.1f}% / 12 {dc['12']*100:.1f}% / 2X {dc['2X']*100:.1f}%")
 
     if result["best_picks"]:
         print(f"\nBest picks (>= {BEST_PICK_THRESHOLD*100:.0f}% confidence):")

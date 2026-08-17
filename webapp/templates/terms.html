@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}{{ t(request, 'terms.title') }}{% endblock %}
+{% block description %}{{ t(request, 'terms.description') }}{% endblock %}
+{% block main_class %}max-w-3xl{% endblock %}
+{% block content %}
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
+
+{% if request.state.locale == 'fr' %}
+
+  <h1 class="mb-1 text-2xl font-semibold text-slate-900 sm:text-3xl">Conditions générales d'utilisation</h1>
+  <p class="mb-8 text-sm text-slate-500">Dernière mise à jour : 16 août 2026</p>
+
+  <p class="mb-6 text-sm leading-relaxed text-slate-600">
+    Veuillez lire attentivement ces Conditions générales d'utilisation (les « Conditions ») avant d'utiliser le
+    site et le service Balling Predictions (le « Service »). Le Service est exploité par la personne qui gère
+    Balling Predictions (« nous »), joignable à
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>.
+    En créant un compte ou en utilisant le Service de quelque manière que ce soit, vous acceptez d'être lié par
+    ces Conditions ainsi que par notre
+    <a href="{{ url(request, '/privacy') }}" class="text-emerald-600 hover:underline">Politique de confidentialité</a>.
+    Si vous n'êtes pas d'accord, veuillez ne pas utiliser le Service.
+  </p>
+
+  <h2 id="section-1" class="mb-2 mt-8 text-lg font-semibold text-slate-900">1. Ce qu'est Balling Predictions</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Balling Predictions est un outil d'analyse statistique de matchs de football. À partir des résultats
+    historiques, de classements Elo des équipes et de simulations de Monte-Carlo, il estime des probabilités
+    pour des issues telles que victoire/nul/défaite, le score exact, les deux équipes marquent (BTTS) et le
+    total de buts plus/moins, sur plus de 700 équipes des plus grands championnats européens.
+  </p>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Le Service est fourni à titre informatif et récréatif uniquement. Il ne s'agit pas d'un opérateur de paris
+    ou de jeux d'argent&nbsp;: nous n'acceptons aucune mise, ne détenons aucun enjeu, ne plaçons aucun pari en
+    votre nom et ne versons aucun gain. Rien sur le Service ne constitue un conseil financier, de paris ou
+    d'investissement, et aucun résultat n'est garanti exact — les résultats du football sont par nature
+    imprévisibles, et les statistiques passées ne garantissent pas les résultats futurs.
+  </p>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Si vous choisissez d'utiliser nos pronostics pour placer des paris ou des mises auprès d'un tiers, vous le
+    faites entièrement à vos propres risques et êtes seul responsable du respect des lois sur les paris et jeux
+    d'argent qui vous sont applicables.
+  </p>
+
+  <h2 id="section-2" class="mb-2 mt-8 text-lg font-semibold text-slate-900">2. Éligibilité</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Vous devez avoir au moins 18 ans pour créer un compte ou souscrire à un plan payant. En vous inscrivant,
+    vous confirmez remplir cette condition et que les informations fournies (nom, e-mail) sont exactes. Un
+    compte par personne&nbsp;; les comptes sont personnels et non transférables.
+  </p>
+
+  <h2 id="section-3" class="mb-2 mt-8 text-lg font-semibold text-slate-900">3. Votre compte</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+    <li>Vous êtes responsable de la confidentialité de votre mot de passe et de toute activité effectuée depuis votre compte.</li>
+    <li>Une seule session active est autorisée par compte à la fois — se connecter depuis un nouvel appareil ou navigateur met fin à toute session précédente.</li>
+    <li>Vous devez vérifier votre adresse e-mail (via un code à 6 chiffres) avant que votre compte ne soit pleinement activé.</li>
+    <li>Nous pouvons suspendre ou résilier un compte qui fournit de fausses informations, partage ses identifiants de connexion, tente de contourner les quotas d'utilisation, ou enfreint autrement ces Conditions.</li>
+  </ul>
+
+  <h2 id="section-4" class="mb-2 mt-8 text-lg font-semibold text-slate-900">4. Plans, quotas et facturation</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+    <li>Chaque compte vérifié reçoit automatiquement le plan Gratuit&nbsp;: 20 confrontations distinctes par mois, sans frais, sans moyen de paiement requis.</li>
+    <li>Les plans payants (Mensuel, 6 mois, Annuel) débloquent un quota mensuel de confrontations distinctes plus élevé, au prix en francs CFA (XAF) indiqué sur la page de paiement au moment de l'achat.</li>
+    <li>Une « confrontation distincte » correspond à une paire unique d'équipes domicile/extérieur (et à un choix de terrain neutre ou non) au sein de votre cycle de facturation en cours — resimuler la même confrontation ne consomme pas de quota supplémentaire.</li>
+    <li>Les plans payants sont actuellement facturés via Mobile Money (MTN Mobile Money, Orange Money — Cameroun) grâce à nos prestataires de paiement Monetbil et KPay. Vous approuvez vous-même chaque paiement sur votre téléphone&nbsp;; nous ne voyons ni ne stockons jamais votre code PIN Mobile Money. Nous prévoyons d'ajouter les paiements par carte Visa/Mastercard et PayPal à l'avenir&nbsp;; une fois disponibles, ces paiements seront également régis par les propres conditions et politique de confidentialité de ce prestataire.</li>
+    <li>Les plans sont prépayés pour une durée fixe (30 / 182 / 365 jours) et ne se renouvellent pas automatiquement — l'accès repasse au plan Gratuit une fois la période payante expirée, et un nouveau paiement est nécessaire pour continuer sur un plan payant.</li>
+    <li>Un paiement réussi est normalement confirmé et votre plan activé automatiquement en quelques minutes, et au plus tard sous 24 heures.</li>
+  </ul>
+
+  <h2 id="section-5" class="mb-2 mt-8 text-lg font-semibold text-slate-900">5. Remboursements</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Une fois un paiement confirmé et votre plan activé, celui-ci est définitif et non remboursable, sauf
+    lorsqu'un remboursement est exigé par la loi applicable, ou lorsque nous déterminons, à notre discrétion,
+    qu'un débit a été effectué par erreur (par exemple un double débit). Les paiements qui échouent, sont
+    annulés, ou ne sont pas approuvés sur votre téléphone ne sont jamais capturés — il n'y a donc rien à
+    rembourser. Contactez-nous à
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>
+    si vous pensez avoir été débité à tort.
+  </p>
+
+  <h2 id="section-6" class="mb-2 mt-8 text-lg font-semibold text-slate-900">6. Utilisation autorisée</h2>
+  <p class="mb-2 text-sm leading-relaxed text-slate-600">Vous vous engagez à ne pas&nbsp;:</p>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+    <li>utiliser des outils automatisés pour extraire (scraper), interroger en masse, décompiler ou revendre le Service ou ses pronostics&nbsp;;</li>
+    <li>créer plusieurs comptes pour obtenir un quota gratuit supplémentaire&nbsp;;</li>
+    <li>partager votre compte ou votre session avec quiconque&nbsp;;</li>
+    <li>tenter de contourner, désactiver ou déjouer les quotas, la sécurité ou les contrôles d'accès&nbsp;;</li>
+    <li>utiliser le Service à des fins illégales, ou d'une manière portant atteinte aux droits d'autrui.</li>
+  </ul>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Nous pouvons suspendre ou résilier l'accès, avec ou sans préavis, en cas de violation de cette section.
+  </p>
+
+  <h2 id="section-7" class="mb-2 mt-8 text-lg font-semibold text-slate-900">7. Propriété intellectuelle</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Le Service, les modèles statistiques sous-jacents, le logiciel, le design ainsi que le nom et le logo
+    « Balling Predictions » nous appartiennent, ou appartiennent à nos concédants. Nous vous accordons une
+    licence personnelle, non exclusive, non transférable et révocable pour accéder au Service et l'utiliser à
+    des fins strictement personnelles et non commerciales. Vous ne pouvez pas copier, revendre, sous-licencier
+    ou redistribuer les pronostics ou toute partie du Service sans notre autorisation écrite préalable.
+  </p>
+
+  <h2 id="section-8" class="mb-2 mt-8 text-lg font-semibold text-slate-900">8. Exclusion de garanties</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Le Service est fourni « tel quel » et « selon disponibilité », sans garantie d'aucune sorte, expresse ou
+    implicite, notamment quant à son exactitude, son exhaustivité, sa fiabilité ou son adéquation à un usage
+    particulier. Nous ne garantissons pas que les pronostics seront exacts, que le Service sera ininterrompu ou
+    exempt d'erreurs, ni que les défauts seront corrigés.
+  </p>
+
+  <h2 id="section-9" class="mb-2 mt-8 text-lg font-semibold text-slate-900">9. Limitation de responsabilité</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Dans la mesure permise par la loi applicable, nous ne sommes pas responsables des dommages indirects,
+    accessoires, spéciaux ou consécutifs, ni d'aucune perte de profits, de revenus ou de fonds — y compris les
+    pertes résultant de paris ou mises placés ailleurs en se fiant à nos pronostics. Notre responsabilité totale
+    pour toute réclamation liée au Service est limitée au montant que vous nous avez payé, le cas échéant, au
+    cours des 12 mois précédant la réclamation.
+  </p>
+
+  <h2 id="section-10" class="mb-2 mt-8 text-lg font-semibold text-slate-900">10. Résiliation</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Vous pouvez cesser d'utiliser le Service et demander la fermeture de votre compte à tout moment en écrivant
+    à
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>.
+    Nous pouvons suspendre ou résilier votre compte en cas de violation de ces Conditions, de fraude ou d'abus
+    suspecté, ou si la loi l'exige. À la résiliation, votre droit d'utiliser le Service cesse immédiatement&nbsp;;
+    les sections qui, de par leur nature, doivent survivre (propriété intellectuelle, exclusions de garantie,
+    limitation de responsabilité) continuent de s'appliquer.
+  </p>
+
+  <h2 id="section-11" class="mb-2 mt-8 text-lg font-semibold text-slate-900">11. Modifications des présentes Conditions</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Nous pouvons mettre à jour ces Conditions de temps à autre, par exemple pour refléter de nouvelles
+    fonctionnalités, de nouveaux plans ou moyens de paiement. Nous mettrons à jour la date de « Dernière mise à
+    jour » ci-dessus et, pour les changements importants, ferons de notre mieux pour informer les utilisateurs
+    actifs (par exemple par e-mail). Continuer à utiliser le Service après l'entrée en vigueur des changements
+    signifie que vous acceptez les Conditions mises à jour&nbsp;; les changements ne s'appliquent jamais
+    rétroactivement à une période de plan déjà payée.
+  </p>
+
+  <h2 id="section-12" class="mb-2 mt-8 text-lg font-semibold text-slate-900">12. Droit applicable</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Ces Conditions sont régies par le droit camerounais. Tout litige sera soumis aux tribunaux compétents du
+    Cameroun, sans préjudice des droits impératifs de protection des consommateurs dont vous pourriez bénéficier
+    en vertu du droit de votre pays de résidence. Si vous payez via un prestataire international (par exemple
+    Visa, Mastercard, PayPal), cette transaction est en outre soumise aux propres conditions et au processus de
+    résolution des litiges de ce prestataire. Vous êtes responsable de vous assurer que votre utilisation du
+    Service respecte les lois qui vous sont applicables, où que vous y accédiez.
+  </p>
+
+  <h2 id="section-13" class="mb-2 mt-8 text-lg font-semibold text-slate-900">13. Contact</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Des questions sur ces Conditions&nbsp;? Écrivez à
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>.
+  </p>
+
+{% else %}
+
+  <h1 class="mb-1 text-2xl font-semibold text-slate-900 sm:text-3xl">Terms of Service</h1>
+  <p class="mb-8 text-sm text-slate-500">Last updated: August 16, 2026</p>
+
+  <p class="mb-6 text-sm leading-relaxed text-slate-600">
+    Please read these Terms of Service (the "Terms") carefully before using the Balling Predictions website
+    and service (the "Service"). The Service is operated by the individual who runs Balling Predictions
+    ("we", "us"), reachable at
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>.
+    By creating an account or using the Service in any way, you agree to be bound by these Terms and by our
+    <a href="{{ url(request, '/privacy') }}" class="text-emerald-600 hover:underline">Privacy Policy</a>.
+    If you do not agree, please do not use the Service.
+  </p>
+
+  <h2 id="section-1" class="mb-2 mt-8 text-lg font-semibold text-slate-900">1. What Balling Predictions is</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Balling Predictions is a statistical football-match analysis tool. Using historical results, Elo-style
+    team ratings and Monte Carlo simulation, it estimates probabilities for outcomes such as win/draw/loss,
+    correct scorelines, both-teams-to-score (BTTS), and over/under total goals, across 700+ teams in Europe's
+    top leagues.
+  </p>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    The Service is informational and entertainment-only. It is not a betting or gambling operator: we do not
+    accept wagers, hold stakes, place bets on your behalf, or pay out winnings of any kind. Nothing on the
+    Service constitutes financial, gambling, or investment advice, and no output is guaranteed to be accurate
+    — football results are inherently unpredictable, and past statistics do not guarantee future outcomes.
+  </p>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    If you choose to use our predictions when placing bets or wagers with a third party, you do so entirely
+    at your own risk and are solely responsible for complying with the gambling and betting laws applicable
+    to you.
+  </p>
+
+  <h2 id="section-2" class="mb-2 mt-8 text-lg font-semibold text-slate-900">2. Eligibility</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    You must be at least 18 years old to create an account or subscribe to a paid plan. By registering, you
+    confirm that you meet this requirement and that the information you provide (name, email) is accurate.
+    One account per person; accounts are personal and non-transferable.
+  </p>
+
+  <h2 id="section-3" class="mb-2 mt-8 text-lg font-semibold text-slate-900">3. Your account</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+    <li>You're responsible for keeping your password confidential and for all activity under your account.</li>
+    <li>Only one active session is allowed per account at a time — logging in from a new device or browser ends any previous session.</li>
+    <li>You must verify your email address (a 6-digit code) before your account is fully activated.</li>
+    <li>We may suspend or terminate an account that provides false information, shares login credentials, attempts to bypass usage quotas, or otherwise breaches these Terms.</li>
+  </ul>
+
+  <h2 id="section-4" class="mb-2 mt-8 text-lg font-semibold text-slate-900">4. Plans, quotas and billing</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+    <li>Every verified account automatically receives the Free plan: 20 distinct matchups per month, at no cost, no payment method required.</li>
+    <li>Paid plans (Monthly, 6 Months, Yearly) unlock a higher monthly quota of distinct matchups, priced in CFA francs (XAF) as shown on the payment page at the time of purchase.</li>
+    <li>A "distinct matchup" means a unique home/away team pairing (and neutral-venue setting) within your current billing cycle — re-simulating the same matchup doesn't use additional quota.</li>
+    <li>Paid plans are currently billed via Mobile Money (MTN Mobile Money, Orange Money — Cameroon) through our payment processors Monetbil and KPay. You approve each payment yourself on your phone; we never see or store your Mobile Money PIN. We plan to add Visa/Mastercard and PayPal in the future; once available, those payments will additionally be governed by that processor's own terms and privacy policy.</li>
+    <li>Plans are prepaid for a fixed term (30 / 182 / 365 days) and do not auto-renew — access reverts to the Free plan once a paid term expires, and you'll need to make a new payment to continue at a paid tier.</li>
+    <li>A successful payment is normally confirmed and your plan activated automatically within minutes, and no later than 24 hours.</li>
+  </ul>
+
+  <h2 id="section-5" class="mb-2 mt-8 text-lg font-semibold text-slate-900">5. Refunds</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Once a payment is confirmed and your plan activated, it is final and non-refundable, except where a refund
+    is required by applicable law or where we determine, at our discretion, that you were charged in error
+    (e.g. a duplicate charge). Payments that fail, are cancelled, or aren't approved on your phone are never
+    captured, so there is nothing to refund. Contact us at
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>
+    if you believe you were charged incorrectly.
+  </p>
+
+  <h2 id="section-6" class="mb-2 mt-8 text-lg font-semibold text-slate-900">6. Acceptable use</h2>
+  <p class="mb-2 text-sm leading-relaxed text-slate-600">You agree not to:</p>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+    <li>use automated tools to scrape, bulk-query, reverse engineer, or resell the Service or its predictions;</li>
+    <li>create multiple accounts to obtain additional free-plan quota;</li>
+    <li>share your account or session with anyone else;</li>
+    <li>attempt to bypass, disable, or circumvent quota, security, or access controls;</li>
+    <li>use the Service for any unlawful purpose, or in a way that infringes anyone else's rights.</li>
+  </ul>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    We may suspend or terminate access, with or without notice, for violations of this section.
+  </p>
+
+  <h2 id="section-7" class="mb-2 mt-8 text-lg font-semibold text-slate-900">7. Intellectual property</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    The Service, its underlying statistical models, software, design, and the "Balling Predictions" name and
+    logo are owned by us or our licensors. We grant you a personal, non-exclusive, non-transferable, revocable
+    licence to access and use the Service for your own personal, non-commercial use. You may not copy, resell,
+    sublicense, or redistribute predictions or any part of the Service without our prior written permission.
+  </p>
+
+  <h2 id="section-8" class="mb-2 mt-8 text-lg font-semibold text-slate-900">8. Disclaimer of warranties</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    The Service is provided "as is" and "as available", without warranties of any kind, express or implied,
+    including accuracy, completeness, reliability, or fitness for a particular purpose. We do not guarantee
+    that predictions will be correct, that the Service will be uninterrupted or error-free, or that defects
+    will be corrected.
+  </p>
+
+  <h2 id="section-9" class="mb-2 mt-8 text-lg font-semibold text-slate-900">9. Limitation of liability</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    To the maximum extent permitted by applicable law, we are not liable for any indirect, incidental,
+    special, or consequential damages, or for any loss of profits, revenue, or funds — including losses
+    arising from bets or wagers placed elsewhere in reliance on our predictions. Our total liability for any
+    claim relating to the Service is limited to the amount you paid us, if any, in the 12 months preceding
+    the claim.
+  </p>
+
+  <h2 id="section-10" class="mb-2 mt-8 text-lg font-semibold text-slate-900">10. Termination</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    You may stop using the Service and request closure of your account at any time by writing to
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>.
+    We may suspend or terminate your account for breach of these Terms, suspected fraud or abuse, or if
+    required by law. On termination, your right to use the Service ends immediately; sections that by their
+    nature should survive (intellectual property, disclaimers, limitation of liability) continue to apply.
+  </p>
+
+  <h2 id="section-11" class="mb-2 mt-8 text-lg font-semibold text-slate-900">11. Changes to these Terms</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    We may update these Terms from time to time, e.g. to reflect new features, plans, or payment methods.
+    We'll update the "Last updated" date above and, for material changes, do our best to notify active users
+    (e.g. by email). Continuing to use the Service after changes take effect means you accept the updated
+    Terms; changes never apply retroactively to a plan term you've already paid for.
+  </p>
+
+  <h2 id="section-12" class="mb-2 mt-8 text-lg font-semibold text-slate-900">12. Governing law</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    These Terms are governed by the laws of Cameroon. Any dispute will be submitted to the competent courts
+    of Cameroon, without prejudice to any mandatory consumer-protection rights you may have under the law of
+    your own country of residence. If you pay via an international processor (e.g. Visa, Mastercard, PayPal),
+    that transaction is additionally subject to that processor's own terms and dispute-resolution process.
+    You're responsible for making sure your use of the Service complies with the laws that apply to you
+    wherever you access it from.
+  </p>
+
+  <h2 id="section-13" class="mb-2 mt-8 text-lg font-semibold text-slate-900">13. Contact</h2>
+  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+    Questions about these Terms? Email
+    <a href="mailto:zanguevan31@gmail.com" class="text-emerald-600 hover:underline">zanguevan31@gmail.com</a>.
+  </p>
+
+{% endif %}
+
+</div>
+{% endblock %}
