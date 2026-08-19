@@ -62,9 +62,9 @@ class PaymentRequest(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    # Monetbil's paymentId once place_payment() accepts the request — also
-    # doubles as payment_ref's target (see webapp/monetbil.py) since this
-    # row's own `id` is generated up front and sent as payment_ref.
+    # KPay's Payment id once place_payment() accepts the request (see
+    # webapp/kpay.py) — this row's own `id` is generated up front and sent
+    # as KPay's externalId, which the webhook then uses to look it back up.
     transaction_id: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
     operator: Mapped[str | None] = mapped_column(String)

@@ -533,126 +533,6 @@ async def test_payment_submit_surfaces_kpay_rejection_without_creating_a_payment
         assert result.first() is None
 
 
-async def test_monetbil_webhook_activates_subscription_on_success() -> None:
-    from webapp.monetbil import sign
-
-    user_id = await _create_user("webhook-user@example.com")
-    payment_id = uuid4()
-    async with get_engine().begin() as connection:
-        await connection.execute(
-            PaymentRequest.__table__.insert().values(
-                id=payment_id, user_id=user_id, transaction_id="MB-PID-WEBHOOK",
-                phone_number="670000000", operator="CM_MTNMOBILEMONEY",
-                amount_fcfa=PLANS["monthly"].price_fcfa, plan="monthly",
-                status="PENDING", submitted_at=datetime.now(UTC),
-            )
-        )
-
-    params = {
-        "status": "success",
-        "amount": str(PLANS["monthly"].price_fcfa),
-        "payment_ref": str(payment_id),
-        "transaction_id": "op-txn-1",
-    }
-    params["sign"] = sign("test-service-secret", params)
-
-    async with await _client() as client:
-        response = await client.post(
-            "/webhooks/monetbil/test-webhook-secret", data=params
-        )
-    assert response.status_code == 200
-    assert response.text == "received"
-
-    async with get_engine().begin() as connection:
-        payment_row = (
-            await connection.execute(
-                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
-            )
-        ).scalar_one()
-        sub_row = (
-            await connection.execute(
-                select(Subscription.status, Subscription.plan, Subscription.quota_limit)
-                .where(Subscription.user_id == user_id)
-            )
-        ).one()
-    assert payment_row == "APPROVED"
-    assert sub_row.status == "ACTIVE"
-    assert sub_row.plan == "monthly"
-    assert sub_row.quota_limit == PLANS["monthly"].quota
-
-
-async def test_monetbil_webhook_rejects_wrong_secret_path() -> None:
-    async with await _client() as client:
-        response = await client.post("/webhooks/monetbil/not-the-real-secret", data={})
-    assert response.status_code == 404
-
-
-async def test_monetbil_webhook_rejects_bad_signature() -> None:
-    user_id = await _create_user("webhook-badsign@example.com")
-    payment_id = uuid4()
-    async with get_engine().begin() as connection:
-        await connection.execute(
-            PaymentRequest.__table__.insert().values(
-                id=payment_id, user_id=user_id, transaction_id="MB-PID-BADSIGN",
-                phone_number="670000000", amount_fcfa=PLANS["monthly"].price_fcfa,
-                plan="monthly", status="PENDING", submitted_at=datetime.now(UTC),
-            )
-        )
-    params = {
-        "status": "success", "amount": str(PLANS["monthly"].price_fcfa),
-        "payment_ref": str(payment_id), "sign": "not-a-real-signature",
-    }
-    async with await _client() as client:
-        response = await client.post("/webhooks/monetbil/test-webhook-secret", data=params)
-    assert response.status_code == 403
-
-    async with get_engine().begin() as connection:
-        status = (
-            await connection.execute(
-                select(PaymentRequest.status).where(PaymentRequest.id == payment_id)
-            )
-        ).scalar_one()
-    assert status == "PENDING"
-
-
-async def test_monetbil_webhook_does_not_activate_an_underpaid_notification() -> None:
-    """If the paid amount comes back lower than what we charged for the
-    plan, don't grant the plan — leave it PENDING for manual review."""
-    from webapp.monetbil import sign
-
-    user_id = await _create_user("underpaid@example.com")
-    payment_id = uuid4()
-    async with get_engine().begin() as connection:
-        await connection.execute(
-            PaymentRequest.__table__.insert().values(
-                id=payment_id, user_id=user_id, transaction_id="MB-PID-UNDERPAID",
-                phone_number="670000000", amount_fcfa=PLANS["annual"].price_fcfa,
-                plan="annual", status="PENDING", submitted_at=datetime.now(UTC),
-            )
-        )
-    params = {
-        "status": "success",
-        "amount": str(PLANS["monthly"].price_fcfa),  # much less than the annual price charged
-        "payment_ref": str(payment_id),
-    }
-    params["sign"] = sign("test-service-secret", params)
-    async with await _client() as client:
-        response = await client.post("/webhooks/monetbil/test-webhook-secret", data=params)
-    assert response.status_code == 200
-
-    async with get_engine().begin() as connection:
-        payment_status_, sub_row = (
-            await connection.execute(
-                select(PaymentRequest.status, Subscription.status)
-                .select_from(PaymentRequest)
-                .join(Subscription, Subscription.user_id == PaymentRequest.user_id, isouter=True)
-                .where(PaymentRequest.id == payment_id)
-            )
-        ).one()
-    assert payment_status_ == "PENDING"
-    assert sub_row is None
-
-
 def _kpay_signed_request(secret: str, body: dict) -> tuple[bytes, str]:
     import hashlib
     import hmac as hmac_module
@@ -823,8 +703,8 @@ async def test_kpay_webhook_rejects_bad_signature() -> None:
 
 
 async def test_kpay_webhook_does_not_activate_an_underpaid_notification() -> None:
-    """Same guard as Monetbil's: don't auto-activate if the confirmed
-    amount is less than what was charged for the selected plan."""
+    """Don't auto-activate if the confirmed amount is less than what was
+    charged for the selected plan."""
     user_id = await _create_user("kpay-underpaid@example.com")
     payment_id = uuid4()
     async with get_engine().begin() as connection:

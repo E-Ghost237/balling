@@ -23,21 +23,13 @@ class Settings(BaseSettings):
     verification_code_ttl_minutes: int = 10
     verification_resend_cooldown_seconds: int = 60
     public_base_url: str = "https://ballingpronostics.site"
-    monetbil_service_key: str = ""
-    monetbil_service_secret: str = ""
-    # Random, hard-to-guess path segment for the notification webhook (in
-    # addition to signature verification) — Monetbil's own docs recommend
-    # an unguessable URL as a first layer before the signature check.
-    monetbil_webhook_path: str = ""
-    monetbil_country: str = "CM"
-    monetbil_currency: str = "XAF"
     kpay_api_key: str = ""
     kpay_secret_key: str = ""
     # Separate from kpay_secret_key — KPay's dashboard has a distinct
     # "Webhook Secret" specifically for X-KPAY-Signature verification.
     kpay_webhook_secret: str = ""
-    # Same unguessable-path-plus-signature pattern as Monetbil's webhook —
-    # see webapp/routes/webhooks.py.
+    # Random, hard-to-guess path segment for the webhook URL, in addition
+    # to the signature check — see webapp/routes/webhooks.py.
     kpay_webhook_path: str = ""
 
 

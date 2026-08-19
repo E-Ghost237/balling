@@ -112,7 +112,7 @@ async def transaction_id_already_used(connection: AsyncConnection, transaction_i
 
 async def activate_subscription_for_payment(connection: AsyncConnection, payment: Mapping) -> None:
     """Grants the plan on an approved PaymentRequest — shared by the admin's
-    manual approve button, the Monetbil webhook, and the /payment/status
+    manual approve button, the KPay webhook, and the /payment/status
     reconciliation poll, so all three paths compute expiry/quota identically
     from the same PLANS registry."""
     plan = PLANS[payment["plan"]]

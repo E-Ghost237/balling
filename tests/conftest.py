@@ -4,9 +4,6 @@ import tempfile
 from pathlib import Path
 
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://postgres:test@localhost:55432/balling_test")
-os.environ["MONETBIL_SERVICE_KEY"] = "test-service-key"
-os.environ["MONETBIL_SERVICE_SECRET"] = "test-service-secret"
-os.environ["MONETBIL_WEBHOOK_PATH"] = "test-webhook-secret"
 os.environ["KPAY_API_KEY"] = "kpay_test_dummy"
 os.environ["KPAY_SECRET_KEY"] = "test-kpay-secret-key"
 os.environ["KPAY_WEBHOOK_SECRET"] = "test-kpay-webhook-signing-secret"
