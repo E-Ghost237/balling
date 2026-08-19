@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from webapp.db import get_engine
 from webapp.deps import NotAuthenticated, NotAuthorized
@@ -18,7 +19,18 @@ SITE_URL = "https://ballingpronostics.site"
 async def lifespan(app: FastAPI):
     engine = get_engine()
     async with engine.begin() as connection:
+        # One-time: the `predictions` table is new (moved out of
+        # data/football.db — see models.Prediction). If this is the first
+        # boot to create it, any prediction_id already sitting on usage_log
+        # rows points at the old, now-gone SQLite-backed table — left as-is
+        # those values would collide with this brand-new id sequence and
+        # show a *different* match's data instead of "unavailable".
+        is_first_boot_with_predictions_table = (
+            await connection.execute(text("SELECT to_regclass('predictions')"))
+        ).scalar_one() is None
         await connection.run_sync(Base.metadata.create_all)
+        if is_first_boot_with_predictions_table:
+            await connection.execute(text("UPDATE usage_log SET prediction_id = NULL"))
     yield
 
 

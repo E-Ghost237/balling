@@ -22,7 +22,7 @@ def send_email(
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
-    message["From"] = settings.smtp_from or settings.smtp_user
+    message["From"] = f"Balling Predictions <{settings.smtp_from or settings.smtp_user}>"
     message["To"] = to
     message.attach(MIMEText(body, "plain"))
     message.attach(MIMEText(_render_html(subject, body, code, locale), "html"))

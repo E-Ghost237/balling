@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -90,6 +90,37 @@ class VerificationCode(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Prediction(Base):
+    """A saved /simulate result, read back by webapp/routes/history.py.
+    Deliberately in Postgres, not data/football.db — that SQLite file also
+    holds rebuildable scraped reference data (teams/matches/ratings), and a
+    wholesale rebuild/replace of it used to silently orphan every user's
+    prediction history (UsageLog.prediction_id pointed at rows that no
+    longer existed, with nothing erroring — see git history for the
+    "Details unavailable" bug this fixed). Team names are stored directly
+    rather than as SQLite team_id FKs for the same reason: resilient to
+    that file being rebuilt out from under us. modeling/simulate.py's own
+    SQLite-backed predictions table still exists separately, for the
+    standalone Streamlit tool (app.py) only."""
+
+    __tablename__ = "predictions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    home_team: Mapped[str] = mapped_column(String, nullable=False)
+    away_team: Mapped[str] = mapped_column(String, nullable=False)
+    lambda_home: Mapped[float] = mapped_column(Float, nullable=False)
+    lambda_away: Mapped[float] = mapped_column(Float, nullable=False)
+    n_simulations: Mapped[int] = mapped_column(Integer, nullable=False)
+    prob_home_win: Mapped[float] = mapped_column(Float, nullable=False)
+    prob_draw: Mapped[float] = mapped_column(Float, nullable=False)
+    prob_away_win: Mapped[float] = mapped_column(Float, nullable=False)
+    most_likely_score: Mapped[str | None] = mapped_column(String)
+    scoreline_probs: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    markets: Mapped[dict | None] = mapped_column(JSONB)
+    best_picks: Mapped[list | None] = mapped_column(JSONB)
 
 
 class UsageLog(Base):

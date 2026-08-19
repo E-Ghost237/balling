@@ -35,6 +35,7 @@ from webapp.otp import (
     verify_code,
 )
 from webapp.plans import PAID_PLANS, PLANS
+from webapp.predictions import save_prediction
 from webapp.quota import check_quota, distinct_matchup_count, record_usage
 from webapp.security import generate_session_token, hash_password
 from webapp.templates import templates
@@ -562,8 +563,12 @@ async def simulate_submit(
 
     conn = sqlite3.connect(settings.football_db_path)
     try:
+        # save=False: modeling/simulate.py's own SQLite predictions table is
+        # only for the standalone Streamlit tool (app.py) — the webapp saves
+        # the result itself, into Postgres, right below. See
+        # models.Prediction for why it isn't saved to data/football.db.
         result = simulate.predict_match(
-            conn, settings.football_db_path, home, away, save=True, neutral=neutral
+            conn, settings.football_db_path, home, away, save=False, neutral=neutral
         )
     except ValueError as exc:
         conn.close()
@@ -576,6 +581,7 @@ async def simulate_submit(
         )
     conn.close()
 
+    result["prediction_id"] = await save_prediction(connection, result)
     if not user.is_admin:
         await record_usage(
             connection, user.id, home, away, neutral, prediction_id=result["prediction_id"]
