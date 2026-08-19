@@ -8,7 +8,7 @@
 {% if request.state.locale == 'fr' %}
 
   <h1 class="mb-1 text-2xl font-semibold text-slate-900 sm:text-3xl">Politique de confidentialité</h1>
-  <p class="mb-8 text-sm text-slate-500">Dernière mise à jour : 19 août 2026</p>
+  <p class="mb-8 text-sm text-slate-500">Dernière mise à jour : 20 août 2026</p>
 
   <p class="mb-6 text-sm leading-relaxed text-slate-600">
     Cette Politique de confidentialité explique quelles données personnelles Balling Predictions (« nous »)
@@ -53,7 +53,8 @@
   <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
     <li>KPay, notre prestataire de paiement Mobile Money, reçoit le numéro de téléphone, l'opérateur et le montant nécessaires pour traiter chaque paiement&nbsp;;</li>
     <li>MTN Mobile Money / Orange Money, en tant qu'opérateur mobile que vous choisissez pour payer, voit la transaction sur ses propres systèmes&nbsp;;</li>
-    <li>notre prestataire d'e-mail, pour l'envoi des e-mails de vérification et de réinitialisation de mot de passe&nbsp;;</li>
+    <li>Resend, notre prestataire d'envoi d'e-mails (qui s'appuie sur l'infrastructure Amazon SES), pour l'envoi des e-mails de vérification et de réinitialisation de mot de passe&nbsp;;</li>
+    <li>Cloudflare, qui gère notre infrastructure DNS et achemine les e-mails reçus à contact@ballingpronostics.site vers notre boîte de réception&nbsp;;</li>
     <li>notre hébergeur, qui stocke la base de données sous-jacente et les journaux serveur&nbsp;;</li>
     <li>les autorités judiciaires ou de régulation, uniquement si la loi nous y oblige.</li>
   </ul>
@@ -137,7 +138,7 @@
 {% else %}
 
   <h1 class="mb-1 text-2xl font-semibold text-slate-900 sm:text-3xl">Privacy Policy</h1>
-  <p class="mb-8 text-sm text-slate-500">Last updated: August 19, 2026</p>
+  <p class="mb-8 text-sm text-slate-500">Last updated: August 20, 2026</p>
 
   <p class="mb-6 text-sm leading-relaxed text-slate-600">
     This Privacy Policy explains what personal data Balling Predictions ("we", "us") collects when you use
@@ -181,7 +182,8 @@
   <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
     <li>KPay, our Mobile Money payment processor, receives the phone number, operator, and amount needed to process each payment;</li>
     <li>MTN Mobile Money / Orange Money, as the mobile operator you choose to pay through, sees the transaction on their own systems;</li>
-    <li>our email provider, to deliver verification and password-reset emails;</li>
+    <li>Resend, our email-sending provider (built on Amazon SES infrastructure), to deliver verification and password-reset emails;</li>
+    <li>Cloudflare, which manages our DNS infrastructure and routes email sent to contact@ballingpronostics.site to our inbox;</li>
     <li>our hosting provider, which stores the underlying database and server logs;</li>
     <li>law enforcement or regulators, only if legally required to do so.</li>
   </ul>
