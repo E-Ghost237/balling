@@ -4,10 +4,10 @@
 {% macro team_badge(badge) %}
   <div class="flex flex-col items-center gap-3">
     {% if badge.flag_code %}
-      <img src="/assets/flags/{{ badge.flag_code }}.png" alt="" class="h-6 rounded-sm" />
+      <img src="/assets/flags/{{ badge.flag_code }}.png?v={{ asset_version }}" alt="" class="h-6 rounded-sm" />
     {% endif %}
     {% if badge.team_id %}
-      <img src="/assets/logos/{{ badge.team_id }}.png" alt="" class="h-28 w-28 object-contain"
+      <img src="/assets/logos/{{ badge.team_id }}.png?v={{ asset_version }}" alt="" class="h-28 w-28 object-contain"
            onerror="this.style.display='none'" />
     {% endif %}
     <span class="font-display text-base font-semibold uppercase tracking-wide text-paper">{{ badge.name }}</span>

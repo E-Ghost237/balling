@@ -103,7 +103,9 @@ SOFASCORE_LEAGUES = {
         "kind": "club",
         "source": "sofascore",
         "tournament_id": 915,
-        "season_ids": [24971, 34667, 39187, 44731, 52957, 65237, 79503, 99852],
+        # 2023 onward only, per explicit instruction — trimmed from the
+        # original 8-season (19/20-26/27) pull on 2026-08-25.
+        "season_ids": [52957, 65237, 79503, 99852],
     },
     "Iraq_Stars_League": {
         "name": "Iraq Stars League",
@@ -142,7 +144,9 @@ SOFASCORE_LEAGUES = {
         "kind": "club",
         "source": "sofascore",
         "tournament_id": 7,
-        "season_ids": [41897, 52162, 61644, 76953, 96518],
+        # 2023 onward only, per explicit instruction — trimmed from the
+        # original 5-season (22/23-26/27) pull on 2026-08-25.
+        "season_ids": [52162, 61644, 76953, 96518],
         "require_name_contains": "Qualification",
     },
     "UEFA_Europa_League": {
@@ -151,7 +155,9 @@ SOFASCORE_LEAGUES = {
         "kind": "club",
         "source": "sofascore",
         "tournament_id": 679,
-        "season_ids": [44509, 53654, 61645, 76984, 96522],
+        # 2023 onward only, per explicit instruction — trimmed from the
+        # original 5-season (22/23-26/27) pull on 2026-08-25.
+        "season_ids": [53654, 61645, 76984, 96522],
         "exclude_name_contains": "Qualification",
     },
     "UEFA_Europa_League_Qualification": {
@@ -160,7 +166,9 @@ SOFASCORE_LEAGUES = {
         "kind": "club",
         "source": "sofascore",
         "tournament_id": 679,
-        "season_ids": [44509, 53654, 61645, 76984, 96522],
+        # 2023 onward only, per explicit instruction — trimmed from the
+        # original 5-season (22/23-26/27) pull on 2026-08-25.
+        "season_ids": [53654, 61645, 76984, 96522],
         "require_name_contains": "Qualification",
     },
     "UEFA_Conference_League": {
@@ -169,7 +177,9 @@ SOFASCORE_LEAGUES = {
         "kind": "club",
         "source": "sofascore",
         "tournament_id": 17015,
-        "season_ids": [42224, 52327, 61648, 76960, 96529],
+        # 2023 onward only, per explicit instruction — trimmed from the
+        # original 5-season (22/23-26/27) pull on 2026-08-25.
+        "season_ids": [52327, 61648, 76960, 96529],
         "exclude_name_contains": "Qualification",
     },
     "UEFA_Conference_League_Qualification": {
@@ -178,7 +188,9 @@ SOFASCORE_LEAGUES = {
         "kind": "club",
         "source": "sofascore",
         "tournament_id": 17015,
-        "season_ids": [42224, 52327, 61648, 76960, 96529],
+        # 2023 onward only, per explicit instruction — trimmed from the
+        # original 5-season (22/23-26/27) pull on 2026-08-25.
+        "season_ids": [52327, 61648, 76960, 96529],
         "require_name_contains": "Qualification",
     },
     # --- 14-league expansion, requested to include xG. These have no
@@ -449,6 +461,90 @@ SOFASCORE_LEAGUES = {
         # 27 matches for a season that should have several hundred.
         # Pagination sidesteps the whole round/prefix mess.
         "use_paginated_events": True,
+    },
+}
+
+# Weekly-fixtures-only entries: leagues that already have their own
+# historical source (Understat for the top-5, football-data.co.uk for the
+# rest — see DOMESTIC_LEAGUES above) and don't need SofaScore for
+# backfill, but DO need a SofaScore tournament_id/season_id so
+# sofascore_weekly_fixtures.py can pull their upcoming fixtures for the
+# Monday-Sunday picker. Just the current season (singular id, not a
+# list) — this dict is never used for historical backfill. First and
+# second tier only, per explicit instruction — third tier (League One,
+# Serie C) deliberately excluded, same as this morning's junk-league
+# cleanup (both had zero real historical data of their own anyway).
+#
+# Every id below was verified the same way as SOFASCORE_LEAGUES: fetched
+# a real page of events and confirmed actual football clubs, not a
+# same-name/same-country entry for a different sport. This caught real
+# collisions — e.g. "Segunda División" id 1476 (Spain) is women's/men's
+# FUTSAL (team names end "FS"), not the football second division (that's
+# "LaLiga 2" id 54, already used and proven correct by
+# SOFASCORE_XG_ENRICH above); two separate "Serie A"/"Serie B"/
+# "Bundesliga"/"Eredivisie" ids under the same country turned out to be
+# futsal, basketball, handball, and volleyball respectively. Verified
+# 2026-08-25.
+WEEKLY_FIXTURES_LEAGUES = {
+    "Premier_League": {
+        "name": "Premier League", "country": "England", "kind": "club",
+        "tournament_id": 17, "season_id": 96668,
+    },
+    "Championship": {
+        "name": "Championship", "country": "England", "kind": "club",
+        "tournament_id": 18, "season_id": 97037,
+    },
+    "La_Liga": {
+        "name": "La Liga", "country": "Spain", "kind": "club",
+        "tournament_id": 8, "season_id": 97268,
+    },
+    "La_Liga_2": {
+        "name": "La Liga 2", "country": "Spain", "kind": "club",
+        "tournament_id": 54, "season_id": 97280,
+    },
+    "Serie_A": {
+        "name": "Serie A", "country": "Italy", "kind": "club",
+        "tournament_id": 23, "season_id": 95836,
+    },
+    "Serie_B": {
+        "name": "Serie B", "country": "Italy", "kind": "club",
+        "tournament_id": 53, "season_id": 99067,
+    },
+    "Bundesliga": {
+        "name": "Bundesliga", "country": "Germany", "kind": "club",
+        "tournament_id": 35, "season_id": 97464,
+    },
+    "Bundesliga_2": {
+        "name": "Bundesliga 2", "country": "Germany", "kind": "club",
+        "tournament_id": 44, "season_id": 97406,
+    },
+    "Ligue_1": {
+        "name": "Ligue 1", "country": "France", "kind": "club",
+        "tournament_id": 34, "season_id": 96127,
+    },
+    "Ligue_2": {
+        "name": "Ligue 2", "country": "France", "kind": "club",
+        "tournament_id": 182, "season_id": 96109,
+    },
+    "Primeira_Liga": {
+        "name": "Primeira Liga", "country": "Portugal", "kind": "club",
+        "tournament_id": 238, "season_id": 97436,
+    },
+    "Eredivisie": {
+        "name": "Eredivisie", "country": "Netherlands", "kind": "club",
+        "tournament_id": 37, "season_id": 96143,
+    },
+    "Belgian_Pro_League": {
+        "name": "Belgian Pro League", "country": "Belgium", "kind": "club",
+        "tournament_id": 38, "season_id": 96616,
+    },
+    "Russian_Premier_League": {
+        "name": "Russian Premier League", "country": "Russia", "kind": "club",
+        "tournament_id": 203, "season_id": 97023,
+    },
+    "Austrian_Bundesliga": {
+        "name": "Austrian Bundesliga", "country": "Austria", "kind": "club",
+        "tournament_id": 45, "season_id": 97043,
     },
 }
 

@@ -429,21 +429,28 @@ def _load_teams_for_league(db_path: str, league_id: int) -> list[str]:
 FIXTURES_DISPLAY_TZ = timezone(timedelta(hours=1))  # WAT / Cameroon, UTC+1
 
 
+WEEKDAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+
 def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
-    """Scheduled fixtures (see scrapers/api_football_daily_fixtures.py),
-    split into "today"/"tomorrow" tabs and grouped by league within each
-    (alphabetical — the SQL sorts that way and dict insertion order is
-    preserved, no separate re-sort needed). Kickoff times and the
-    today/tomorrow split are both computed in FIXTURES_DISPLAY_TZ
-    (Cameroon, UTC+1), not UTC — kickoff_utc itself stays UTC in the db,
-    this only affects what's shown/grouped. Each fixture keeps its own
-    league_id/home/away name so a fixture card can post straight to
-    POST /simulate — the exact same endpoint and quota/prediction path
-    the manual team picker already uses, just pre-filled instead of
-    typed. Anything beyond tomorrow is dropped here (this view is
-    deliberately just today+tomorrow); a 3rd day can be added back once
-    the data source supports it further out — see conversation notes on
-    API-Football's free-tier date-range limit."""
+    """Scheduled fixtures for the current Monday-Sunday week, split into
+    one tab per day and grouped by league within each (alphabetical —
+    the SQL sorts that way and dict insertion order is preserved, no
+    separate re-sort needed). Kickoff times and the day split are both
+    computed in FIXTURES_DISPLAY_TZ (Cameroon, UTC+1), not UTC —
+    kickoff_utc itself stays UTC in the db, this only affects what's
+    shown/grouped. Each fixture keeps its own league_id/home/away name
+    so a fixture card can post straight to POST /simulate — the exact
+    same endpoint and quota/prediction path the manual team picker
+    already uses, just pre-filled instead of typed.
+
+    source='sofascore' only, deliberately — API-Football's free tier
+    caps at a 3-day rolling window (yesterday/today/tomorrow) so it can
+    never fill a full week; SofaScore's per-league fetch has no such
+    limit (see sofascore_weekly_fixtures.py). Mixing both sources in one
+    week view would mean API-Football leagues silently vanish after
+    tomorrow, which reads as a bug rather than the real limitation it
+    is."""
     conn = sqlite3.connect(db_path)
     try:
         rows = conn.execute(
@@ -455,6 +462,7 @@ def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
             JOIN teams ht ON ht.id = m.home_team_id
             JOIN teams at ON at.id = m.away_team_id
             WHERE m.status = 'scheduled' AND m.kickoff_utc IS NOT NULL
+                  AND m.source = 'sofascore'
             ORDER BY l.name, m.kickoff_utc
             """
         ).fetchall()
@@ -462,16 +470,16 @@ def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
         conn.close()
 
     today = datetime.now(FIXTURES_DISPLAY_TZ).date()
-    tomorrow = today + timedelta(days=1)
-    day_groups: dict[str, dict[int, dict]] = {"today": {}, "tomorrow": {}}
+    monday = today - timedelta(days=today.weekday())
+    week_dates = [monday + timedelta(days=i) for i in range(7)]
+    date_to_key = dict(zip(week_dates, WEEKDAY_KEYS))
+
+    day_groups: dict[str, dict[int, dict]] = {day: {} for day in WEEKDAY_KEYS}
     for (league_id, league_name, league_country, kickoff_utc,
          home_id, home_name, away_id, away_name) in rows:
         kickoff_dt = datetime.fromtimestamp(kickoff_utc, tz=FIXTURES_DISPLAY_TZ)
-        if kickoff_dt.date() == today:
-            day_key = "today"
-        elif kickoff_dt.date() == tomorrow:
-            day_key = "tomorrow"
-        else:
+        day_key = date_to_key.get(kickoff_dt.date())
+        if day_key is None:
             continue
 
         group = day_groups[day_key].setdefault(league_id, {
@@ -572,7 +580,7 @@ async def simulate_page(
     leagues = _load_leagues(settings.football_db_path) if active else []
     fixture_days = (
         _load_upcoming_fixtures(settings.football_db_path) if active
-        else {"today": [], "tomorrow": []}
+        else {day: [] for day in WEEKDAY_KEYS}
     )
     quota_used = 0
     quota_limit = subscription.quota_limit or 0 if subscription else 0
@@ -587,6 +595,7 @@ async def simulate_page(
             "active": active,
             "leagues": leagues,
             "fixture_days": fixture_days,
+            "current_weekday": WEEKDAY_KEYS[datetime.now(FIXTURES_DISPLAY_TZ).weekday()],
             "teams": [],
             "quota_used": quota_used,
             "quota_limit": quota_limit,
@@ -637,6 +646,7 @@ async def simulate_submit(
             "leagues": leagues,
             "teams": teams,
             "fixture_days": fixture_days,
+            "current_weekday": WEEKDAY_KEYS[datetime.now(FIXTURES_DISPLAY_TZ).weekday()],
             "selected_league_id": league_id,
             "selected_home": home,
             "selected_away": away,
