@@ -19,21 +19,38 @@
    peer-checked reference below it. Each content div only ever tests its
    OWN day's peer — unlike a 2-way toggle there's no single "else"
    peer to hide behind, so every div is `hidden` by default and opts
-   into `peer-checked/{day}:block` for exactly one day. #}
+   into `peer-checked/{day}:block` for exactly one day.
+
+   Every peer/{day} and peer-checked/{day}:* class name below is written
+   out literally, one block per day, NOT built by interpolating a Jinja
+   loop variable into the class string — Tailwind generates its CSS by
+   statically scanning template *source* for complete, literal
+   class-name tokens, before Jinja ever runs, so a class name built at
+   render time never matches anything in that scan and silently
+   compiles to no CSS at all. Confirmed live: an earlier version built
+   these names from a loop variable — the HTML rendered correctly, every
+   day's fixtures were server-side correct, but no tab ever visually
+   showed its content, because the CSS for the show/hide behavior was
+   never generated in the first place. #}
 <div class="mb-8">
   <h2 class="mb-1 font-display text-lg font-semibold uppercase tracking-wide text-paper">{{ t(request, 'simulate.fixtures_heading') }}</h2>
   <p class="mb-4 text-sm text-paper-dim">{{ t(request, 'simulate.fixtures_subtitle') }}</p>
 
-  {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
-  <input type="radio" name="fixture-day" id="fixture-day-{{ day }}" class="peer/{{ day }} sr-only" {{ 'checked' if day == current_weekday }} />
-  {% endfor %}
+  <input type="radio" name="fixture-day" id="fixture-day-monday" class="peer/monday sr-only" {{ 'checked' if current_weekday == 'monday' }} />
+  <input type="radio" name="fixture-day" id="fixture-day-tuesday" class="peer/tuesday sr-only" {{ 'checked' if current_weekday == 'tuesday' }} />
+  <input type="radio" name="fixture-day" id="fixture-day-wednesday" class="peer/wednesday sr-only" {{ 'checked' if current_weekday == 'wednesday' }} />
+  <input type="radio" name="fixture-day" id="fixture-day-thursday" class="peer/thursday sr-only" {{ 'checked' if current_weekday == 'thursday' }} />
+  <input type="radio" name="fixture-day" id="fixture-day-friday" class="peer/friday sr-only" {{ 'checked' if current_weekday == 'friday' }} />
+  <input type="radio" name="fixture-day" id="fixture-day-saturday" class="peer/saturday sr-only" {{ 'checked' if current_weekday == 'saturday' }} />
+  <input type="radio" name="fixture-day" id="fixture-day-sunday" class="peer/sunday sr-only" {{ 'checked' if current_weekday == 'sunday' }} />
 
-  {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
-  <label for="fixture-day-{{ day }}"
-    class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/{{ day }}:border-amber peer-checked/{{ day }}:text-amber">
-    {{ t(request, 'simulate.day_' + day) }}
-  </label>
-  {% endfor %}
+  <label for="fixture-day-monday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/monday:border-amber peer-checked/monday:text-amber">{{ t(request, 'simulate.day_monday') }}</label>
+  <label for="fixture-day-tuesday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/tuesday:border-amber peer-checked/tuesday:text-amber">{{ t(request, 'simulate.day_tuesday') }}</label>
+  <label for="fixture-day-wednesday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/wednesday:border-amber peer-checked/wednesday:text-amber">{{ t(request, 'simulate.day_wednesday') }}</label>
+  <label for="fixture-day-thursday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/thursday:border-amber peer-checked/thursday:text-amber">{{ t(request, 'simulate.day_thursday') }}</label>
+  <label for="fixture-day-friday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/friday:border-amber peer-checked/friday:text-amber">{{ t(request, 'simulate.day_friday') }}</label>
+  <label for="fixture-day-saturday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/saturday:border-amber peer-checked/saturday:text-amber">{{ t(request, 'simulate.day_saturday') }}</label>
+  <label for="fixture-day-sunday" class="mb-4 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/sunday:border-amber peer-checked/sunday:text-amber">{{ t(request, 'simulate.day_sunday') }}</label>
 
   {% macro fixture_leagues(leagues) %}
     {% if leagues %}
@@ -79,9 +96,11 @@
     {% endif %}
   {% endmacro %}
 
-  {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
-  <div class="hidden peer-checked/{{ day }}:block">
-    {{ fixture_leagues(fixture_days[day]) }}
-  </div>
-  {% endfor %}
+  <div class="hidden peer-checked/monday:block">{{ fixture_leagues(fixture_days.monday) }}</div>
+  <div class="hidden peer-checked/tuesday:block">{{ fixture_leagues(fixture_days.tuesday) }}</div>
+  <div class="hidden peer-checked/wednesday:block">{{ fixture_leagues(fixture_days.wednesday) }}</div>
+  <div class="hidden peer-checked/thursday:block">{{ fixture_leagues(fixture_days.thursday) }}</div>
+  <div class="hidden peer-checked/friday:block">{{ fixture_leagues(fixture_days.friday) }}</div>
+  <div class="hidden peer-checked/saturday:block">{{ fixture_leagues(fixture_days.saturday) }}</div>
+  <div class="hidden peer-checked/sunday:block">{{ fixture_leagues(fixture_days.sunday) }}</div>
 </div>
