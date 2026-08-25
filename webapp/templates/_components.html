@@ -1,0 +1,42 @@
+{# Shared layout/component macros — consolidates the hand-copied
+   "rounded-xl border border-line bg-ink-2" card pattern and a few other
+   repeated clusters into one place. #}
+
+{% macro card(title=None, icon=None, muted=False) %}
+<div class="rounded-xl border border-line bg-ink-2 {{ 'p-4 shadow-none' if muted else 'p-6' }}">
+  {% if title %}
+    <h2 class="{{ 'mb-3 text-sm' if muted else 'mb-4' }} flex items-center gap-2 font-display font-semibold uppercase tracking-wide text-paper">
+      {% if icon %}<span class="{{ 'text-paper-dim' if muted else 'text-teal' }}">{{ icon }}</span>{% endif %}
+      {{ title }}
+    </h2>
+  {% endif %}
+  {{ caller() }}
+</div>
+{% endmacro %}
+
+{% macro badge(text, variant="brand") %}
+{% set styles = {
+  "brand": "bg-teal/15 text-teal",
+  "accent": "bg-amber/15 text-amber",
+  "neutral": "bg-ink-3 text-paper-dim",
+} %}
+<span class="inline-block w-fit rounded-full px-3 py-1 font-mono text-xs font-medium {{ styles[variant] }}">{{ text }}</span>
+{% endmacro %}
+
+{% macro button_class(variant="primary") %}{% set styles = {
+  "primary": "rounded-md bg-amber px-4 py-2.5 font-mono text-sm font-semibold text-ink hover:brightness-110",
+  "secondary": "rounded-md border border-line px-4 py-2.5 font-mono text-sm text-paper hover:border-paper-dim hover:bg-ink-3",
+  "danger": "rounded-md bg-red-500 px-4 py-2.5 font-mono text-sm font-semibold text-ink hover:brightness-110",
+} %}{{ styles[variant] }}{% endmacro %}
+
+{% macro stat_tile(label, value, href=None) %}
+{% set inner %}
+  <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ label }}</p>
+  <p class="font-mono text-2xl font-semibold text-amber">{{ value }}</p>
+{% endset %}
+{% if href %}
+<a href="{{ href }}" class="block rounded-xl border border-line bg-ink-2 p-6 transition hover:border-paper-dim">{{ inner }}</a>
+{% else %}
+<div class="rounded-xl border border-line bg-ink-2 p-6">{{ inner }}</div>
+{% endif %}
+{% endmacro %}

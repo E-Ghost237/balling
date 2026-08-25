@@ -1,64 +1,64 @@
 {% extends "base.html" %}
 {% block title %}{{ t(request, 'register.title') }}{% endblock %}
 {% block description %}{{ t(request, 'register.description') }}{% endblock %}
-{% block page_bg %}bg-page-register{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-  <h1 class="mb-2 text-2xl font-semibold text-slate-900">{{ t(request, 'register.heading') }}</h1>
-  <p class="mb-8 text-sm text-slate-500">{{ t(request, 'register.subtitle') }}</p>
+<div class="mx-auto max-w-sm rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
+  <h1 class="mb-2 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'register.heading') }}</h1>
+  <p class="mb-8 text-sm text-paper-dim">{{ t(request, 'register.subtitle') }}</p>
   <form method="post" action="{{ url(request, '/register') }}" class="space-y-4" onsubmit="return checkPasswordsMatch()">
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'register.first_name') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.first_name') }}</label>
         <input name="first_name" type="text" required autofocus
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+          class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'register.last_name') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.last_name') }}</label>
         <input name="last_name" type="text" required
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+          class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
       </div>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'common.email') }}</label>
+      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.email') }}</label>
       <input name="login" type="email" required
-        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+        class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'common.password') }}</label>
+      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.password') }}</label>
       <div class="relative">
         <input id="password" name="password" type="password" required minlength="8"
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-16 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+          class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 pr-16 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
         <button type="button" onclick="togglePasswordField('password', this)"
           data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
-          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">{{ t(request, 'common.show') }}</button>
+          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-paper-dim hover:text-paper">{{ t(request, 'common.show') }}</button>
       </div>
-      <p class="mt-1 text-xs text-slate-400">{{ t(request, 'register.password_hint') }}</p>
+      <p class="mt-1 text-xs text-paper-dim">{{ t(request, 'register.password_hint') }}</p>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'register.confirm_password') }}</label>
+      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.confirm_password') }}</label>
       <div class="relative">
         <input id="confirm_password" name="confirm_password" type="password" required minlength="8"
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-16 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+          class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 pr-16 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
         <button type="button" onclick="togglePasswordField('confirm_password', this)"
           data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
-          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-slate-500 hover:text-slate-700">{{ t(request, 'common.show') }}</button>
+          class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-paper-dim hover:text-paper">{{ t(request, 'common.show') }}</button>
       </div>
-      <p id="mismatch-warning" class="mt-1 hidden text-xs text-red-600">{{ t(request, 'register.mismatch') }}</p>
+      <p id="mismatch-warning" class="mt-1 hidden text-xs text-red-400">{{ t(request, 'register.mismatch') }}</p>
     </div>
     <button type="submit"
-      class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+      class="w-full rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
       {{ t(request, 'register.submit') }}
     </button>
   </form>
-  <p class="mt-4 text-center text-xs text-slate-400">
+  <p class="mt-4 text-center text-xs text-paper-dim">
     {{ t(request, 'consent.register_pre') }}
-    <a href="{{ url(request, '/terms') }}" class="underline hover:text-slate-600">{{ t(request, 'footer.terms') }}</a>
+    <a href="{{ url(request, '/terms') }}" class="underline hover:text-paper-dim">{{ t(request, 'footer.terms') }}</a>
     {{ t(request, 'consent.and') }}
-    <a href="{{ url(request, '/privacy') }}" class="underline hover:text-slate-600">{{ t(request, 'footer.privacy') }}</a>.
+    <a href="{{ url(request, '/privacy') }}" class="underline hover:text-paper-dim">{{ t(request, 'footer.privacy') }}</a>.
   </p>
-  <p class="mt-6 text-center text-sm text-slate-500">
-    {{ t(request, 'register.already_have') }} <a href="{{ url(request, '/login') }}" class="font-medium text-emerald-600 hover:underline">{{ t(request, 'register.login_link') }}</a>
+  <p class="mt-6 text-center text-sm text-paper-dim">
+    {{ t(request, 'register.already_have') }} <a href="{{ url(request, '/login') }}" class="font-medium text-amber hover:underline">{{ t(request, 'register.login_link') }}</a>
   </p>
 </div>
 <script>

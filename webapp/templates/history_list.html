@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon_chevron_left, icon_chevron_right %}
 {% block title %}{{ t(request, 'history.title') }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-3xl">
-  <h1 class="mb-8 text-2xl font-semibold text-slate-900">{{ t(request, 'history.heading') }}</h1>
+  <h1 class="mb-8 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'history.heading') }}</h1>
 
   {% if not entries %}
-    <div class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-      <p class="text-slate-500">{{ t(request, 'history.empty') }}</p>
-      <a href="{{ url(request, '/simulate') }}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+    <div class="rounded-xl border border-line bg-ink-2 p-6 text-center shadow-sm">
+      <p class="text-paper-dim">{{ t(request, 'history.empty') }}</p>
+      <a href="{{ url(request, '/simulate') }}" class="mt-4 inline-block rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
         {{ t(request, 'history.simulate_a_match') }}
       </a>
     </div>
@@ -15,20 +16,20 @@
     <div class="space-y-3">
       {% for entry in entries %}
         {% if entry.prediction_id %}<a href="{{ url(request, '/history/' ~ entry.id) }}" class="block">{% endif %}
-        <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm {% if entry.prediction_id %}hover:border-emerald-300 hover:shadow{% endif %} transition">
+        <div class="flex items-center justify-between rounded-xl border border-line bg-ink-2 p-5 shadow-sm {% if entry.prediction_id %}hover:border-teal/40 hover:shadow{% endif %} transition">
           <div>
-            <p class="font-medium text-slate-900">{{ entry.home_team }} vs {{ entry.away_team }}</p>
-            <p class="text-xs text-slate-400">
+            <p class="font-medium text-paper">{{ entry.home_team }} vs {{ entry.away_team }}</p>
+            <p class="text-xs text-paper-dim">
               {{ entry.simulated_at.strftime("%d %b %Y, %H:%M") }}
               {% if entry.neutral %}· {{ t(request, 'history.neutral_venue') }}{% endif %}
             </p>
           </div>
           <div class="text-right">
             {% if entry.most_likely_score %}
-              <p class="text-sm font-semibold text-slate-900">{{ entry.most_likely_score }}</p>
-              <p class="text-xs text-slate-400">{{ t(request, 'history.most_likely_score') }}</p>
+              <p class="text-sm font-semibold text-paper">{{ entry.most_likely_score }}</p>
+              <p class="text-xs text-paper-dim">{{ t(request, 'history.most_likely_score') }}</p>
             {% else %}
-              <p class="text-xs text-slate-400">{{ t(request, 'history.details_unavailable') }}</p>
+              <p class="text-xs text-paper-dim">{{ t(request, 'history.details_unavailable') }}</p>
             {% endif %}
           </div>
         </div>
@@ -38,12 +39,12 @@
 
     <div class="mt-6 flex justify-between">
       {% if page > 1 %}
-        <a href="{{ url(request, '/history') }}?page={{ page - 1 }}" class="text-sm font-medium text-emerald-600 hover:underline">{{ t(request, 'history.newer') }}</a>
+        <a href="{{ url(request, '/history') }}?page={{ page - 1 }}" class="flex items-center gap-1 text-sm font-medium text-amber hover:underline">{{ icon_chevron_left() }}{{ t(request, 'history.newer') }}</a>
       {% else %}
         <span></span>
       {% endif %}
       {% if has_next %}
-        <a href="{{ url(request, '/history') }}?page={{ page + 1 }}" class="text-sm font-medium text-emerald-600 hover:underline">{{ t(request, 'history.older') }}</a>
+        <a href="{{ url(request, '/history') }}?page={{ page + 1 }}" class="flex items-center gap-1 text-sm font-medium text-amber hover:underline">{{ t(request, 'history.older') }}{{ icon_chevron_right() }}</a>
       {% endif %}
     </div>
   {% endif %}

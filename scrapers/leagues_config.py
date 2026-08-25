@@ -348,6 +348,108 @@ SOFASCORE_LEAGUES = {
         "season_ids": [57353, 69871, 87931, 96370],
         "fetch_xg": True,
     },
+    # --- South/Central American first divisions, verified the same way as
+    # the 14-league expansion above: every tournament_id checked against a
+    # real round's team names, not trusted from search-result metadata
+    # alone.
+    "Argentina_Liga_Profesional": {
+        "name": "Liga Profesional Argentina",
+        "country": "Argentina",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 155,
+        # Argentina ran a single full-season format in 2023/2024 and 2026,
+        # but reverted to a split Apertura/Clausura format for 2025 only
+        # (confirmed live — two separate season entries both labeled
+        # "2025" under this same tournament_id) — both included so 2025
+        # merges into one complete season the same way Paraguay's/
+        # Colombia's/Mexico's splits do.
+        "season_ids": [47647, 57478, 70268, 77826, 87913],
+        "fetch_xg": True,
+    },
+    "Brazil_Serie_A": {
+        "name": "Brasileirão Série A",
+        "country": "Brazil",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 325,
+        "season_ids": [48982, 58766, 72034, 87678],
+        "fetch_xg": True,
+    },
+    "Bolivia_Division_Profesional": {
+        "name": "División Profesional",
+        "country": "Bolivia",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 16736,
+        "season_ids": [48353, 58156, 73577, 92509],
+        "fetch_xg": True,
+    },
+    # Colombia's top flight runs as two half-year tournaments per calendar
+    # year (Apertura/Finalización, same shape as Paraguay) — both feed
+    # the same "Categoría Primera A"/Colombia league row via
+    # get_or_create_league's name+country match, no special-case code
+    # needed. Confirmed same team pool across both (América de Cali,
+    # Atlético Nacional, Junior Barranquilla, etc.).
+    "Colombia_Primera_A": {
+        "name": "Categoría Primera A",
+        "country": "Colombia",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 11539,
+        "season_ids": [48283, 57374, 70681, 88503],
+        "fetch_xg": True,
+    },
+    "Colombia_Primera_A_Finalizacion": {
+        "name": "Categoría Primera A",
+        "country": "Colombia",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 11536,
+        "season_ids": [42387, 52847, 63819, 77825],
+        "fetch_xg": True,
+    },
+    # Liga MX, same Apertura/Clausura shape — both feed the same "Liga
+    # MX"/Mexico row. Deliberately NOT "Liga de Expansión MX" (tournament
+    # ids 11611/11612) — that's Mexico's second division, out of scope
+    # (first-division-only was explicitly asked for).
+    "Liga_MX_Apertura": {
+        "name": "Liga MX",
+        "country": "Mexico",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 11621,
+        "season_ids": [42017, 52052, 61419, 76500],
+        "fetch_xg": True,
+    },
+    "Liga_MX_Clausura": {
+        "name": "Liga MX",
+        "country": "Mexico",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 11620,
+        "season_ids": [47656, 57315, 70096, 87699],
+        "fetch_xg": True,
+    },
+    "Venezuela_Liga_FUTVE": {
+        "name": "Liga FUTVE",
+        "country": "Venezuela",
+        "kind": "club",
+        "source": "sofascore",
+        "tournament_id": 231,
+        "season_ids": [48742, 57694, 71012, 88538],
+        "fetch_xg": True,
+        # Unlike Argentina's Apertura/Clausura split (round numbers reused
+        # but disambiguated by slug — safe with the plain round fetcher),
+        # Venezuela's rounds carry a "prefix" field instead ("Apertura",
+        # "Apertura, Main Round", "Clausura") with NO slug — round numbers
+        # collide across phases with nothing to tell them apart, so the
+        # round-based fetcher's (round, slug) dedup key silently collapses
+        # most of the season. Confirmed directly: round-based fetch found
+        # 27 matches for a season that should have several hundred.
+        # Pagination sidesteps the whole round/prefix mess.
+        "use_paginated_events": True,
+    },
 }
 
 # xG-only enrichment targets: leagues that ALREADY have fixtures/results in

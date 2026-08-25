@@ -1,34 +1,32 @@
+{% from "_icons.html" import icon_device_phone, icon_check_circle, icon_x_circle, icon_spinner %}
 {% if payment.status == "PENDING" %}
 <div id="payment-status" hx-get="{{ url(request, '/payment/status/' ~ payment.id) }}" hx-trigger="load, every 4s" hx-swap="outerHTML"
-     class="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-  <div class="mb-4 text-4xl">📱</div>
-  <h1 class="mb-2 text-xl font-semibold text-slate-900">{{ t(request, 'pending.check_phone') }}</h1>
-  <p class="text-slate-500">
+     class="rounded-xl border border-line bg-ink-2 p-8 text-center shadow-sm">
+  <div class="mb-4 flex justify-center text-amber">{{ icon_device_phone('h-10 w-10') }}</div>
+  <h1 class="mb-2 font-display text-xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'pending.check_phone') }}</h1>
+  <p class="text-paper-dim">
     {{ t(request, 'pending.prompt_sent',
          operator=("MTN Mobile Money" if payment.operator == "MTN_MOMO_CMR" else "Orange Money"),
          phone=payment.phone_number,
          amount="{:,}".format(payment.amount_fcfa)) }}
   </p>
-  <p class="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
-    <svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-    </svg>
+  <p class="mt-6 flex items-center justify-center gap-2 text-xs text-paper-dim">
+    {{ icon_spinner() }}
     {{ t(request, 'pending.waiting') }}
   </p>
 </div>
 {% elif payment.status == "APPROVED" %}
-<div id="payment-status" class="rounded-xl border border-emerald-200 bg-emerald-50 p-8 text-center">
-  <div class="mb-4 text-4xl">✅</div>
-  <h1 class="mb-2 text-xl font-semibold text-emerald-900">{{ t(request, 'pending.confirmed') }}</h1>
-  <p class="text-emerald-700">{{ t(request, 'pending.active_redirect') }}</p>
+<div id="payment-status" class="rounded-xl border border-teal/30 bg-teal/10 p-8 text-center">
+  <div class="mb-4 flex justify-center text-amber">{{ icon_check_circle('h-10 w-10') }}</div>
+  <h1 class="mb-2 font-display text-xl font-semibold uppercase tracking-wide text-teal">{{ t(request, 'pending.confirmed') }}</h1>
+  <p class="text-teal">{{ t(request, 'pending.active_redirect') }}</p>
 </div>
 {% else %}
-<div id="payment-status" class="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-  <div class="mb-4 text-4xl">❌</div>
-  <h1 class="mb-2 text-xl font-semibold text-red-900">{{ t(request, 'pending.not_completed') }}</h1>
-  <p class="mb-6 text-red-700">{{ t(request, 'pending.not_completed_detail') }}</p>
-  <a href="{{ url(request, '/payment') }}" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+<div id="payment-status" class="rounded-xl border border-red-500/30 bg-red-500/10 p-8 text-center">
+  <div class="mb-4 flex justify-center text-red-500">{{ icon_x_circle('h-10 w-10') }}</div>
+  <h1 class="mb-2 font-display text-xl font-semibold uppercase tracking-wide text-red-300">{{ t(request, 'pending.not_completed') }}</h1>
+  <p class="mb-6 text-red-300">{{ t(request, 'pending.not_completed_detail') }}</p>
+  <a href="{{ url(request, '/payment') }}" class="rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
     {{ t(request, 'pending.try_again') }}
   </a>
 </div>

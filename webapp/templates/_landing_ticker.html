@@ -1,0 +1,43 @@
+{# Full-bleed scrolling ticker of illustrative matchups. Locale handled
+   client-side (see _landing_sim_panel.html for why) so this stays a
+   single shared partial. #}
+<div class="overflow-hidden whitespace-nowrap border-y border-line bg-ink-2">
+  <div class="inline-flex animate-[landing-ticker-scroll_42s_linear_infinite] motion-reduce:animate-none" id="landing-ticker-track"></div>
+</div>
+<style>
+  @keyframes landing-ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+</style>
+<script>
+(function(){
+  const isFr = document.documentElement.lang === 'fr';
+  const items = isFr ? [
+    {t:'PSG — MARSEILLE', p:'58%', hot:false},
+    {t:'REAL MADRID — BARCELONE', p:'46%', hot:false},
+    {t:'FLAMENGO — PALMEIRAS', p:'41%', hot:false},
+    {t:'BAYERN — DORTMUND', p:'55%', hot:false},
+    {t:'ARSENAL — ASTON VILLA', p:'64%', hot:true},
+    {t:'CLUB AMÉRICA — CHIVAS', p:'52%', hot:false},
+    {t:'INTER MILAN — JUVENTUS', p:'61%', hot:true},
+    {t:'AJAX — PSV', p:'47%', hot:false},
+  ] : [
+    {t:'PSG — MARSEILLE', p:'58%', hot:false},
+    {t:'REAL MADRID — BARCELONA', p:'46%', hot:false},
+    {t:'FLAMENGO — PALMEIRAS', p:'41%', hot:false},
+    {t:'BAYERN — DORTMUND', p:'55%', hot:false},
+    {t:'ARSENAL — ASTON VILLA', p:'64%', hot:true},
+    {t:'CLUB AMÉRICA — CHIVAS', p:'52%', hot:false},
+    {t:'INTER MILAN — JUVENTUS', p:'61%', hot:true},
+    {t:'AJAX — PSV', p:'47%', hot:false},
+  ];
+  const track = document.getElementById('landing-ticker-track');
+  let html = '';
+  for(let pass=0; pass<2; pass++){
+    items.forEach(it=>{
+      html += `<span class="border-r border-line px-6 py-3 font-mono text-xs text-paper-dim inline-flex items-center gap-2.5">`
+            + `<b class="font-medium text-paper">${it.t}</b>`
+            + `<span class="font-semibold ${it.hot ? 'text-amber' : 'text-teal'}">${it.p}</span></span>`;
+    });
+  }
+  track.innerHTML = html;
+})();
+</script>

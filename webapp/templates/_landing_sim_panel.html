@@ -1,0 +1,159 @@
+{# Live-feeling simulation scatter visual for the landing page hero.
+   Illustrative example matchups only — not a live feed. Team/competition
+   labels are picked in JS by document.documentElement.lang so this one
+   partial serves both locales without duplicating the script. #}
+<div class="rounded-xl border border-line bg-ink-2 p-5">
+  <div class="mb-1.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-wide text-paper-dim">
+    <span id="landing-sim-label">Simulation</span>
+    <span class="flex items-center gap-1.5 text-teal"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-teal"></span>20,000 <span id="landing-sim-draws-label">draws</span></span>
+  </div>
+  <div class="mb-3 font-display text-xl font-bold uppercase tracking-wide text-paper" id="landing-sim-title">ARSENAL <span class="font-mono text-sm font-normal normal-case text-paper-dim">vs</span> ASTON VILLA</div>
+  <div class="mb-3 font-mono text-[10px] uppercase tracking-wide text-paper-dim" id="landing-sim-comp">PREMIER LEAGUE · ENGLAND</div>
+  <svg id="landing-scatter" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg" class="block w-full rounded bg-ink"></svg>
+  <div class="mt-3 flex items-center justify-between border-t border-dashed border-line pt-3">
+    <div class="font-mono text-xs text-paper-dim"><span id="landing-score-label">Most likely score</span><b id="landing-sim-score" class="mt-0.5 block font-mono text-xl font-semibold text-amber">2 – 1</b></div>
+    <div class="text-right font-mono text-[11px] text-paper-dim"><span id="landing-prob-label">Probability</span><b id="landing-sim-pct" class="block font-mono text-paper">14.2%</b></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const isFr = document.documentElement.lang === 'fr';
+  document.getElementById('landing-sim-label').textContent = isFr ? 'Simulation en cours' : 'Simulation running';
+  document.getElementById('landing-sim-draws-label').textContent = isFr ? 'tirages' : 'draws';
+  document.getElementById('landing-score-label').textContent = isFr ? 'Score le plus probable' : 'Most likely score';
+  document.getElementById('landing-prob-label').textContent = isFr ? 'Probabilité' : 'Probability';
+
+  const matches = isFr ? [
+    { home:'ARSENAL', away:'ASTON VILLA', comp:'PREMIER LEAGUE · ANGLETERRE', peak:[2,1], pct:14.2 },
+    { home:'REAL MADRID', away:'BARCELONE', comp:'LA LIGA · ESPAGNE', peak:[2,0], pct:16.8 },
+    { home:'FLAMENGO', away:'PALMEIRAS', comp:'BRASILEIRÃO · BRÉSIL', peak:[1,1], pct:13.1 },
+    { home:'PSG', away:'MARSEILLE', comp:'LIGUE 1 · FRANCE', peak:[2,0], pct:15.4 },
+    { home:'BAYERN MUNICH', away:'DORTMUND', comp:'BUNDESLIGA · ALLEMAGNE', peak:[3,1], pct:12.6 },
+    { home:'CLUB AMÉRICA', away:'CHIVAS', comp:'LIGA MX · MEXIQUE', peak:[1,0], pct:17.9 },
+  ] : [
+    { home:'ARSENAL', away:'ASTON VILLA', comp:'PREMIER LEAGUE · ENGLAND', peak:[2,1], pct:14.2 },
+    { home:'REAL MADRID', away:'BARCELONA', comp:'LA LIGA · SPAIN', peak:[2,0], pct:16.8 },
+    { home:'FLAMENGO', away:'PALMEIRAS', comp:'BRASILEIRÃO · BRAZIL', peak:[1,1], pct:13.1 },
+    { home:'PSG', away:'MARSEILLE', comp:'LIGUE 1 · FRANCE', peak:[2,0], pct:15.4 },
+    { home:'BAYERN MUNICH', away:'DORTMUND', comp:'BUNDESLIGA · GERMANY', peak:[3,1], pct:12.6 },
+    { home:'CLUB AMÉRICA', away:'CHIVAS', comp:'LIGA MX · MEXICO', peak:[1,0], pct:17.9 },
+  ];
+
+  const svg = document.getElementById('landing-scatter');
+  const cols = 6, rows = 6;
+  const cellW = 340 / cols, cellH = 240 / rows;
+  const originX = 30, originY = 20;
+  let mi = 0;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function scoreWeight(k, target){ return Math.pow(target, k) * Math.exp(-target) / factorial(k); }
+  function factorial(n){ let f=1; for(let i=2;i<=n;i++) f*=i; return f; }
+
+  function render(match){
+    svg.innerHTML = '';
+    const ns = 'http://www.w3.org/2000/svg';
+
+    for(let c=0;c<cols;c++){
+      const t = document.createElementNS(ns,'text');
+      t.setAttribute('x', originX + c*cellW + cellW/2);
+      t.setAttribute('y', originY + rows*cellH + 16);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('font-family','IBM Plex Mono, monospace');
+      t.setAttribute('font-size','9');
+      t.setAttribute('fill','#93a0b7');
+      t.textContent = c;
+      svg.appendChild(t);
+    }
+    for(let r=0;r<rows;r++){
+      const t = document.createElementNS(ns,'text');
+      t.setAttribute('x', originX - 10);
+      t.setAttribute('y', originY + r*cellH + cellH/2 + 3);
+      t.setAttribute('text-anchor','end');
+      t.setAttribute('font-family','IBM Plex Mono, monospace');
+      t.setAttribute('font-size','9');
+      t.setAttribute('fill','#93a0b7');
+      t.textContent = r;
+      svg.appendChild(t);
+    }
+
+    const targetH = match.peak[0] + 0.9;
+    const targetA = match.peak[1] + 0.9;
+    let maxW = 0;
+    const weights = [];
+    for(let h=0; h<cols; h++){
+      for(let a=0; a<rows; a++){
+        const w = scoreWeight(h, targetH) * scoreWeight(a, targetA);
+        weights.push({h,a,w});
+        if(w>maxW) maxW = w;
+      }
+    }
+
+    weights.forEach(cell=>{
+      const intensity = cell.w / maxW;
+      const rect = document.createElementNS(ns,'rect');
+      rect.setAttribute('x', originX + cell.h*cellW + 1);
+      rect.setAttribute('y', originY + cell.a*cellH + 1);
+      rect.setAttribute('width', cellW-2);
+      rect.setAttribute('height', cellH-2);
+      rect.setAttribute('rx', 2);
+      const isPeak = cell.h===match.peak[0] && cell.a===match.peak[1];
+      rect.setAttribute('fill', isPeak ? 'rgba(255,176,32,0.14)' : 'rgba(43,179,163,'+(0.03+intensity*0.16).toFixed(3)+')');
+      rect.setAttribute('stroke', isPeak ? '#ffb020' : 'none');
+      rect.setAttribute('stroke-width', isPeak ? 1.5 : 0);
+      svg.appendChild(rect);
+    });
+
+    const group = document.createElementNS(ns,'g');
+    svg.appendChild(group);
+
+    function gaussianRand(mean, sd){
+      let u=0,v=0;
+      while(u===0) u = Math.random();
+      while(v===0) v = Math.random();
+      return mean + sd * Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+    }
+
+    function addDot(delay){
+      const h = Math.min(cols-1, Math.max(0, Math.round(gaussianRand(match.peak[0], 1.1))));
+      const a = Math.min(rows-1, Math.max(0, Math.round(gaussianRand(match.peak[1], 1.1))));
+      const jx = (Math.random()-0.5) * (cellW-8);
+      const jy = (Math.random()-0.5) * (cellH-8);
+      const cx = originX + h*cellW + cellW/2 + jx;
+      const cy = originY + a*cellH + cellH/2 + jy;
+      const c = document.createElementNS(ns,'circle');
+      c.setAttribute('cx', cx);
+      c.setAttribute('cy', cy);
+      c.setAttribute('r', 1.6);
+      const isPeak = h===match.peak[0] && a===match.peak[1];
+      c.setAttribute('fill', isPeak ? '#ffb020' : '#2bb3a3');
+      c.setAttribute('opacity', 0);
+      group.appendChild(c);
+      if(reduceMotion){
+        c.setAttribute('opacity', 0.55);
+      } else {
+        setTimeout(()=>{
+          c.style.transition = 'opacity .5s';
+          c.setAttribute('opacity', 0.55);
+        }, delay);
+      }
+    }
+
+    const total = 320;
+    for(let i=0;i<total;i++){ addDot(Math.floor(i*4)); }
+  }
+
+  function updatePanel(){
+    const m = matches[mi];
+    document.getElementById('landing-sim-title').innerHTML = m.home + ' <span class="font-mono text-sm font-normal normal-case text-paper-dim">vs</span> ' + m.away;
+    document.getElementById('landing-sim-comp').textContent = m.comp;
+    document.getElementById('landing-sim-score').textContent = m.peak[0] + ' – ' + m.peak[1];
+    document.getElementById('landing-sim-pct').textContent = m.pct + '%';
+    render(m);
+    mi = (mi + 1) % matches.length;
+  }
+
+  updatePanel();
+  if(!reduceMotion){ setInterval(updatePanel, 6500); }
+})();
+</script>

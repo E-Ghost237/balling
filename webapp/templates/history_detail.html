@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon_arrow_left %}
 {% block title %}{{ t(request, 'history.detail_title', home=result.home_team, away=result.away_team) }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-3xl">
-  <a href="{{ url(request, '/history') }}" class="mb-6 inline-block text-sm font-medium text-emerald-600 hover:underline">{{ t(request, 'history.back_to_history') }}</a>
-  <p class="mb-6 text-xs text-slate-400">{{ t(request, 'history.simulated_at', date=simulated_at.strftime("%d %b %Y, %H:%M")) }}</p>
+  <a href="{{ url(request, '/history') }}" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-amber hover:underline">{{ icon_arrow_left() }}{{ t(request, 'history.back_to_history') }}</a>
+  <p class="mb-6 text-xs text-paper-dim">{{ t(request, 'history.simulated_at', date=simulated_at.strftime("%d %b %Y, %H:%M")) }}</p>
   {% include "_result_card.html" %}
 </div>
 {% endblock %}

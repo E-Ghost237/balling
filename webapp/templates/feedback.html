@@ -1,41 +1,43 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon_arrow_left, icon_check_circle %}
 {% block title %}{{ t(request, 'feedback.title') }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-lg">
-  <h1 class="mb-2 text-2xl font-semibold text-slate-900">{{ t(request, 'feedback.heading') }}</h1>
-  <p class="mb-8 text-sm text-slate-500">
+  <h1 class="mb-2 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'feedback.heading') }}</h1>
+  <p class="mb-8 text-sm text-paper-dim">
     {{ t(request, 'feedback.subtitle') }}
   </p>
 
   {% if sent %}
-    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-      <p class="text-emerald-800">{{ t(request, 'feedback.thanks') }}</p>
-      <a href="{{ url(request, '/simulate') }}" class="mt-4 inline-block text-sm font-medium text-emerald-700 hover:underline">{{ t(request, 'feedback.back_to_simulate') }}</a>
+    <div class="rounded-xl border border-teal/30 bg-teal/10 p-6 text-center">
+      <div class="mb-2 flex justify-center text-amber">{{ icon_check_circle('h-8 w-8') }}</div>
+      <p class="text-teal">{{ t(request, 'feedback.thanks') }}</p>
+      <a href="{{ url(request, '/simulate') }}" class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-teal hover:underline">{{ icon_arrow_left('h-3.5 w-3.5') }}{{ t(request, 'feedback.back_to_simulate') }}</a>
     </div>
   {% else %}
-    <form method="post" action="{{ url(request, '/feedback') }}" class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form method="post" action="{{ url(request, '/feedback') }}" class="space-y-4 rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
       <div>
-        <label class="mb-2 block text-sm text-slate-600">{{ t(request, 'feedback.rating_label') }}</label>
+        <label class="mb-2 block text-sm text-paper-dim">{{ t(request, 'feedback.rating_label') }}</label>
         <div class="flex gap-2">
           {% for n in range(1, 6) %}
           <label class="flex-1">
             <input type="radio" name="rating" value="{{ n }}" class="peer sr-only" />
-            <div class="cursor-pointer rounded-lg border-2 border-slate-200 py-2 text-center text-sm font-medium text-slate-500 transition peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:border-slate-300">
+            <div class="cursor-pointer rounded-lg border-2 border-line py-2 text-center text-sm font-medium text-paper-dim transition peer-checked:border-amber peer-checked:bg-amber/10 peer-checked:text-amber hover:border-line">
               {{ n }}
             </div>
           </label>
           {% endfor %}
         </div>
-        <p class="mt-1 flex justify-between text-xs text-slate-400"><span>{{ t(request, 'feedback.rough') }}</span><span>{{ t(request, 'feedback.great') }}</span></p>
+        <p class="mt-1 flex justify-between text-xs text-paper-dim"><span>{{ t(request, 'feedback.rough') }}</span><span>{{ t(request, 'feedback.great') }}</span></p>
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'feedback.message_label') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'feedback.message_label') }}</label>
         <textarea name="message" rows="5" required
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+          class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber"
           placeholder="{{ t(request, 'feedback.message_placeholder') }}"></textarea>
       </div>
       <button type="submit"
-        class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+        class="w-full rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
         {{ t(request, 'feedback.send') }}
       </button>
     </form>

@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% from "_components.html" import badge %}
+{% from "_icons.html" import icon_check_solid %}
+{% block title %}{{ t(request, 'landing.title') }}{% endblock %}
+{% block description %}{{ t(request, 'landing.description') }}{% endblock %}
+{% block main_class %}w-full{% endblock %}
+
+{% block nav_links %}
+<a href="#method" class="hover:text-paper">{{ t(request, 'landing.nav_method') }}</a>
+<a href="#coverage" class="hover:text-paper">{{ t(request, 'landing.nav_coverage') }}</a>
+<a href="#pricing" class="hover:text-paper">{{ t(request, 'landing.nav_pricing') }}</a>
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="-mx-4 -mt-10 sm:-mx-6">
+
+{% if request.state.locale == 'fr' %}
+
+  <section class="border-b border-line px-4 py-16 sm:px-6 sm:py-20">
+    <div class="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-2">
+      <div>
+        <div class="mb-4 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal">
+          <span class="h-px w-6 bg-teal"></span>Données · Notation dynamique · Simulation
+        </div>
+        <h1 class="font-display text-4xl font-extrabold uppercase leading-[0.98] tracking-tight text-paper sm:text-5xl">
+          On ne devine pas.<br><span class="text-amber">On simule 20 000 fois avant le coup d'envoi.</span>
+        </h1>
+        <p class="mt-6 max-w-[46ch] text-lg text-paper-dim">
+          Un moteur statistique qui rejoue chaque match des milliers de fois pour transformer l'incertitude en probabilité calibrée; victoire, nul, score exact, plus de 90 minutes analysées avant que l'arbitre ne siffle.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="{{ url(request, '/simulate') if user else url(request, '/register') }}" class="rounded-md bg-amber px-6 py-3.5 font-mono text-sm font-semibold text-ink hover:brightness-110">{{ t(request, 'landing.cta_hero_logged_in') if user else 'Commencer gratuitement' }}</a>
+          <a href="#method" class="rounded-md border border-line px-6 py-3.5 font-mono text-sm text-paper hover:border-paper-dim">Comment ça marche</a>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-6 font-mono text-xs text-paper-dim">
+          <div><b class="text-paper">102 000+</b> matchs analysés</div>
+          <div><b class="text-paper">1 425</b> équipes suivies</div>
+          <div><b class="text-paper">55</b> compétitions</div>
+        </div>
+      </div>
+      {% include "_landing_sim_panel.html" %}
+    </div>
+  </section>
+
+  {% include "_landing_ticker.html" %}
+
+  <section id="method" class="px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-14 max-w-[640px]">
+        <div class="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>La méthode</div>
+        <h2 class="font-display text-3xl font-extrabold uppercase tracking-tight text-paper sm:text-4xl">Quatre étapes, aucune opinion</h2>
+        <p class="mt-3 max-w-[52ch] text-paper-dim">Chaque pronostic traverse le même pipeline, sans intervention manuelle — la rigueur vient de la répétition, pas de l'intuition d'un tipster.</p>
+      </div>
+      <div class="border-t border-line">
+        {% set steps = [
+          ("01", "Collecte", "Historique complet des résultats, buts et forme récente pour chaque équipe suivie, à travers les grands championnats et les compétitions internationales.", "→ 102 000+ matchs · 1 425 équipes · 55 compétitions"),
+          ("02", "Notation", "Une notation dynamique des équipes, ajustée après chaque match, combinée à un score attaque/défense pondéré par l'expected goals (xG) là où la donnée est disponible.", None),
+          ("03", "Simulation", "Un modèle de scoring calibré par équipe, rejoué 20 000 fois à grande échelle pour couvrir tous les scénarios de score.", None),
+          ("04", "Verdict", "Les probabilités de chaque issue victoire, nul, double chance, plus/moins, score exact sont publiées avant le coup d'envoi, jamais après.", None),
+        ] %}
+        {% for num, title, desc, stat in steps %}
+        <div class="grid grid-cols-[56px_1fr] border-b border-line sm:grid-cols-[80px_1fr]">
+          <div class="border-r border-line py-6 pl-1 font-mono text-sm text-paper-dim">{{ num }}</div>
+          <div class="px-6 py-6">
+            <h3 class="mb-1 font-display text-xl font-bold uppercase tracking-wide text-paper">{{ title }}</h3>
+            <p class="max-w-[60ch] text-sm text-paper-dim">{{ desc }}</p>
+            {% if stat %}<div class="mt-2 font-mono text-xs text-teal">{{ stat }}</div>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <div class="border-y border-line bg-ink-2">
+    <div class="mx-auto grid max-w-5xl grid-cols-2 gap-px bg-line sm:grid-cols-4">
+      {% for n, small, label in [("102", "k+", "Matchs historiques analysés"), ("1 425", "", "Équipes suivies en continu"), ("55", "", "Compétitions couvertes"), ("20", "k", "Simulations par match")] %}
+      <div class="bg-ink-2 px-6 py-8">
+        <div class="font-mono text-3xl font-semibold text-amber sm:text-4xl">{{ n }}<small class="text-lg font-normal text-paper-dim">{{ small }}</small></div>
+        <div class="mt-1.5 text-sm text-paper-dim">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <section class="px-4 py-16 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div class="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>{{ t(request, 'landing.accuracy_heading') }}</div>
+          <p class="text-sm text-paper-dim">{{ t(request, 'landing.accuracy_subtitle') }}</p>
+        </div>
+        <a href="{{ url(request, '/accuracy') }}" class="font-mono text-xs text-amber hover:underline">{{ t(request, 'landing.accuracy_view_log') }} →</a>
+      </div>
+      {% if accuracy.total > 0 %}
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-xl border border-line bg-ink-2 p-6">
+          <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'accuracy.stat_outcome_label') }}</p>
+          <p class="font-mono text-3xl font-semibold text-amber">{{ accuracy.outcome_pct }}%</p>
+          <p class="mt-1 text-xs text-paper-dim">{{ accuracy.outcome_correct }}/{{ accuracy.total }} {{ t(request, 'accuracy.stat_graded') }}</p>
+        </div>
+        <div class="rounded-xl border border-line bg-ink-2 p-6">
+          <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'accuracy.stat_score_label') }}</p>
+          <p class="font-mono text-3xl font-semibold text-teal">{{ accuracy.score_pct }}%</p>
+          <p class="mt-1 text-xs text-paper-dim">{{ accuracy.score_correct }}/{{ accuracy.total }} {{ t(request, 'accuracy.stat_graded') }}</p>
+        </div>
+        <div class="rounded-xl border border-line bg-ink-2 p-6">
+          <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'landing.won') }} / {{ t(request, 'landing.lost') }}</p>
+          <p class="font-mono text-3xl font-semibold text-paper">{{ accuracy.won }} <span class="text-paper-dim">/</span> {{ accuracy.lost }}</p>
+          <p class="mt-1 text-xs text-paper-dim">{{ t(request, 'landing.this_season') }}</p>
+        </div>
+      </div>
+      {% else %}
+      <div class="rounded-xl border border-dashed border-line bg-ink-2 px-4 py-6 text-center text-sm text-paper-dim">{{ t(request, 'accuracy.no_data') }}</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section id="coverage" class="px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-14 max-w-[640px]">
+        <div class="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>Couverture</div>
+        <h2 class="font-display text-3xl font-extrabold uppercase tracking-tight text-paper sm:text-4xl">De la Premier League aux qualifications de la CAN</h2>
+        <p class="mt-3 max-w-[52ch] text-paper-dim">43 championnats nationaux à travers plus de 30 pays, plus 12 compétitions internationales et continentales.</p>
+      </div>
+      <div class="grid overflow-hidden rounded-xl border border-line md:grid-cols-2">
+        <div class="border-b border-line bg-gradient-to-b from-teal/10 to-transparent p-7 md:border-b-0 md:border-r">
+          <h3 class="mb-1 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-wide text-paper"><span class="h-2.5 w-2.5 rounded-full bg-teal"></span>Championnats nationaux</h3>
+          <p class="mb-4 font-mono text-xs text-paper-dim">43 championnats</p>
+          <div class="flex flex-wrap gap-2">
+            {% for chip in ["Premier League","La Liga","Serie A","Bundesliga","Ligue 1","Brasileirão","Liga MX","MLS","Süper Lig","+ 34 autres"] %}
+            <span class="rounded-full border border-line px-3 py-1.5 font-mono text-xs text-paper-dim">{{ chip }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="bg-gradient-to-b from-amber/10 to-transparent p-7">
+          <h3 class="mb-1 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-wide text-paper"><span class="h-2.5 w-2.5 rounded-full bg-amber"></span>Compétitions internationales</h3>
+          <p class="mb-4 font-mono text-xs text-paper-dim">12 compétitions</p>
+          <div class="flex flex-wrap gap-2">
+            {% for chip in ["Ligue des Champions","Ligue Europa","Coupe du monde","CAN","Euro","Copa América","+ qualifications"] %}
+            <span class="rounded-full border border-line px-3 py-1.5 font-mono text-xs text-paper-dim">{{ chip }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-14 max-w-[640px]">
+        <div class="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>Abonnement</div>
+        <h2 class="font-display text-3xl font-extrabold uppercase tracking-tight text-paper sm:text-4xl">Accès aux pronostics</h2>
+        <p class="mt-3 text-paper-dim">Paiement en Mobile Money — pas de carte bancaire nécessaire pour l'instant.</p>
+      </div>
+      {% include "_landing_pricing.html" %}
+    </div>
+  </section>
+
+{% else %}
+
+  <section class="border-b border-line px-4 py-16 sm:px-6 sm:py-20">
+    <div class="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-2">
+      <div>
+        <div class="mb-4 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal">
+          <span class="h-px w-6 bg-teal"></span>Data · Dynamic Ratings · Simulation
+        </div>
+        <h1 class="font-display text-4xl font-extrabold uppercase leading-[0.98] tracking-tight text-paper sm:text-5xl">
+          We don't guess.<br><span class="text-amber">We simulate 20,000 times before kickoff.</span>
+        </h1>
+        <p class="mt-6 max-w-[46ch] text-lg text-paper-dim">
+          A statistical engine that replays every match thousands of times to turn uncertainty into calibrated probability win/draw/loss, correct score, every scenario weighed before the referee blows the whistle.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="{{ url(request, '/simulate') if user else url(request, '/register') }}" class="rounded-md bg-amber px-6 py-3.5 font-mono text-sm font-semibold text-ink hover:brightness-110">{{ t(request, 'landing.cta_hero_logged_in') if user else 'Start for free' }}</a>
+          <a href="#method" class="rounded-md border border-line px-6 py-3.5 font-mono text-sm text-paper hover:border-paper-dim">How it works</a>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-6 font-mono text-xs text-paper-dim">
+          <div><b class="text-paper">102,000+</b> matches analyzed</div>
+          <div><b class="text-paper">1,425</b> teams tracked</div>
+          <div><b class="text-paper">55</b> competitions</div>
+        </div>
+      </div>
+      {% include "_landing_sim_panel.html" %}
+    </div>
+  </section>
+
+  {% include "_landing_ticker.html" %}
+
+  <section id="method" class="px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-14 max-w-[640px]">
+        <div class="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>The method</div>
+        <h2 class="font-display text-3xl font-extrabold uppercase tracking-tight text-paper sm:text-4xl">Four steps, no opinions</h2>
+        <p class="mt-3 max-w-[52ch] text-paper-dim">Every prediction runs through the same pipeline, with no manual intervention, the rigor comes from repetition, not a tipster's gut feeling.</p>
+      </div>
+      <div class="border-t border-line">
+        {% set steps = [
+          ("01", "Collect", "Full result history, goals, and recent form for every team we track, across major domestic leagues and international competitions.", "→ 102,000+ matches · 1,425 teams · 55 competitions"),
+          ("02", "Rate", "A dynamic team rating, updated after every match, combined with an attack/defense score weighted by expected goals (xG) where that data is available.", None),
+          ("03", "Simulate", "A scoring model calibrated per team, replayed 20,000 times at scale to cover every scoreline scenario.", None),
+          ("04", "Verdict", "Probabilities for every outcome win, draw, double chance, over/under, correct score are published before kickoff, never after.", None),
+        ] %}
+        {% for num, title, desc, stat in steps %}
+        <div class="grid grid-cols-[56px_1fr] border-b border-line sm:grid-cols-[80px_1fr]">
+          <div class="border-r border-line py-6 pl-1 font-mono text-sm text-paper-dim">{{ num }}</div>
+          <div class="px-6 py-6">
+            <h3 class="mb-1 font-display text-xl font-bold uppercase tracking-wide text-paper">{{ title }}</h3>
+            <p class="max-w-[60ch] text-sm text-paper-dim">{{ desc }}</p>
+            {% if stat %}<div class="mt-2 font-mono text-xs text-teal">{{ stat }}</div>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <div class="border-y border-line bg-ink-2">
+    <div class="mx-auto grid max-w-5xl grid-cols-2 gap-px bg-line sm:grid-cols-4">
+      {% for n, small, label in [("102", "k+", "Historical matches analyzed"), ("1,425", "", "Teams tracked continuously"), ("55", "", "Competitions covered"), ("20", "k", "Simulations per match")] %}
+      <div class="bg-ink-2 px-6 py-8">
+        <div class="font-mono text-3xl font-semibold text-amber sm:text-4xl">{{ n }}<small class="text-lg font-normal text-paper-dim">{{ small }}</small></div>
+        <div class="mt-1.5 text-sm text-paper-dim">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <section class="px-4 py-16 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div class="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>{{ t(request, 'landing.accuracy_heading') }}</div>
+          <p class="text-sm text-paper-dim">{{ t(request, 'landing.accuracy_subtitle') }}</p>
+        </div>
+        <a href="{{ url(request, '/accuracy') }}" class="font-mono text-xs text-amber hover:underline">{{ t(request, 'landing.accuracy_view_log') }} →</a>
+      </div>
+      {% if accuracy.total > 0 %}
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-xl border border-line bg-ink-2 p-6">
+          <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'accuracy.stat_outcome_label') }}</p>
+          <p class="font-mono text-3xl font-semibold text-amber">{{ accuracy.outcome_pct }}%</p>
+          <p class="mt-1 text-xs text-paper-dim">{{ accuracy.outcome_correct }}/{{ accuracy.total }} {{ t(request, 'accuracy.stat_graded') }}</p>
+        </div>
+        <div class="rounded-xl border border-line bg-ink-2 p-6">
+          <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'accuracy.stat_score_label') }}</p>
+          <p class="font-mono text-3xl font-semibold text-teal">{{ accuracy.score_pct }}%</p>
+          <p class="mt-1 text-xs text-paper-dim">{{ accuracy.score_correct }}/{{ accuracy.total }} {{ t(request, 'accuracy.stat_graded') }}</p>
+        </div>
+        <div class="rounded-xl border border-line bg-ink-2 p-6">
+          <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'landing.won') }} / {{ t(request, 'landing.lost') }}</p>
+          <p class="font-mono text-3xl font-semibold text-paper">{{ accuracy.won }} <span class="text-paper-dim">/</span> {{ accuracy.lost }}</p>
+          <p class="mt-1 text-xs text-paper-dim">{{ t(request, 'landing.this_season') }}</p>
+        </div>
+      </div>
+      {% else %}
+      <div class="rounded-xl border border-dashed border-line bg-ink-2 px-4 py-6 text-center text-sm text-paper-dim">{{ t(request, 'accuracy.no_data') }}</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section id="coverage" class="px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-14 max-w-[640px]">
+        <div class="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>Coverage</div>
+        <h2 class="font-display text-3xl font-extrabold uppercase tracking-tight text-paper sm:text-4xl">From the Premier League to AFCON qualifiers</h2>
+        <p class="mt-3 max-w-[52ch] text-paper-dim">43 domestic leagues across 30+ countries, plus 12 international and continental competitions.</p>
+      </div>
+      <div class="grid overflow-hidden rounded-xl border border-line md:grid-cols-2">
+        <div class="border-b border-line bg-gradient-to-b from-teal/10 to-transparent p-7 md:border-b-0 md:border-r">
+          <h3 class="mb-1 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-wide text-paper"><span class="h-2.5 w-2.5 rounded-full bg-teal"></span>Domestic leagues</h3>
+          <p class="mb-4 font-mono text-xs text-paper-dim">43 leagues</p>
+          <div class="flex flex-wrap gap-2">
+            {% for chip in ["Premier League","La Liga","Serie A","Bundesliga","Ligue 1","Brasileirão","Liga MX","MLS","Süper Lig","+ 34 more"] %}
+            <span class="rounded-full border border-line px-3 py-1.5 font-mono text-xs text-paper-dim">{{ chip }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="bg-gradient-to-b from-amber/10 to-transparent p-7">
+          <h3 class="mb-1 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-wide text-paper"><span class="h-2.5 w-2.5 rounded-full bg-amber"></span>International competitions</h3>
+          <p class="mb-4 font-mono text-xs text-paper-dim">12 competitions</p>
+          <div class="flex flex-wrap gap-2">
+            {% for chip in ["Champions League","Europa League","World Cup","AFCON","Euro","Copa América","+ qualifiers"] %}
+            <span class="rounded-full border border-line px-3 py-1.5 font-mono text-xs text-paper-dim">{{ chip }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-14 max-w-[640px]">
+        <div class="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal"><span class="h-px w-6 bg-teal"></span>Subscription</div>
+        <h2 class="font-display text-3xl font-extrabold uppercase tracking-tight text-paper sm:text-4xl">Access to predictions</h2>
+        <p class="mt-3 text-paper-dim">Pay with Mobile Money — no card required for now.</p>
+      </div>
+      {% include "_landing_pricing.html" %}
+    </div>
+  </section>
+
+{% endif %}
+
+</div>
+{% endblock %}

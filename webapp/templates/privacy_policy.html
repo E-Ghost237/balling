@@ -3,39 +3,39 @@
 {% block description %}{{ t(request, 'privacy.description') }}{% endblock %}
 {% block main_class %}max-w-3xl{% endblock %}
 {% block content %}
-<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
+<div class="rounded-xl border border-line bg-ink-2 p-6 shadow-sm sm:p-10">
 
 {% if request.state.locale == 'fr' %}
 
-  <h1 class="mb-1 text-2xl font-semibold text-slate-900 sm:text-3xl">Politique de confidentialité</h1>
-  <p class="mb-8 text-sm text-slate-500">Dernière mise à jour : 20 août 2026</p>
+  <h1 class="font-display mb-1 text-2xl font-semibold uppercase tracking-wide text-paper sm:text-3xl">Politique de confidentialité</h1>
+  <p class="mb-8 text-sm text-paper-dim">Dernière mise à jour : 20 août 2026</p>
 
-  <p class="mb-6 text-sm leading-relaxed text-slate-600">
+  <p class="mb-6 text-sm leading-relaxed text-paper-dim">
     Cette Politique de confidentialité explique quelles données personnelles Balling Predictions (« nous »)
     collecte lorsque vous utilisez ballingpronostics.site (le « Service »), pourquoi nous les collectons, ainsi
     que les choix et droits dont vous disposez. Elle doit être lue conjointement avec nos
-    <a href="{{ url(request, '/terms') }}" class="text-emerald-600 hover:underline">Conditions générales d'utilisation</a>.
+    <a href="{{ url(request, '/terms') }}" class="text-amber hover:underline">Conditions générales d'utilisation</a>.
   </p>
 
-  <h2 id="section-1" class="mb-2 mt-8 text-lg font-semibold text-slate-900">1. Qui nous sommes</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-1" class="mb-2 mt-8 text-lg font-semibold text-paper">1. Qui nous sommes</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Balling Predictions est actuellement exploité par notre équipe, joignable à
-    <a href="mailto:contact@ballingpronostics.site" class="text-emerald-600 hover:underline">contact@ballingpronostics.site</a>
+    <a href="mailto:contact@ballingpronostics.site" class="text-amber hover:underline">contact@ballingpronostics.site</a>
     pour toute question ou demande relative à la confidentialité. C'est l'adresse à utiliser pour tout ce qui
     concerne cette politique — demandes d'accès, de correction, de suppression, ou questions générales.
   </p>
 
-  <h2 id="section-2" class="mb-2 mt-8 text-lg font-semibold text-slate-900">2. Ce que nous collectons</h2>
-  <ul class="mb-4 list-disc space-y-2.5 pl-5 text-sm leading-relaxed text-slate-600">
-    <li><span class="font-medium text-slate-900">Données de compte&nbsp;:</span> prénom, nom, adresse e-mail (utilisée comme identifiant de connexion), et un mot de passe stocké de façon sécurisée (haché) — nous ne stockons jamais votre mot de passe en clair.</li>
-    <li><span class="font-medium text-slate-900">Données de paiement&nbsp;:</span> lorsque vous souscrivez à un plan payant, le numéro de téléphone Mobile Money et l'opérateur (MTN ou Orange) que vous indiquez, ainsi que le plan, le montant, le statut et la référence de transaction de chaque paiement. Votre code PIN Mobile Money est saisi directement sur votre téléphone et n'est jamais vu, transmis ou stocké par nous — les paiements sont traités par notre partenaire de paiement, KPay. Si nous ajoutons les paiements par carte ou PayPal à l'avenir, votre numéro de carte et vos identifiants PayPal seront de la même façon traités directement par ce prestataire, et non par nous.</li>
-    <li><span class="font-medium text-slate-900">Données d'utilisation&nbsp;:</span> les confrontations que vous simulez (équipes, choix de terrain neutre) et à quel moment, afin de faire respecter le quota mensuel de votre plan et de vous afficher votre historique de pronostics.</li>
-    <li><span class="font-medium text-slate-900">Avis&nbsp;:</span> toute note ou message que vous soumettez sur la page Avis.</li>
-    <li><span class="font-medium text-slate-900">Données techniques&nbsp;:</span> un cookie de session qui vous garde connecté (voir « Cookies » ci-dessous), ainsi que les journaux standards de notre serveur web (par exemple adresse IP, user-agent du navigateur), conservés à des fins de sécurité et de prévention des abus.</li>
+  <h2 id="section-2" class="mb-2 mt-8 text-lg font-semibold text-paper">2. Ce que nous collectons</h2>
+  <ul class="mb-4 list-disc space-y-2.5 pl-5 text-sm leading-relaxed text-paper-dim">
+    <li><span class="font-medium text-paper">Données de compte&nbsp;:</span> prénom, nom, adresse e-mail (utilisée comme identifiant de connexion), et un mot de passe stocké de façon sécurisée (haché) — nous ne stockons jamais votre mot de passe en clair.</li>
+    <li><span class="font-medium text-paper">Données de paiement&nbsp;:</span> lorsque vous souscrivez à un plan payant, le numéro de téléphone Mobile Money et l'opérateur (MTN ou Orange) que vous indiquez, ainsi que le plan, le montant, le statut et la référence de transaction de chaque paiement. Votre code PIN Mobile Money est saisi directement sur votre téléphone et n'est jamais vu, transmis ou stocké par nous — les paiements sont traités par notre partenaire de paiement, KPay. Si nous ajoutons les paiements par carte ou PayPal à l'avenir, votre numéro de carte et vos identifiants PayPal seront de la même façon traités directement par ce prestataire, et non par nous.</li>
+    <li><span class="font-medium text-paper">Données d'utilisation&nbsp;:</span> les confrontations que vous simulez (équipes, choix de terrain neutre) et à quel moment, afin de faire respecter le quota mensuel de votre plan et de vous afficher votre historique de pronostics.</li>
+    <li><span class="font-medium text-paper">Avis&nbsp;:</span> toute note ou message que vous soumettez sur la page Avis.</li>
+    <li><span class="font-medium text-paper">Données techniques&nbsp;:</span> un cookie de session qui vous garde connecté (voir « Cookies » ci-dessous), ainsi que les journaux standards de notre serveur web (par exemple adresse IP, user-agent du navigateur), conservés à des fins de sécurité et de prévention des abus.</li>
   </ul>
 
-  <h2 id="section-3" class="mb-2 mt-8 text-lg font-semibold text-slate-900">3. Comment nous utilisons vos données</h2>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-3" class="mb-2 mt-8 text-lg font-semibold text-paper">3. Comment nous utilisons vos données</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>pour créer et sécuriser votre compte, et vous garder connecté&nbsp;;</li>
     <li>pour vous envoyer des codes de vérification d'e-mail et de réinitialisation de mot de passe&nbsp;;</li>
     <li>pour traiter vos paiements d'abonnement et activer le bon plan&nbsp;;</li>
@@ -44,13 +44,13 @@
     <li>pour détecter et prévenir la fraude, les abus et les violations de nos Conditions&nbsp;;</li>
     <li>pour respecter nos obligations légales (par exemple, les registres comptables liés aux paiements).</li>
   </ul>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Nous n'utilisons pas vos données à des fins de publicité tierce, et nous ne vendons vos données
     personnelles à personne.
   </p>
 
-  <h2 id="section-4" class="mb-2 mt-8 text-lg font-semibold text-slate-900">4. Avec qui nous les partageons</h2>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-4" class="mb-2 mt-8 text-lg font-semibold text-paper">4. Avec qui nous les partageons</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>KPay, notre prestataire de paiement Mobile Money, reçoit le numéro de téléphone, l'opérateur et le montant nécessaires pour traiter chaque paiement&nbsp;;</li>
     <li>MTN Mobile Money / Orange Money, en tant qu'opérateur mobile que vous choisissez pour payer, voit la transaction sur ses propres systèmes&nbsp;;</li>
     <li>Resend, notre prestataire d'envoi d'e-mails (qui s'appuie sur l'infrastructure Amazon SES), pour l'envoi des e-mails de vérification et de réinitialisation de mot de passe&nbsp;;</li>
@@ -58,114 +58,114 @@
     <li>notre hébergeur, qui stocke la base de données sous-jacente et les journaux serveur&nbsp;;</li>
     <li>les autorités judiciaires ou de régulation, uniquement si la loi nous y oblige.</li>
   </ul>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Nous ne partageons, ne louons ni ne vendons vos données personnelles à des tiers en dehors de ces cas.
   </p>
 
-  <h2 id="section-5" class="mb-2 mt-8 text-lg font-semibold text-slate-900">5. Cookies</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-5" class="mb-2 mt-8 text-lg font-semibold text-paper">5. Cookies</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Le Service utilise un unique cookie essentiel — un cookie de session HTTP-only — pour vous garder connecté&nbsp;;
     il ne vous suit pas sur d'autres sites. Nous n'utilisons actuellement aucun cookie publicitaire ou
     analytique tiers. Si cela devait changer, nous mettrions à jour cette politique et, lorsque requis,
     solliciterions votre consentement au préalable.
   </p>
 
-  <h2 id="section-6" class="mb-2 mt-8 text-lg font-semibold text-slate-900">6. Durée de conservation</h2>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-6" class="mb-2 mt-8 text-lg font-semibold text-paper">6. Durée de conservation</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>L'historique des simulations de matchs est conservé pendant une durée limitée (actuellement 14 jours) afin de faire respecter les quotas et d'alimenter votre page d'historique, puis supprimé automatiquement.</li>
     <li>Les codes de vérification d'e-mail et de réinitialisation de mot de passe sont stockés (hachés) et expirent peu après leur émission (actuellement 10 minutes), qu'ils aient été utilisés ou non.</li>
     <li>Les données de compte, d'abonnement et de paiement sont conservées tant que votre compte est actif, puis aussi longtemps que nécessaire pour respecter nos obligations légales/comptables ou résoudre un litige.</li>
     <li>Si vous nous demandez de supprimer votre compte, nous supprimons votre compte ainsi que les données d'utilisation, d'avis, de paiement et de session associées, à l'exception de ce que la loi nous oblige à conserver.</li>
   </ul>
 
-  <h2 id="section-7" class="mb-2 mt-8 text-lg font-semibold text-slate-900">7. Vos droits</h2>
-  <p class="mb-2 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-7" class="mb-2 mt-8 text-lg font-semibold text-paper">7. Vos droits</h2>
+  <p class="mb-2 text-sm leading-relaxed text-paper-dim">
     Où que vous soyez, vous pouvez écrire à
-    <a href="mailto:contact@ballingpronostics.site" class="text-emerald-600 hover:underline">contact@ballingpronostics.site</a>
+    <a href="mailto:contact@ballingpronostics.site" class="text-amber hover:underline">contact@ballingpronostics.site</a>
     pour&nbsp;:
   </p>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>demander une copie des données personnelles que nous détenons à votre sujet&nbsp;;</li>
     <li>nous demander de corriger des données inexactes (par exemple via votre page Compte, ou sur demande)&nbsp;;</li>
     <li>nous demander de supprimer votre compte et les données associées&nbsp;;</li>
     <li>vous opposer à certains traitements, ou nous demander de les restreindre&nbsp;;</li>
     <li>demander vos données dans un format portable.</li>
   </ul>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Si vous vous trouvez dans l'Espace économique européen, au Royaume-Uni, ou dans une juridiction dotée d'une
     législation de protection des données similaire (par exemple le RGPD ou le CCPA), nous honorerons les
     demandes conformément aux droits que ces lois vous accordent, même si nous n'y sommes pas établis. Nous
     répondrons à toute demande dans un délai raisonnable.
   </p>
 
-  <h2 id="section-8" class="mb-2 mt-8 text-lg font-semibold text-slate-900">8. Mineurs</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-8" class="mb-2 mt-8 text-lg font-semibold text-paper">8. Mineurs</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Le Service est destiné exclusivement aux adultes de 18 ans et plus, conformément à nos
-    <a href="{{ url(request, '/terms') }}" class="text-emerald-600 hover:underline">Conditions générales d'utilisation</a>,
+    <a href="{{ url(request, '/terms') }}" class="text-amber hover:underline">Conditions générales d'utilisation</a>,
     et nous ne collectons pas sciemment de données personnelles auprès de personnes de moins de 18 ans. Si nous
     apprenons qu'un mineur a créé un compte, nous le fermerons.
   </p>
 
-  <h2 id="section-9" class="mb-2 mt-8 text-lg font-semibold text-slate-900">9. Transferts internationaux de données</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-9" class="mb-2 mt-8 text-lg font-semibold text-paper">9. Transferts internationaux de données</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Le Service est basé au Cameroun, et nos prestataires de paiement et notre infrastructure d'hébergement
     peuvent stocker ou traiter des données dans d'autres pays. En utilisant le Service, vous comprenez que vos
     données peuvent être transférées au-delà des frontières afin de vous fournir le Service.
   </p>
 
-  <h2 id="section-10" class="mb-2 mt-8 text-lg font-semibold text-slate-900">10. Sécurité des données</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-10" class="mb-2 mt-8 text-lg font-semibold text-paper">10. Sécurité des données</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Nous hachons les mots de passe ainsi que les jetons de session et de vérification (sans jamais les stocker
     en clair), et servons le Service en HTTPS. Aucun système n'est sécurisé à 100&nbsp;%, mais nous prenons des
     mesures techniques et organisationnelles raisonnables pour protéger vos données contre tout accès non
     autorisé, perte ou usage abusif.
   </p>
 
-  <h2 id="section-11" class="mb-2 mt-8 text-lg font-semibold text-slate-900">11. Modifications de cette politique</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-11" class="mb-2 mt-8 text-lg font-semibold text-paper">11. Modifications de cette politique</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Nous pouvons mettre à jour cette Politique de confidentialité à mesure que le Service évolue (par exemple,
     nouveaux moyens de paiement). Nous mettrons à jour la date de « Dernière mise à jour », et pour les
     changements importants, ferons de notre mieux pour en informer les utilisateurs actifs, par exemple par
     e-mail.
   </p>
 
-  <h2 id="section-12" class="mb-2 mt-8 text-lg font-semibold text-slate-900">12. Contact</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-12" class="mb-2 mt-8 text-lg font-semibold text-paper">12. Contact</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Questions, demandes ou réclamations concernant cette politique&nbsp;:
-    <a href="mailto:contact@ballingpronostics.site" class="text-emerald-600 hover:underline">contact@ballingpronostics.site</a>.
+    <a href="mailto:contact@ballingpronostics.site" class="text-amber hover:underline">contact@ballingpronostics.site</a>.
   </p>
 
 {% else %}
 
-  <h1 class="mb-1 text-2xl font-semibold text-slate-900 sm:text-3xl">Privacy Policy</h1>
-  <p class="mb-8 text-sm text-slate-500">Last updated: August 20, 2026</p>
+  <h1 class="font-display mb-1 text-2xl font-semibold uppercase tracking-wide text-paper sm:text-3xl">Privacy Policy</h1>
+  <p class="mb-8 text-sm text-paper-dim">Last updated: August 20, 2026</p>
 
-  <p class="mb-6 text-sm leading-relaxed text-slate-600">
+  <p class="mb-6 text-sm leading-relaxed text-paper-dim">
     This Privacy Policy explains what personal data Balling Predictions ("we", "us") collects when you use
     ballingpronostics.site (the "Service"), why we collect it, and the choices and rights you have. It should
     be read together with our
-    <a href="{{ url(request, '/terms') }}" class="text-emerald-600 hover:underline">Terms of Service</a>.
+    <a href="{{ url(request, '/terms') }}" class="text-amber hover:underline">Terms of Service</a>.
   </p>
 
-  <h2 id="section-1" class="mb-2 mt-8 text-lg font-semibold text-slate-900">1. Who we are</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-1" class="mb-2 mt-8 text-lg font-semibold text-paper">1. Who we are</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Balling Predictions is currently operated by our team, reachable at
-    <a href="mailto:contact@ballingpronostics.site" class="text-emerald-600 hover:underline">contact@ballingpronostics.site</a>
+    <a href="mailto:contact@ballingpronostics.site" class="text-amber hover:underline">contact@ballingpronostics.site</a>
     for any privacy question or request. That's the address to use for everything in this policy — access,
     correction, or deletion requests, or general questions.
   </p>
 
-  <h2 id="section-2" class="mb-2 mt-8 text-lg font-semibold text-slate-900">2. What we collect</h2>
-  <ul class="mb-4 list-disc space-y-2.5 pl-5 text-sm leading-relaxed text-slate-600">
-    <li><span class="font-medium text-slate-900">Account data:</span> first name, last name, email address (used as your login), and a securely hashed password — we never store your password in plain text.</li>
-    <li><span class="font-medium text-slate-900">Payment data:</span> when you subscribe to a paid plan, the Mobile Money phone number and operator (MTN or Orange) you provide, plus the plan, amount, status, and transaction reference of each payment. Your Mobile Money PIN is entered directly on your phone and is never seen, transmitted to, or stored by us — payments are processed by our payment partner, KPay. If we add card or PayPal payments in the future, your card number and PayPal credentials will likewise be handled directly by that payment processor, not by us.</li>
-    <li><span class="font-medium text-slate-900">Usage data:</span> the matchups you simulate (teams, neutral-venue setting) and when, so we can enforce your plan's monthly quota and show you your prediction history.</li>
-    <li><span class="font-medium text-slate-900">Feedback:</span> any rating or message you submit on the Feedback page.</li>
-    <li><span class="font-medium text-slate-900">Technical data:</span> a session cookie that keeps you logged in (see "Cookies" below), and standard web-server logs (e.g. IP address, browser user agent) kept for security and abuse-prevention purposes.</li>
+  <h2 id="section-2" class="mb-2 mt-8 text-lg font-semibold text-paper">2. What we collect</h2>
+  <ul class="mb-4 list-disc space-y-2.5 pl-5 text-sm leading-relaxed text-paper-dim">
+    <li><span class="font-medium text-paper">Account data:</span> first name, last name, email address (used as your login), and a securely hashed password — we never store your password in plain text.</li>
+    <li><span class="font-medium text-paper">Payment data:</span> when you subscribe to a paid plan, the Mobile Money phone number and operator (MTN or Orange) you provide, plus the plan, amount, status, and transaction reference of each payment. Your Mobile Money PIN is entered directly on your phone and is never seen, transmitted to, or stored by us — payments are processed by our payment partner, KPay. If we add card or PayPal payments in the future, your card number and PayPal credentials will likewise be handled directly by that payment processor, not by us.</li>
+    <li><span class="font-medium text-paper">Usage data:</span> the matchups you simulate (teams, neutral-venue setting) and when, so we can enforce your plan's monthly quota and show you your prediction history.</li>
+    <li><span class="font-medium text-paper">Feedback:</span> any rating or message you submit on the Feedback page.</li>
+    <li><span class="font-medium text-paper">Technical data:</span> a session cookie that keeps you logged in (see "Cookies" below), and standard web-server logs (e.g. IP address, browser user agent) kept for security and abuse-prevention purposes.</li>
   </ul>
 
-  <h2 id="section-3" class="mb-2 mt-8 text-lg font-semibold text-slate-900">3. How we use your data</h2>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-3" class="mb-2 mt-8 text-lg font-semibold text-paper">3. How we use your data</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>to create and secure your account, and keep you logged in;</li>
     <li>to send you email-verification codes and password-reset codes;</li>
     <li>to process your subscription payments and activate the right plan;</li>
@@ -174,12 +174,12 @@
     <li>to detect and prevent fraud, abuse, and violations of our Terms;</li>
     <li>to comply with legal obligations (e.g. accounting records for payments).</li>
   </ul>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     We do not use your data for third-party advertising, and we do not sell your personal data to anyone.
   </p>
 
-  <h2 id="section-4" class="mb-2 mt-8 text-lg font-semibold text-slate-900">4. Who we share it with</h2>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-4" class="mb-2 mt-8 text-lg font-semibold text-paper">4. Who we share it with</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>KPay, our Mobile Money payment processor, receives the phone number, operator, and amount needed to process each payment;</li>
     <li>MTN Mobile Money / Orange Money, as the mobile operator you choose to pay through, sees the transaction on their own systems;</li>
     <li>Resend, our email-sending provider (built on Amazon SES infrastructure), to deliver verification and password-reset emails;</li>
@@ -187,76 +187,76 @@
     <li>our hosting provider, which stores the underlying database and server logs;</li>
     <li>law enforcement or regulators, only if legally required to do so.</li>
   </ul>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     We do not otherwise share, rent, or sell your personal data to third parties.
   </p>
 
-  <h2 id="section-5" class="mb-2 mt-8 text-lg font-semibold text-slate-900">5. Cookies</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-5" class="mb-2 mt-8 text-lg font-semibold text-paper">5. Cookies</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     The Service uses one essential cookie — an HTTP-only session cookie — to keep you signed in; it doesn't
     track you across other websites. We don't currently use third-party advertising or analytics cookies. If
     that changes, we'll update this policy and, where required, ask for your consent first.
   </p>
 
-  <h2 id="section-6" class="mb-2 mt-8 text-lg font-semibold text-slate-900">6. How long we keep data</h2>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-6" class="mb-2 mt-8 text-lg font-semibold text-paper">6. How long we keep data</h2>
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>Match-simulation history is kept for a limited period (currently 14 days) to enforce quotas and populate your history page, then automatically deleted.</li>
     <li>Email-verification and password-reset codes are stored (hashed) and expire shortly after being issued (currently 10 minutes), whether or not used.</li>
     <li>Account, subscription, and payment records are kept for as long as your account is active, and afterwards for as long as needed to meet legal/accounting obligations or resolve disputes.</li>
     <li>If you ask us to delete your account, we delete your account and associated usage, feedback, payment, and session records, except anything we're legally required to keep.</li>
   </ul>
 
-  <h2 id="section-7" class="mb-2 mt-8 text-lg font-semibold text-slate-900">7. Your rights</h2>
-  <p class="mb-2 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-7" class="mb-2 mt-8 text-lg font-semibold text-paper">7. Your rights</h2>
+  <p class="mb-2 text-sm leading-relaxed text-paper-dim">
     Wherever you're located, you can write to
-    <a href="mailto:contact@ballingpronostics.site" class="text-emerald-600 hover:underline">contact@ballingpronostics.site</a>
+    <a href="mailto:contact@ballingpronostics.site" class="text-amber hover:underline">contact@ballingpronostics.site</a>
     to:
   </p>
-  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+  <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-paper-dim">
     <li>ask for a copy of the personal data we hold about you;</li>
     <li>ask us to correct inaccurate data (e.g. via your Account page, or by request);</li>
     <li>ask us to delete your account and associated data;</li>
     <li>object to, or ask us to restrict, certain processing;</li>
     <li>ask for your data in a portable format.</li>
   </ul>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     If you're in the European Economic Area, the UK, or a jurisdiction with similar data-protection law (e.g.
     under GDPR or CCPA), we'll honour requests consistent with the rights those laws give you, even though
     we're not established there. We'll respond to any request within a reasonable time.
   </p>
 
-  <h2 id="section-8" class="mb-2 mt-8 text-lg font-semibold text-slate-900">8. Children</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-8" class="mb-2 mt-8 text-lg font-semibold text-paper">8. Children</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     The Service is intended for adults 18 and older only, per our
-    <a href="{{ url(request, '/terms') }}" class="text-emerald-600 hover:underline">Terms of Service</a>,
+    <a href="{{ url(request, '/terms') }}" class="text-amber hover:underline">Terms of Service</a>,
     and we don't knowingly collect personal data from anyone under 18. If we learn a minor has created an
     account, we'll close it.
   </p>
 
-  <h2 id="section-9" class="mb-2 mt-8 text-lg font-semibold text-slate-900">9. International data transfers</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-9" class="mb-2 mt-8 text-lg font-semibold text-paper">9. International data transfers</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     The Service is based in Cameroon, and our payment processors and hosting infrastructure may store or
     process data in other countries. By using the Service, you understand your data may be transferred across
     borders in order to provide it to you.
   </p>
 
-  <h2 id="section-10" class="mb-2 mt-8 text-lg font-semibold text-slate-900">10. Data security</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-10" class="mb-2 mt-8 text-lg font-semibold text-paper">10. Data security</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     We hash passwords and session/verification tokens (never storing them in plain text), and serve the
     Service over HTTPS. No system is 100% secure, but we take reasonable technical and organizational measures
     to protect your data against unauthorized access, loss, or misuse.
   </p>
 
-  <h2 id="section-11" class="mb-2 mt-8 text-lg font-semibold text-slate-900">11. Changes to this policy</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-11" class="mb-2 mt-8 text-lg font-semibold text-paper">11. Changes to this policy</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     We may update this Privacy Policy as the Service evolves (e.g. new payment methods). We'll update the
     "Last updated" date, and for material changes we'll do our best to let active users know, e.g. by email.
   </p>
 
-  <h2 id="section-12" class="mb-2 mt-8 text-lg font-semibold text-slate-900">12. Contact</h2>
-  <p class="mb-4 text-sm leading-relaxed text-slate-600">
+  <h2 id="section-12" class="mb-2 mt-8 text-lg font-semibold text-paper">12. Contact</h2>
+  <p class="mb-4 text-sm leading-relaxed text-paper-dim">
     Questions, requests, or complaints about this policy:
-    <a href="mailto:contact@ballingpronostics.site" class="text-emerald-600 hover:underline">contact@ballingpronostics.site</a>.
+    <a href="mailto:contact@ballingpronostics.site" class="text-amber hover:underline">contact@ballingpronostics.site</a>.
   </p>
 
 {% endif %}

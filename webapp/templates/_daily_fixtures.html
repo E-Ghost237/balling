@@ -1,0 +1,84 @@
+{% from "_icons.html" import icon_chevron_right %}
+{# fixture_days = {"today": [...leagues], "tomorrow": [...leagues]}, each
+   league already alphabetical with its own fixtures already kickoff-
+   ordered — see _load_upcoming_fixtures. Every fixture is its own tiny
+   <form> posting straight to POST /simulate with the exact same
+   league_id/home/away fields the manual picker sends — same endpoint,
+   same quota/prediction logic, no probabilities shown until the click
+   actually happens. Team crests use the team_id-keyed logo path (see
+   _result_card.html's team_badge macro for the same convention) —
+   flags are reserved for the league header only, not individual teams.
+
+   The two radios/labels/content-divs below are all deliberately flat,
+   direct siblings of one parent — Tailwind's peer-checked relies on a
+   plain CSS sibling combinator, which only matches actual siblings, not
+   elements nested inside an earlier sibling. Nesting the radios inside
+   a wrapper div (e.g. for a flex tab-bar) would silently break every
+   peer-checked reference below it. #}
+<div class="mb-8">
+  <h2 class="mb-1 font-display text-lg font-semibold uppercase tracking-wide text-paper">{{ t(request, 'simulate.fixtures_heading') }}</h2>
+  <p class="mb-4 text-sm text-paper-dim">{{ t(request, 'simulate.fixtures_subtitle') }}</p>
+
+  <input type="radio" name="fixture-day" id="fixture-day-today" class="peer/today sr-only" checked />
+  <input type="radio" name="fixture-day" id="fixture-day-tomorrow" class="peer/tomorrow sr-only" />
+
+  <label for="fixture-day-today"
+    class="mb-4 mr-2 inline-block cursor-pointer rounded-md border border-line px-3 py-1.5 font-mono text-xs text-paper-dim peer-checked/today:border-amber peer-checked/today:text-amber">
+    {{ t(request, 'simulate.day_today') }}
+  </label>
+  <label for="fixture-day-tomorrow"
+    class="mb-4 inline-block cursor-pointer rounded-md border border-line px-3 py-1.5 font-mono text-xs text-paper-dim peer-checked/tomorrow:border-amber peer-checked/tomorrow:text-amber">
+    {{ t(request, 'simulate.day_tomorrow') }}
+  </label>
+
+  {% macro fixture_leagues(leagues) %}
+    {% if leagues %}
+      <div class="space-y-4">
+        {% for league in leagues %}
+        <div class="overflow-hidden rounded-xl border border-line">
+          <div class="flex items-center gap-2 border-b border-line bg-ink-3 px-4 py-2.5">
+            {% if league.flag_code %}<img src="/assets/flags/{{ league.flag_code }}.png" alt="" class="h-3.5 rounded-sm" />{% endif %}
+            <span class="font-display text-sm font-semibold uppercase tracking-wide text-paper">{{ league.name }}</span>
+          </div>
+          <div class="divide-y divide-line">
+            {% for fx in league.fixtures %}
+            <form method="post" action="{{ url(request, '/simulate') }}">
+              <input type="hidden" name="league_id" value="{{ fx.league_id }}" />
+              <input type="hidden" name="home" value="{{ fx.home.name }}" />
+              <input type="hidden" name="away" value="{{ fx.away.name }}" />
+              <input type="hidden" name="fixture_kickoff" value="{{ fx.kickoff_utc }}" />
+              <button type="submit" class="flex w-full items-center gap-4 bg-ink-2 px-4 py-3 text-left transition hover:bg-ink-3">
+                <div class="w-12 flex-none font-mono text-xs text-paper-dim">{{ fx.time_label }}</div>
+                <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
+                  <span class="flex min-w-0 items-center gap-2 text-sm text-paper">
+                    <img src="/assets/logos/{{ fx.home.id }}.png" alt="" class="h-5 w-5 flex-none object-contain" onerror="this.style.display='none'" />
+                    <span class="truncate">{{ fx.home.name }}</span>
+                  </span>
+                  <span class="flex-none font-mono text-[10px] text-paper-dim">vs</span>
+                  <span class="flex min-w-0 items-center justify-end gap-2 text-sm text-paper">
+                    <span class="truncate text-right">{{ fx.away.name }}</span>
+                    <img src="/assets/logos/{{ fx.away.id }}.png" alt="" class="h-5 w-5 flex-none object-contain" onerror="this.style.display='none'" />
+                  </span>
+                </div>
+                <span class="flex-none text-paper-dim">{{ icon_chevron_right('h-4 w-4') }}</span>
+              </button>
+            </form>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="rounded-xl border border-dashed border-line bg-ink-2 px-4 py-6 text-center text-sm text-paper-dim">
+        {{ t(request, 'simulate.fixtures_empty') }}
+      </div>
+    {% endif %}
+  {% endmacro %}
+
+  <div class="peer-checked/tomorrow:hidden">
+    {{ fixture_leagues(fixture_days.today) }}
+  </div>
+  <div class="hidden peer-checked/tomorrow:block">
+    {{ fixture_leagues(fixture_days.tomorrow) }}
+  </div>
+</div>

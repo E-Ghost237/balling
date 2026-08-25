@@ -1,5 +1,42 @@
 @import "tailwindcss";
+
+/* Design system matches the marketing landing page exactly (confirmed
+   design, see conversation) — an ink/amber/teal editorial-data aesthetic,
+   replacing the earlier light emerald/slate system site-wide so every page
+   reads as one product. */
+@theme {
+  --color-ink: #0b1220;      /* page ground */
+  --color-ink-2: #101a2e;    /* card/panel surface */
+  --color-ink-3: #142140;    /* deeper panel / hover state */
+  --color-paper: #edefe9;    /* primary text on dark */
+  --color-paper-dim: #93a0b7; /* secondary text on dark */
+  --color-line: #223056;     /* borders */
+  --color-amber: #ffb020;    /* primary accent — CTAs, highlights, peaks */
+  --color-teal: #2bb3a3;     /* secondary accent — live/data emphasis */
+
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+}
+
 @source "../../templates/**/*.html";
+
+body {
+  background: var(--color-ink);
+}
+
+/* Subtle film-grain texture over the whole page, matching the landing
+   page — keeps large flat ink areas from looking dead/plasticky. Fixed +
+   pointer-events:none so it never intercepts clicks or scrolls with the
+   page. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(237, 239, 233, 0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+}
 
 .htmx-indicator {
   opacity: 0;
@@ -9,22 +46,3 @@
 .htmx-request.htmx-indicator {
   opacity: 1;
 }
-
-/* Per-page hero backgrounds — drop an image at the matching path in
-   static/backgrounds/ and it's picked up automatically; if the file is
-   missing the background is simply absent, nothing breaks. */
-.bg-page {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-/* A dark gradient layered on top of every photo (stacked as a second
-   background-image, painted first/on top) so any text that ends up over
-   the image — not just inside a white card — still reads clearly, and so
-   busy/bright photo detail doesn't fight with the UI. */
-.bg-page-login    { background-image: linear-gradient(rgba(2,6,23,0.6), rgba(2,6,23,0.6)), url('/assets/backgrounds/login.avif'); }
-.bg-page-register { background-image: linear-gradient(rgba(2,6,23,0.6), rgba(2,6,23,0.6)), url('/assets/backgrounds/register.avif'); }
-.bg-page-reset    { background-image: linear-gradient(rgba(2,6,23,0.6), rgba(2,6,23,0.6)), url('/assets/backgrounds/reset.jpg'); }
-.bg-page-payment  { background-image: linear-gradient(rgba(2,6,23,0.6), rgba(2,6,23,0.6)), url('/assets/backgrounds/payment.jpg'); }
-.bg-page-simulate { background-image: linear-gradient(rgba(2,6,23,0.6), rgba(2,6,23,0.6)), url('/assets/backgrounds/simulate.webp'); }

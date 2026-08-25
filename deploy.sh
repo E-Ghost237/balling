@@ -16,7 +16,7 @@ $SSH "sudo mkdir -p /opt/balling && sudo chown ubuntu:ubuntu /opt/balling"
 rsync -az --delete \
   --exclude '.git' --exclude 'venv' --exclude 'webapp_venv' --exclude '__pycache__' \
   --exclude '.pytest_cache' --exclude '.ruff_cache' --exclude 'bin' \
-  --exclude 'data/dedup_review' --exclude 'data/football.db' \
+  --exclude 'data/dedup_review' --exclude 'data/football.db' --exclude 'logs' \
   -e "ssh -i $KEY -o StrictHostKeyChecking=accept-new" \
   ./ "ubuntu@$IP:/opt/balling/"
 

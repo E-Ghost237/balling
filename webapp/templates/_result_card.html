@@ -1,3 +1,6 @@
+{% from "_components.html" import card %}
+{% from "_icons.html" import icon_star, icon_table_cells, icon_target, icon_arrows_right_left, icon_arrows_up_down %}
+
 {% macro team_badge(badge) %}
   <div class="flex flex-col items-center gap-3">
     {% if badge.flag_code %}
@@ -7,85 +10,87 @@
       <img src="/assets/logos/{{ badge.team_id }}.png" alt="" class="h-28 w-28 object-contain"
            onerror="this.style.display='none'" />
     {% endif %}
-    <span class="text-base font-semibold text-slate-900">{{ badge.name }}</span>
+    <span class="font-display text-base font-semibold uppercase tracking-wide text-paper">{{ badge.name }}</span>
   </div>
 {% endmacro %}
 
 <div class="space-y-6">
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div class="rounded-xl border border-line bg-ink-2 p-6">
+    <div class="mb-1 flex items-center justify-between font-mono text-[11px] uppercase tracking-wide text-paper-dim">
+      <span>{{ t(request, 'result.panel_label') }}</span>
+      <span class="flex items-center gap-1.5 text-teal"><span class="h-1.5 w-1.5 rounded-full bg-teal"></span>{{ result.n_sims }} {{ t(request, 'result.simulations') }}</span>
+    </div>
     <div class="mb-6 flex items-center justify-center gap-10">
       {{ team_badge(home_badge) }}
-      <span class="text-lg text-slate-400">vs</span>
+      <span class="font-mono text-sm text-paper-dim">vs</span>
       {{ team_badge(away_badge) }}
     </div>
-    <p class="mb-4 text-center text-xs text-slate-400">{{ t(request, 'result.elo_line', home_elo=(result.home_elo | round(0) | int), away_elo=(result.away_elo | round(0) | int), n_sims=result.n_sims) }}</p>
+    <p class="mb-4 text-center font-mono text-xs text-paper-dim">{{ t(request, 'result.elo_line', home_elo=(result.home_elo | round(0) | int), away_elo=(result.away_elo | round(0) | int), n_sims=result.n_sims) }}</p>
 
-    <div class="mb-1 flex h-8 w-full overflow-hidden rounded-lg text-xs font-medium">
-      <div class="flex items-center justify-center bg-blue-600 text-white" style="width: {{ (result.prob_home_win*100) | round(1) }}%">
+    <div class="mb-1 flex h-8 w-full overflow-hidden rounded-lg font-mono text-xs font-medium">
+      <div class="flex items-center justify-center bg-amber text-ink" style="width: {{ (result.prob_home_win*100) | round(1) }}%">
         {% if result.prob_home_win >= 0.12 %}{{ (result.prob_home_win*100) | round(1) }}%{% endif %}
       </div>
-      <div class="flex items-center justify-center bg-slate-400 text-white" style="width: {{ (result.prob_draw*100) | round(1) }}%">
+      <div class="flex items-center justify-center bg-teal text-ink" style="width: {{ (result.prob_draw*100) | round(1) }}%">
         {% if result.prob_draw >= 0.12 %}{{ (result.prob_draw*100) | round(1) }}%{% endif %}
       </div>
-      <div class="flex items-center justify-center bg-red-500 text-white" style="width: {{ (result.prob_away_win*100) | round(1) }}%">
+      <div class="flex items-center justify-center bg-ink-3 text-paper-dim" style="width: {{ (result.prob_away_win*100) | round(1) }}%">
         {% if result.prob_away_win >= 0.12 %}{{ (result.prob_away_win*100) | round(1) }}%{% endif %}
       </div>
     </div>
-    <div class="mb-6 flex justify-between text-xs text-slate-500">
+    <div class="mb-6 flex justify-between font-mono text-[11px] text-paper-dim">
       <span>{{ result.home_team }} {{ t(request, 'result.win_suffix') }}</span><span>{{ t(request, 'result.draw') }}</span><span>{{ result.away_team }} {{ t(request, 'result.win_suffix') }}</span>
     </div>
 
-    <div class="grid grid-cols-3 gap-4 text-center">
+    <div class="grid grid-cols-3 gap-4 border-t border-dashed border-line pt-4 text-center">
       <div>
-        <p class="text-xs text-slate-500">{{ t(request, 'result.expected_goals') }}</p>
-        <p class="text-slate-900">{{ result.lambda_home | round(2) }} – {{ result.lambda_away | round(2) }}</p>
+        <p class="font-mono text-[11px] uppercase tracking-wide text-paper-dim">{{ t(request, 'result.expected_goals') }}</p>
+        <p class="font-mono text-lg font-semibold text-amber">{{ result.lambda_home | round(2) }} – {{ result.lambda_away | round(2) }}</p>
       </div>
       <div>
-        <p class="text-xs text-slate-500">{{ t(request, 'result.most_likely_score') }}</p>
-        <p class="text-slate-900">{{ result.most_likely_score }}</p>
+        <p class="font-mono text-[11px] uppercase tracking-wide text-paper-dim">{{ t(request, 'result.most_likely_score') }}</p>
+        <p class="font-mono text-lg font-semibold text-amber">{{ result.most_likely_score }}</p>
       </div>
       <div>
-        <p class="text-xs text-slate-500">{{ t(request, 'result.saved_as') }}</p>
-        <p class="text-slate-900">#{{ result.prediction_id }}</p>
+        <p class="font-mono text-[11px] uppercase tracking-wide text-paper-dim">{{ t(request, 'result.saved_as') }}</p>
+        <p class="font-mono text-lg font-semibold text-amber">#{{ result.prediction_id }}</p>
       </div>
     </div>
   </div>
 
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.best_picks') }}</h2>
+  {% call card(title=t(request, 'result.best_picks'), icon=icon_star('h-5 w-5')) %}
     {% if result.markets is none %}
-      <p class="text-sm text-slate-400">{{ t(request, 'result.not_available_older') }}</p>
+      <p class="text-sm text-paper-dim">{{ t(request, 'result.not_available_older') }}</p>
     {% elif result.best_picks %}
       <ul class="space-y-2">
         {% for pick in result.best_picks %}
-          <li class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2.5">
-            <span><span class="font-medium text-slate-900">{{ pick.selection }}</span> <span class="text-slate-400">· {{ pick.market }}</span></span>
-            <span class="font-semibold text-emerald-600">{{ (pick.probability*100) | round(1) }}%</span>
+          <li class="flex items-center justify-between rounded-lg px-4 py-2.5 {{ 'border border-amber/30 bg-amber/10' if loop.first else 'bg-ink-3' }}">
+            <span><span class="font-medium text-paper">{{ pick.selection }}</span> <span class="text-paper-dim">· {{ pick.market }}</span></span>
+            <span class="font-mono font-semibold {{ 'text-amber' if loop.first else 'text-teal' }}">{{ (pick.probability*100) | round(1) }}%</span>
           </li>
         {% endfor %}
       </ul>
     {% else %}
-      <p class="text-sm text-slate-400">{{ t(request, 'result.no_selection_cleared') }}</p>
+      <p class="text-sm text-paper-dim">{{ t(request, 'result.no_selection_cleared') }}</p>
     {% endif %}
-  </div>
+  {% endcall %}
 
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-1 font-semibold text-slate-900">{{ t(request, 'result.scoreline_probabilities') }}</h2>
-    <p class="mb-4 text-xs text-slate-400">{{ t(request, 'result.rows_cols', home=result.home_team, away=result.away_team) }}</p>
+  {% call card(title=t(request, 'result.scoreline_probabilities'), icon=icon_table_cells('h-4 w-4'), muted=True) %}
+    <p class="mb-4 -mt-2 text-xs text-paper-dim">{{ t(request, 'result.rows_cols', home=result.home_team, away=result.away_team) }}</p>
     <div class="overflow-x-auto">
       <table class="mx-auto border-separate" style="border-spacing: 3px;">
         <thead>
           <tr>
             <th></th>
             {% for label in scoreline_matrix.labels %}
-              <th class="px-1 pb-1 text-xs font-normal text-slate-400">{{ label }}</th>
+              <th class="px-1 pb-1 text-xs font-normal text-paper-dim">{{ label }}</th>
             {% endfor %}
           </tr>
         </thead>
         <tbody>
           {% for row in scoreline_matrix.grid %}
             <tr>
-              <th class="pr-2 text-xs font-normal text-slate-400">{{ scoreline_matrix.labels[loop.index0] }}</th>
+              <th class="pr-2 text-xs font-normal text-paper-dim">{{ scoreline_matrix.labels[loop.index0] }}</th>
               {% for cell in row %}
                 <td class="h-12 w-12 rounded text-center text-xs font-medium"
                     style="background-color: {{ cell.color }}; color: {{ cell.text_color }};">
@@ -97,70 +102,66 @@
         </tbody>
       </table>
     </div>
-  </div>
+  {% endcall %}
 
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
     {% if result.markets %}
-    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.btts') }}</h2>
+    {% call card(title=t(request, 'result.btts'), icon=icon_target('h-4 w-4'), muted=True) %}
       <div class="flex gap-4">
-        <div class="flex-1 rounded-lg bg-slate-50 p-4 text-center">
-          <p class="text-xs text-slate-500">{{ t(request, 'result.yes') }}</p>
-          <p class="text-xl font-semibold text-slate-900">{{ (result.markets.btts.yes*100) | round(1) }}%</p>
+        <div class="flex-1 rounded-lg bg-ink-3 p-4 text-center">
+          <p class="text-xs text-paper-dim">{{ t(request, 'result.yes') }}</p>
+          <p class="text-xl font-semibold text-paper">{{ (result.markets.btts.yes*100) | round(1) }}%</p>
         </div>
-        <div class="flex-1 rounded-lg bg-slate-50 p-4 text-center">
-          <p class="text-xs text-slate-500">{{ t(request, 'result.no') }}</p>
-          <p class="text-xl font-semibold text-slate-900">{{ (result.markets.btts.no*100) | round(1) }}%</p>
+        <div class="flex-1 rounded-lg bg-ink-3 p-4 text-center">
+          <p class="text-xs text-paper-dim">{{ t(request, 'result.no') }}</p>
+          <p class="text-xl font-semibold text-paper">{{ (result.markets.btts.no*100) | round(1) }}%</p>
         </div>
       </div>
-    </div>
+    {% endcall %}
     {% endif %}
 
-    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.top_scorelines') }}</h2>
+    {% call card(title=t(request, 'result.top_scorelines'), icon=icon_table_cells('h-4 w-4'), muted=True) %}
       <ul class="space-y-1 text-sm">
         {% for scoreline, prob in result.scoreline_probs | dictsort(by='value', reverse=true) %}
           {% if loop.index <= 8 %}
-            <li class="flex justify-between text-slate-600">
-              <span>{{ scoreline }}</span><span class="text-slate-400">{{ (prob*100) | round(1) }}%</span>
+            <li class="flex justify-between text-paper-dim">
+              <span>{{ scoreline }}</span><span class="text-paper-dim">{{ (prob*100) | round(1) }}%</span>
             </li>
           {% endif %}
         {% endfor %}
       </ul>
-    </div>
+    {% endcall %}
   </div>
 
   {% if result.markets %}
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.double_chance') }}</h2>
+  {% call card(title=t(request, 'result.double_chance'), icon=icon_arrows_right_left('h-4 w-4'), muted=True) %}
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div class="rounded-lg bg-slate-50 p-4 text-center">
-        <p class="text-xs text-slate-500">1X — {{ result.home_team }} {{ t(request, 'result.or_draw') }}</p>
-        <p class="text-xl font-semibold text-slate-900">{{ (result.markets.double_chance['1X']*100) | round(1) }}%</p>
+      <div class="rounded-lg bg-ink-3 p-4 text-center">
+        <p class="text-xs text-paper-dim">1X · {{ result.home_team }} {{ t(request, 'result.or_draw') }}</p>
+        <p class="text-xl font-semibold text-paper">{{ (result.markets.double_chance['1X']*100) | round(1) }}%</p>
       </div>
-      <div class="rounded-lg bg-slate-50 p-4 text-center">
-        <p class="text-xs text-slate-500">12 — {{ result.home_team }} {{ t(request, 'result.or') }} {{ result.away_team }}</p>
-        <p class="text-xl font-semibold text-slate-900">{{ (result.markets.double_chance['12']*100) | round(1) }}%</p>
+      <div class="rounded-lg bg-ink-3 p-4 text-center">
+        <p class="text-xs text-paper-dim">12 · {{ result.home_team }} {{ t(request, 'result.or') }} {{ result.away_team }}</p>
+        <p class="text-xl font-semibold text-paper">{{ (result.markets.double_chance['12']*100) | round(1) }}%</p>
       </div>
-      <div class="rounded-lg bg-slate-50 p-4 text-center">
-        <p class="text-xs text-slate-500">2X — {{ result.away_team }} {{ t(request, 'result.or_draw') }}</p>
-        <p class="text-xl font-semibold text-slate-900">{{ (result.markets.double_chance['2X']*100) | round(1) }}%</p>
+      <div class="rounded-lg bg-ink-3 p-4 text-center">
+        <p class="text-xs text-paper-dim">2X · {{ result.away_team }} {{ t(request, 'result.or_draw') }}</p>
+        <p class="text-xl font-semibold text-paper">{{ (result.markets.double_chance['2X']*100) | round(1) }}%</p>
       </div>
     </div>
-  </div>
+  {% endcall %}
   {% endif %}
 
   {% if result.markets %}
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'result.total_goals') }}</h2>
+  {% call card(title=t(request, 'result.total_goals'), icon=icon_arrows_up_down('h-4 w-4'), muted=True) %}
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm">
-        <thead class="text-slate-400">
+        <thead class="text-paper-dim">
           <tr><th class="pb-2">{{ t(request, 'result.line') }}</th><th class="pb-2">{{ t(request, 'result.over') }}</th><th class="pb-2">{{ t(request, 'result.under') }}</th></tr>
         </thead>
-        <tbody class="text-slate-700">
+        <tbody class="text-paper">
           {% for line, p in result.markets.over_under.items() | sort %}
-            <tr class="border-t border-slate-100">
+            <tr class="border-t border-line">
               <td class="py-1.5">{{ line }}</td>
               <td class="py-1.5">{{ (p.over*100) | round(1) }}%</td>
               <td class="py-1.5">{{ (p.under*100) | round(1) }}%</td>
@@ -169,6 +170,6 @@
         </tbody>
       </table>
     </div>
-  </div>
+  {% endcall %}
   {% endif %}
 </div>

@@ -19,6 +19,9 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String, nullable=False, default="")
     last_name: Mapped[str] = mapped_column(String, nullable=False, default="")
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # Grants the same unlimited-quota / manual-matchup-picker access as an
+    # admin, without admin-panel access — for trusted non-admin users.
+    is_privileged: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -121,6 +124,16 @@ class Prediction(Base):
     scoreline_probs: Mapped[dict] = mapped_column(JSONB, nullable=False)
     markets: Mapped[dict | None] = mapped_column(JSONB)
     best_picks: Mapped[list | None] = mapped_column(JSONB)
+    # Set only when this prediction came from clicking a listed fixture
+    # (not the manual/"Friendly" picker) — the real kickoff date/time of
+    # the actual match, not a data/football.db row id. A plain date/time
+    # is used deliberately, not a foreign-key-style id into that SQLite
+    # file, for the exact same resilience reason documented on this
+    # class's own docstring (that file gets rebuilt out from under us).
+    # NULL means "not tied to a real fixture" — excluded from the public
+    # accuracy log (see routes/accuracy.py), since there's no real-world
+    # outcome to grade a hypothetical matchup against.
+    fixture_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class UsageLog(Base):

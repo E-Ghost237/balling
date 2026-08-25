@@ -48,14 +48,37 @@ BASE_URL = "https://api.sofascore.com/api/v1"
 SOURCE = "sofascore"
 REQUEST_DELAY_SECONDS = 0.6
 
+# Circuit breaker: once we're actually blocked, EVERY subsequent request
+# exhausts its own 5-attempt retry ladder (2+4+6+8+10=30s of backoff each)
+# before giving up and moving to the next event — and there can be
+# hundreds of events left in a season/league list. Measured directly: two
+# workers blocked mid-run each logged 70+ fully-exhausted-retry failures,
+# which is 70+ x 30s+ = 35+ minutes of guaranteed-to-fail grinding *per
+# worker*, on top of however long it takes to notice the run never
+# finished. Aborting the whole process after a short run of consecutive
+# failures turns "blocked for the rest of the run" into "blocked, abort
+# in under a minute" — the difference between a quick, informative failure
+# and burning a large chunk of the (already-tightening, see project
+# memory) block window on requests that were never going to succeed.
+CONSECUTIVE_FAILURE_LIMIT = 4
+
 _scraper = cloudscraper.create_scraper()
+_consecutive_failures = 0
+
+
+class BlockedError(RuntimeError):
+    """Raised when _get() has failed CONSECUTIVE_FAILURE_LIMIT times in a
+    row — almost certainly a sustained block, not transient trouble.
+    Propagates all the way up to main(), which aborts the whole run."""
 
 
 def _get(url: str, max_retries: int = 5) -> dict | None:
+    global _consecutive_failures
     for attempt in range(1, max_retries + 1):
         try:
             resp = _scraper.get(url, timeout=20)
             if resp.status_code == 200:
+                _consecutive_failures = 0
                 return resp.json()
             if resp.status_code in (403, 429, 500, 502, 503):
                 wait = 2 * attempt
@@ -64,13 +87,27 @@ def _get(url: str, max_retries: int = 5) -> dict | None:
                 time.sleep(wait)
                 continue
             print(f"    [{resp.status_code}] {url} — giving up on this request.")
+            _consecutive_failures += 1
+            _check_circuit_breaker()
             return None
         except Exception as exc:
             wait = 2 * attempt
             print(f"    network error on {url} ({exc}) — retrying in {wait}s")
             time.sleep(wait)
     print(f"    Failed after {max_retries} attempts: {url}")
+    _consecutive_failures += 1
+    _check_circuit_breaker()
     return None
+
+
+def _check_circuit_breaker() -> None:
+    if _consecutive_failures >= CONSECUTIVE_FAILURE_LIMIT:
+        raise BlockedError(
+            f"{_consecutive_failures} consecutive request failures — "
+            f"almost certainly blocked. Aborting the whole run rather than "
+            f"grinding through remaining events with guaranteed-to-fail "
+            f"retries. Data committed so far (per-row commits) is safe."
+        )
 
 
 def fetch_rounds_meta(tournament_id: int, season_id: int) -> list[dict]:
@@ -372,10 +409,16 @@ def main() -> None:
     conn.execute("PRAGMA journal_mode = WAL")
 
     grand_total = 0
-    for key in args.leagues:
-        cfg = SOFASCORE_LEAGUES[key]
-        print(f"\n=== {cfg['name']} ({cfg['country']}) ===")
-        grand_total += load_league(conn, key, cfg)
+    try:
+        for key in args.leagues:
+            cfg = SOFASCORE_LEAGUES[key]
+            print(f"\n=== {cfg['name']} ({cfg['country']}) ===")
+            grand_total += load_league(conn, key, cfg)
+    except BlockedError as exc:
+        conn.close()
+        print(f"\nABORTED — {exc}")
+        print(f"{grand_total} finished match(es) loaded/updated before aborting.")
+        raise SystemExit(2) from None
 
     conn.close()
     print(f"\nDone. {grand_total} total finished matches loaded/updated across "

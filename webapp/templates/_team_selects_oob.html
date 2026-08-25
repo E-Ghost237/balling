@@ -3,7 +3,7 @@
     autocomplete="off" value=""
     placeholder="{{ t(request, 'simulate.choose_team') if teams else t(request, 'simulate.select_league_first') }}"
     {% if not teams %}disabled{% endif %}
-    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
   <datalist id="{{ side }}-teams-list" hx-swap-oob="true">
     {% for team in teams %}<option value="{{ team }}"></option>{% endfor %}
   </datalist>

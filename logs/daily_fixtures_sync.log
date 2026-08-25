@@ -1,0 +1,51 @@
+=== 2026-08-23T13:52:02Z ===
+
+=== 2026-08-22 ===
+  (API-Football quota remaining today: 92)
+  1321 fixture(s) returned
+  (sample fixture top-level keys: ['fixture', 'goals', 'league', 'score', 'teams'])
+  -> 41 inserted so far, 1280 skipped (unknown team), 0 skipped (error)
+
+=== 2026-08-23 ===
+  (API-Football quota remaining today: 91)
+  758 fixture(s) returned
+  -> 63 inserted so far, 2016 skipped (unknown team), 0 skipped (error)
+
+=== 2026-08-24 ===
+  (API-Football quota remaining today: 90)
+  142 fixture(s) returned
+  -> 69 inserted so far, 2152 skipped (unknown team), 0 skipped (error)
+
+Done. 69 fixture(s) inserted/updated, 2152 skipped for unrecognized teams, 0 skipped for parse errors, across 2 day(s).
+Fetch OK — pushing to production.
+./scripts/push_football_db.sh: line 13: terraform: command not found
+=== 2026-08-23T13:52:54Z ===
+
+=== 2026-08-22 ===
+  (API-Football quota remaining today: 89)
+  1321 fixture(s) returned
+  (sample fixture top-level keys: ['fixture', 'goals', 'league', 'score', 'teams'])
+  -> 41 inserted so far, 1280 skipped (unknown team), 0 skipped (error)
+
+=== 2026-08-23 ===
+  (API-Football quota remaining today: 88)
+  758 fixture(s) returned
+  -> 63 inserted so far, 2016 skipped (unknown team), 0 skipped (error)
+
+=== 2026-08-24 ===
+  (API-Football quota remaining today: 87)
+  142 fixture(s) returned
+  -> 69 inserted so far, 2152 skipped (unknown team), 0 skipped (error)
+
+Done. 69 fixture(s) inserted/updated, 2152 skipped for unrecognized teams, 0 skipped for parse errors, across 2 day(s).
+Fetch OK — pushing to production.
+==> Backing up remote football.db (football.db.bak-20260823-145301)
+==> Copying local data/football.db to 13.49.196.77:/opt/balling/data/
+==> Restarting api/worker so they pick up the new file
+ Container balling-api-1 Restarting 
+ Container balling-worker-1 Restarting 
+ Container balling-api-1 Started 
+ Container balling-worker-1 Started 
+==> Done. Remote backup kept at /opt/balling/data/football.db.bak-20260823-145301
+    (old backups aren't auto-pruned — clean up periodically: ssh in and 'ls data/*.bak-*')
+Done.

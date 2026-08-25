@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_components.html" import badge %}
+{% from "_icons.html" import icon_check_circle, icon_x_circle, icon_star %}
+{% block title %}{{ t(request, 'accuracy.title') }}{% endblock %}
+{% block description %}{{ t(request, 'accuracy.description') }}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-3xl">
+  <h1 class="mb-2 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'accuracy.heading') }}</h1>
+  <p class="mb-8 text-sm text-paper-dim">{{ t(request, 'accuracy.subtitle') }}</p>
+
+  {% if accuracy.total > 0 %}
+  <div class="mb-8 grid grid-cols-2 gap-4">
+    <div class="rounded-xl border border-line bg-ink-2 p-6">
+      <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'accuracy.stat_outcome_label') }}</p>
+      <p class="font-mono text-3xl font-semibold text-amber">{{ accuracy.outcome_pct }}%</p>
+      <p class="mt-1 text-xs text-paper-dim">{{ accuracy.outcome_correct }}/{{ accuracy.total }} {{ t(request, 'accuracy.stat_graded') }}</p>
+    </div>
+    <div class="rounded-xl border border-line bg-ink-2 p-6">
+      <p class="font-mono text-xs uppercase tracking-wide text-paper-dim">{{ t(request, 'accuracy.stat_score_label') }}</p>
+      <p class="font-mono text-3xl font-semibold text-teal">{{ accuracy.score_pct }}%</p>
+      <p class="mt-1 text-xs text-paper-dim">{{ accuracy.score_correct }}/{{ accuracy.total }} {{ t(request, 'accuracy.stat_graded') }}</p>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if graded %}
+  <div class="overflow-hidden rounded-xl border border-line">
+    <div class="divide-y divide-line">
+      {% for g in graded %}
+      <div class="flex flex-wrap items-center gap-4 bg-ink-2 px-4 py-3">
+        <div class="w-24 flex-none font-mono text-xs text-paper-dim">{{ g.fixture_date.strftime("%d %b %Y") }}</div>
+        <div class="min-w-0 flex-1 text-sm text-paper">
+          <span class="font-medium">{{ g.home_team }}</span> <span class="text-paper-dim">vs</span> <span class="font-medium">{{ g.away_team }}</span>
+        </div>
+        <div class="font-mono text-xs text-paper-dim">{{ t(request, 'accuracy.predicted') }} <span class="text-paper">{{ g.predicted_score }}</span></div>
+        {% if g.settled %}
+          <div class="font-mono text-xs text-paper-dim">{{ t(request, 'accuracy.actual') }} <span class="text-paper">{{ g.actual_score }}</span></div>
+          {% if g.outcome_correct %}
+            <span class="flex items-center gap-1.5 text-teal">{{ icon_check_circle('h-4 w-4') }}{{ badge(t(request, 'accuracy.correct'), variant="brand") }}</span>
+          {% else %}
+            <span class="flex items-center gap-1.5 text-red-400">{{ icon_x_circle('h-4 w-4') }}{{ badge(t(request, 'accuracy.incorrect'), variant="neutral") }}</span>
+          {% endif %}
+          {% if g.score_correct %}
+            <span class="flex items-center gap-1 text-teal" title="{{ t(request, 'accuracy.exact_score') }}">{{ icon_star('h-4 w-4') }}</span>
+          {% endif %}
+        {% else %}
+          {{ badge(t(request, 'accuracy.pending'), variant="neutral") }}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="rounded-xl border border-dashed border-line bg-ink-2 px-4 py-8 text-center text-sm text-paper-dim">
+    {{ t(request, 'accuracy.no_data') }}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

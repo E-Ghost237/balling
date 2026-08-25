@@ -55,7 +55,10 @@ CREATE TABLE IF NOT EXISTS matches (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     league_id       INTEGER NOT NULL REFERENCES leagues(id),
     season_id       INTEGER NOT NULL REFERENCES seasons(id),
-    match_date      TEXT NOT NULL,      -- ISO 8601
+    match_date      TEXT NOT NULL,      -- ISO 8601 (date only)
+    kickoff_utc     INTEGER,            -- Unix timestamp, only populated for upcoming
+                                         -- fixtures (scrapers/sofascore_daily_fixtures.py);
+                                         -- historical-result loaders never set this.
     home_team_id    INTEGER NOT NULL REFERENCES teams(id),
     away_team_id    INTEGER NOT NULL REFERENCES teams(id),
     home_goals      INTEGER,

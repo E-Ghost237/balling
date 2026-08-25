@@ -1,9 +1,11 @@
+{% from "_icons.html" import icon_exclamation_triangle, icon_x_circle %}
+
 {% macro team_input(side, teams, selected) %}
   <input type="text" id="{{ side }}-select" name="{{ side }}" list="{{ side }}-teams-list" required
     autocomplete="off" value="{{ selected or '' }}"
     placeholder="{{ t(request, 'simulate.choose_team') if teams else t(request, 'simulate.select_league_first') }}"
     {% if not teams %}disabled{% endif %}
-    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+    class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
   <datalist id="{{ side }}-teams-list">
     {% for team in teams %}<option value="{{ team }}"></option>{% endfor %}
   </datalist>
@@ -13,37 +15,51 @@
 
 {% if not active %}
   <div class="mx-auto max-w-md text-center">
-    <h1 class="mb-3 text-2xl font-semibold text-slate-900">{{ t(request, 'simulate.subscribe_heading') }}</h1>
-    <p class="mb-8 text-slate-500">{{ t(request, 'simulate.subscribe_subtitle') }}</p>
-    <a href="{{ url(request, '/payment') }}" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+    <h1 class="font-display mb-3 text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'simulate.subscribe_heading') }}</h1>
+    <p class="mb-8 text-paper-dim">{{ t(request, 'simulate.subscribe_subtitle') }}</p>
+    <a href="{{ url(request, '/payment') }}" class="rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
       {{ t(request, 'simulate.subscribe_now') }}
     </a>
   </div>
 {% else %}
 
   {% if quota_exceeded %}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <div class="mb-6 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+      {{ icon_x_circle('h-4 w-4 flex-none') }}
       {{ t(request, 'simulate.quota_exceeded', limit=quota_limit) }}
     </div>
   {% elif quota_warning %}
-    <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+    <div class="mb-6 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+      {{ icon_exclamation_triangle('h-4 w-4 flex-none') }}
       {{ t(request, 'simulate.quota_warning', remaining=(quota_limit - quota_used)) }}
     </div>
   {% endif %}
 
   {% if form_error %}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ form_error }}</div>
+    <div class="mb-6 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+      {{ icon_x_circle('h-4 w-4 flex-none') }}
+      {{ form_error }}
+    </div>
   {% endif %}
 
-  <div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-4 font-semibold text-slate-900">{{ t(request, 'simulate.pick_matchup') }}</h2>
+  {% include "_daily_fixtures.html" %}
+
+  {% if user.is_admin or user.is_privileged %}
+  <div class="mb-6 flex items-center gap-3 text-xs text-paper-dim">
+    <span class="h-px flex-1 bg-line"></span>
+    <span class="font-mono uppercase tracking-wide">{{ t(request, 'simulate.or_pick_manually') }}</span>
+    <span class="h-px flex-1 bg-line"></span>
+  </div>
+
+  <div class="mb-8 rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
+    <h2 class="mb-4 font-semibold text-paper">{{ t(request, 'simulate.pick_matchup') }}</h2>
     <form hx-post="{{ url(request, '/simulate') }}" hx-target="#simulate-page" hx-swap="outerHTML" hx-indicator="#sim-spinner"
           class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="sm:col-span-2">
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.league_label') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.league_label') }}</label>
         <select name="league_id" required
                 hx-get="{{ url(request, '/simulate/teams-for-league') }}" hx-include="this" hx-target="body" hx-swap="none"
-                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber">
           <option value="" disabled {% if not selected_league_id %}selected{% endif %}>{{ t(request, 'simulate.choose_league') }}</option>
           {% for group_label, group_leagues in leagues %}
             <optgroup label="{{ group_label }}">
@@ -53,30 +69,31 @@
             </optgroup>
           {% endfor %}
         </select>
-        <p class="mt-1 text-xs text-slate-400">{{ t(request, 'simulate.league_hint') }}</p>
+        <p class="mt-1 text-xs text-paper-dim">{{ t(request, 'simulate.league_hint') }}</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.home_team') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.home_team') }}</label>
         {{ team_input('home', teams, selected_home) }}
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'simulate.away_team') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.away_team') }}</label>
         {{ team_input('away', teams, selected_away) }}
       </div>
-      <label class="flex items-center gap-2 text-sm text-slate-600 sm:col-span-2">
-        <input type="checkbox" name="neutral" value="true" class="rounded border-slate-300" {% if neutral %}checked{% endif %} />
+      <label class="flex items-center gap-2 text-sm text-paper-dim sm:col-span-2">
+        <input type="checkbox" name="neutral" value="true" class="rounded border-line" {% if neutral %}checked{% endif %} />
         {{ t(request, 'simulate.neutral_venue') }}
       </label>
       <button type="submit"
-        class="relative rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500 sm:col-span-2">
+        class="relative rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110 sm:col-span-2">
         <span>{{ t(request, 'simulate.submit') }}</span>
-        <span id="sim-spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-600">
+        <span id="sim-spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center rounded-lg bg-amber">
           {{ t(request, 'simulate.simulating') }}
         </span>
       </button>
     </form>
-    <p class="mt-3 text-xs text-slate-400">{{ t(request, 'simulate.quota_footer', used=quota_used, limit=quota_limit) }}</p>
+    <p class="mt-3 text-xs text-paper-dim">{{ t(request, 'simulate.quota_footer', used=quota_used, limit=quota_limit) }}</p>
   </div>
+  {% endif %}
 
   {% if result %}
     {% include "_result_card.html" %}

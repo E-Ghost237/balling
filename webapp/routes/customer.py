@@ -1,7 +1,7 @@
 import re
 import sqlite3
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote
 from uuid import UUID, uuid4
@@ -34,6 +34,7 @@ from webapp.otp import (
     seconds_until_resend_allowed,
     verify_code,
 )
+from webapp.accuracy import accuracy_summary, graded_predictions
 from webapp.plans import PAID_PLANS, PLANS
 from webapp.predictions import save_prediction
 from webapp.quota import check_quota, distinct_matchup_count, record_usage
@@ -74,10 +75,42 @@ router = APIRouter()
 
 
 @router.get("/", response_class=HTMLResponse)
-async def home(request: Request, user: User | None = Depends(get_optional_user)):
-    if user is None:
-        return redirect(request, "/login")
-    return redirect(request, "/simulate")
+async def home(
+    request: Request,
+    user: User | None = Depends(get_optional_user),
+    connection: AsyncConnection = Depends(get_db),
+):
+    # Logged-in users land on /simulate right after login (see login_submit),
+    # but the landing page itself stays reachable afterwards too — clicking
+    # the logo, or navigating to / directly, shouldn't dead-end into a
+    # redirect loop back to /simulate. base.html's nav already renders the
+    # correct logged-in links here since `user` is passed through as-is.
+    settings = get_settings()
+    graded = await graded_predictions(connection, settings.football_db_path)
+    return templates.TemplateResponse(
+        request,
+        "landing.html",
+        {"user": user, "plans": list(PLANS.values()), "accuracy": accuracy_summary(graded)},
+    )
+
+
+@router.get("/accuracy", response_class=HTMLResponse)
+async def accuracy_log(
+    request: Request,
+    user: User | None = Depends(get_optional_user),
+    connection: AsyncConnection = Depends(get_db),
+):
+    """Public track record — every fixture-based prediction graded against
+    its real result, wins and misses both shown. No login required: this
+    exists specifically to build trust with people who haven't signed up
+    yet (see conversation notes on international trust-building)."""
+    settings = get_settings()
+    graded = await graded_predictions(connection, settings.football_db_path)
+    return templates.TemplateResponse(
+        request,
+        "accuracy.html",
+        {"user": user, "graded": graded, "accuracy": accuracy_summary(graded)},
+    )
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -393,6 +426,70 @@ def _load_teams_for_league(db_path: str, league_id: int) -> list[str]:
     return [row[0] for row in rows]
 
 
+FIXTURES_DISPLAY_TZ = timezone(timedelta(hours=1))  # WAT / Cameroon, UTC+1
+
+
+def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
+    """Scheduled fixtures (see scrapers/api_football_daily_fixtures.py),
+    split into "today"/"tomorrow" tabs and grouped by league within each
+    (alphabetical — the SQL sorts that way and dict insertion order is
+    preserved, no separate re-sort needed). Kickoff times and the
+    today/tomorrow split are both computed in FIXTURES_DISPLAY_TZ
+    (Cameroon, UTC+1), not UTC — kickoff_utc itself stays UTC in the db,
+    this only affects what's shown/grouped. Each fixture keeps its own
+    league_id/home/away name so a fixture card can post straight to
+    POST /simulate — the exact same endpoint and quota/prediction path
+    the manual team picker already uses, just pre-filled instead of
+    typed. Anything beyond tomorrow is dropped here (this view is
+    deliberately just today+tomorrow); a 3rd day can be added back once
+    the data source supports it further out — see conversation notes on
+    API-Football's free-tier date-range limit."""
+    conn = sqlite3.connect(db_path)
+    try:
+        rows = conn.execute(
+            """
+            SELECT l.id, l.name, l.country, m.kickoff_utc,
+                   ht.id, ht.name, at.id, at.name
+            FROM matches m
+            JOIN leagues l ON l.id = m.league_id
+            JOIN teams ht ON ht.id = m.home_team_id
+            JOIN teams at ON at.id = m.away_team_id
+            WHERE m.status = 'scheduled' AND m.kickoff_utc IS NOT NULL
+            ORDER BY l.name, m.kickoff_utc
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    today = datetime.now(FIXTURES_DISPLAY_TZ).date()
+    tomorrow = today + timedelta(days=1)
+    day_groups: dict[str, dict[int, dict]] = {"today": {}, "tomorrow": {}}
+    for (league_id, league_name, league_country, kickoff_utc,
+         home_id, home_name, away_id, away_name) in rows:
+        kickoff_dt = datetime.fromtimestamp(kickoff_utc, tz=FIXTURES_DISPLAY_TZ)
+        if kickoff_dt.date() == today:
+            day_key = "today"
+        elif kickoff_dt.date() == tomorrow:
+            day_key = "tomorrow"
+        else:
+            continue
+
+        group = day_groups[day_key].setdefault(league_id, {
+            "id": league_id,
+            "name": league_name,
+            "flag_code": flag_code_for_country(league_country),
+            "fixtures": [],
+        })
+        group["fixtures"].append({
+            "league_id": league_id,
+            "kickoff_utc": kickoff_utc,
+            "time_label": kickoff_dt.strftime("%H:%M"),
+            "home": {"id": home_id, "name": home_name},
+            "away": {"id": away_id, "name": away_name},
+        })
+    return {day: list(leagues.values()) for day, leagues in day_groups.items()}
+
+
 def _team_badge(db_path: str, name: str) -> dict[str, str | int | None]:
     conn = sqlite3.connect(db_path)
     try:
@@ -407,19 +504,22 @@ def _team_badge(db_path: str, name: str) -> dict[str, str | int | None]:
     return {"name": name, "flag_code": flag_code_for_country(country), "team_id": team_id}
 
 
-# Same blue ramp as the original Streamlit app's scoreline heatmap.
-_SEQUENTIAL_BLUE = ["cde2fb", "9ec5f4", "6da7ec", "3987e5", "256abf", "184f95", "0d366b"]
+# Dark-ink-to-teal ramp matching the site's dark theme: low-probability
+# cells recede into the card background instead of standing out (which a
+# light-mode ramp would do on a dark page — the visual hierarchy would
+# invert), high-probability cells pop in the site's teal accent.
+_SEQUENTIAL_TEAL = ["142140", "183951", "1c5261", "206a72", "238282", "279b93", "2bb3a3"]
 _MAX_DISPLAY_GOALS = 6
 
 
 def _interpolate_color(t: float) -> str:
     t = max(0.0, min(1.0, t))
-    steps = len(_SEQUENTIAL_BLUE) - 1
+    steps = len(_SEQUENTIAL_TEAL) - 1
     scaled = t * steps
     i = min(int(scaled), steps - 1)
     frac = scaled - i
-    r1, g1, b1 = (int(_SEQUENTIAL_BLUE[i][j : j + 2], 16) for j in (0, 2, 4))
-    r2, g2, b2 = (int(_SEQUENTIAL_BLUE[i + 1][j : j + 2], 16) for j in (0, 2, 4))
+    r1, g1, b1 = (int(_SEQUENTIAL_TEAL[i][j : j + 2], 16) for j in (0, 2, 4))
+    r2, g2, b2 = (int(_SEQUENTIAL_TEAL[i + 1][j : j + 2], 16) for j in (0, 2, 4))
     r = round(r1 + (r2 - r1) * frac)
     g = round(g1 + (g2 - g1) * frac)
     b = round(b1 + (b2 - b1) * frac)
@@ -443,7 +543,7 @@ def _scoreline_matrix(result: dict) -> dict:
                 {
                     "value": round(value, 1),
                     "color": _interpolate_color(t),
-                    "text_color": "#f8fafc" if t >= 0.5 else "#0f172a",
+                    "text_color": "#0b1220" if t >= 0.5 else "#edefe9",
                 }
             )
         grid.append(rendered_row)
@@ -467,11 +567,16 @@ async def simulate_page(
 ):
     settings = get_settings()
     subscription = await get_subscription(connection, user.id)
-    active = user.is_admin or subscription_is_active(subscription, datetime.now(UTC))
+    unlimited = user.is_admin or user.is_privileged
+    active = unlimited or subscription_is_active(subscription, datetime.now(UTC))
     leagues = _load_leagues(settings.football_db_path) if active else []
+    fixture_days = (
+        _load_upcoming_fixtures(settings.football_db_path) if active
+        else {"today": [], "tomorrow": []}
+    )
     quota_used = 0
     quota_limit = subscription.quota_limit or 0 if subscription else 0
-    if active and not user.is_admin and subscription is not None:
+    if active and not unlimited and subscription is not None:
         quota_used = await distinct_matchup_count(
             connection, user.id, subscription.cycle_started_at
         )
@@ -481,6 +586,7 @@ async def simulate_page(
             "user": user,
             "active": active,
             "leagues": leagues,
+            "fixture_days": fixture_days,
             "teams": [],
             "quota_used": quota_used,
             "quota_limit": quota_limit,
@@ -509,16 +615,19 @@ async def simulate_submit(
     home: str = Form(...),
     away: str = Form(...),
     neutral: bool = Form(False),
+    fixture_kickoff: int | None = Form(None),
     user: User = Depends(require_login),
     connection: AsyncConnection = Depends(get_db),
 ):
     settings = get_settings()
     subscription = await get_subscription(connection, user.id)
-    if not user.is_admin and not subscription_is_active(subscription, datetime.now(UTC)):
+    unlimited = user.is_admin or user.is_privileged
+    if not unlimited and not subscription_is_active(subscription, datetime.now(UTC)):
         return redirect(request, "/payment")
 
     leagues = _load_leagues(settings.football_db_path)
     teams = _load_teams_for_league(settings.football_db_path, league_id)
+    fixture_days = _load_upcoming_fixtures(settings.football_db_path)
     quota_limit = subscription.quota_limit or 0 if subscription else 0
 
     def base_context(**extra: object) -> dict:
@@ -527,6 +636,7 @@ async def simulate_submit(
             "active": True,
             "leagues": leagues,
             "teams": teams,
+            "fixture_days": fixture_days,
             "selected_league_id": league_id,
             "selected_home": home,
             "selected_away": away,
@@ -538,7 +648,7 @@ async def simulate_submit(
 
     if home == away:
         quota_used = 0
-        if not user.is_admin and subscription is not None:
+        if not unlimited and subscription is not None:
             quota_used = await distinct_matchup_count(
                 connection, user.id, subscription.cycle_started_at
             )
@@ -551,7 +661,7 @@ async def simulate_submit(
         )
 
     quota_state = None
-    if not user.is_admin:
+    if not unlimited:
         quota_state = await check_quota(
             connection, user.id, home, away, neutral, subscription.cycle_started_at, quota_limit
         )
@@ -581,8 +691,11 @@ async def simulate_submit(
         )
     conn.close()
 
-    result["prediction_id"] = await save_prediction(connection, result)
-    if not user.is_admin:
+    fixture_date = (
+        datetime.fromtimestamp(fixture_kickoff, tz=UTC) if fixture_kickoff is not None else None
+    )
+    result["prediction_id"] = await save_prediction(connection, result, fixture_date)
+    if not unlimited:
         await record_usage(
             connection, user.id, home, away, neutral, prediction_id=result["prediction_id"]
         )

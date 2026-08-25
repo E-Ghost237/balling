@@ -1,17 +1,18 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon_lock_closed %}
 {% block title %}{{ t(request, 'forbidden.title') }}{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-md text-center">
-  <div class="mb-4 text-4xl">🔒</div>
-  <h1 class="mb-3 text-2xl font-semibold text-slate-900">{{ t(request, 'forbidden.heading') }}</h1>
-  <p class="mb-8 text-slate-500">
+  <div class="mb-4 flex justify-center text-paper-dim">{{ icon_lock_closed('h-10 w-10') }}</div>
+  <h1 class="mb-3 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'forbidden.heading') }}</h1>
+  <p class="mb-8 text-paper-dim">
     {% if user and not user.is_admin %}
       {{ t(request, 'forbidden.needs_subscription') }}
     {% else %}
       {{ t(request, 'forbidden.no_access') }}
     {% endif %}
   </p>
-  <a href="{{ url(request, '/simulate') }}" class="rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+  <a href="{{ url(request, '/simulate') }}" class="rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
     {{ t(request, 'forbidden.back_to_simulate') }}
   </a>
 </div>

@@ -9,7 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from webapp.models import Prediction
 
 
-async def save_prediction(connection: AsyncConnection, result: dict) -> int:
+async def save_prediction(
+    connection: AsyncConnection, result: dict, fixture_date: datetime | None = None
+) -> int:
     inserted = await connection.execute(
         Prediction.__table__.insert()
         .values(
@@ -26,6 +28,7 @@ async def save_prediction(connection: AsyncConnection, result: dict) -> int:
             scoreline_probs=result["scoreline_probs"],
             markets=result["markets"],
             best_picks=result["best_picks"],
+            fixture_date=fixture_date,
         )
         .returning(Prediction.id)
     )

@@ -1,42 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Data tools — Admin{% endblock %}
+{% block title %}Data tools | Admin{% endblock %}
 {% block content %}
-<h1 class="mb-2 text-2xl font-semibold text-slate-900">Data tools</h1>
-<p class="mb-8 text-sm text-slate-500">Each of these runs as a background job — you'll be taken to a live status page.</p>
+<h1 class="font-display mb-2 text-2xl font-semibold uppercase tracking-wide text-paper">Data tools</h1>
+<p class="mb-8 text-sm text-paper-dim">Each of these runs as a background job — you'll be taken to a live status page.</p>
 
 <div class="mb-8 space-y-3">
   {% for job in jobs %}
-  <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+  <div class="flex items-center justify-between rounded-xl border border-line bg-ink-2 p-5 shadow-sm">
     <div>
-      <p class="text-slate-900">{{ job.label }}</p>
+      <p class="text-paper">{{ job.label }}</p>
       {% if job.destructive_note %}
         <p class="mt-1 text-xs text-amber-600">{{ job.destructive_note }}</p>
       {% endif %}
     </div>
     <form method="post" action="/admin/tools/run/{{ job.key }}">
-      <button type="submit" class="rounded-lg bg-slate-100 px-4 py-2 text-sm text-slate-700 hover:bg-slate-200">Run</button>
+      <button type="submit" class="rounded-lg bg-ink-3 px-4 py-2 text-sm text-paper hover:brightness-125">Run</button>
     </form>
   </div>
   {% endfor %}
 </div>
 
-<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-  <h2 class="mb-4 font-semibold text-slate-900">Understat scrape (specific league/season)</h2>
+<div class="rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
+  <h2 class="mb-4 font-semibold text-paper">Understat scrape (specific league/season)</h2>
   <form method="post" action="/admin/tools/run-understat" class="flex flex-wrap items-end gap-4">
     <div>
-      <label class="mb-1 block text-sm text-slate-600">League</label>
-      <select name="league" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900">
+      <label class="mb-1 block text-sm text-paper-dim">League</label>
+      <select name="league" class="rounded-lg border border-line bg-ink-2 px-3 py-2 text-paper">
         {% for league in understat_leagues %}
           <option value="{{ league }}">{{ league }}</option>
         {% endfor %}
       </select>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-slate-600">Season start year</label>
+      <label class="mb-1 block text-sm text-paper-dim">Season start year</label>
       <input name="season" type="number" min="2010" max="2030" value="2025" required
-        class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900" />
+        class="w-32 rounded-lg border border-line bg-ink-2 px-3 py-2 text-paper" />
     </div>
-    <button type="submit" class="rounded-lg bg-slate-100 px-4 py-2 text-sm text-slate-700 hover:bg-slate-200">Run</button>
+    <button type="submit" class="rounded-lg bg-ink-3 px-4 py-2 text-sm text-paper hover:brightness-125">Run</button>
   </form>
 </div>
 {% endblock %}

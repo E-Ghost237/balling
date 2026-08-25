@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Users — Admin{% endblock %}
+{% block title %}Users | Admin{% endblock %}
 {% block main_class %}max-w-7xl{% endblock %}
 {% block content %}
-<h1 class="mb-8 text-2xl font-semibold text-slate-900">Users</h1>
-<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+<h1 class="font-display mb-8 text-2xl font-semibold uppercase tracking-wide text-paper">Users</h1>
+<div class="overflow-x-auto rounded-xl border border-line bg-ink-2 shadow-sm">
   <table class="w-full text-left text-sm">
-    <thead class="bg-slate-50 text-slate-500">
+    <thead class="bg-ink-3 text-paper-dim">
       <tr>
         <th class="px-4 py-3">User</th>
         <th class="px-4 py-3">Role</th>
@@ -17,45 +17,45 @@
         <th class="px-4 py-3">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-100 text-slate-700">
+    <tbody class="divide-y divide-line text-paper">
       {% for id, login, first_name, last_name, is_admin, is_active, email_verified, status, plan_key, quota_limit, expires_at, quota_used in rows %}
       {% set full_name = (first_name ~ " " ~ last_name).strip() %}
       <tr>
         <td class="px-4 py-3">
           {% if full_name %}
-            <div class="font-medium text-slate-900 whitespace-nowrap">{{ full_name }}</div>
-            <div class="text-xs text-slate-500 whitespace-nowrap">{{ login }}</div>
+            <div class="font-medium text-paper whitespace-nowrap">{{ full_name }}</div>
+            <div class="text-xs text-paper-dim whitespace-nowrap">{{ login }}</div>
           {% else %}
-            <div class="text-slate-900 whitespace-nowrap">{{ login }}</div>
+            <div class="text-paper whitespace-nowrap">{{ login }}</div>
           {% endif %}
         </td>
         <td class="px-4 py-3 whitespace-nowrap">{{ "Admin" if is_admin else "User" }}</td>
         <td class="px-4 py-3 whitespace-nowrap">
           {% if email_verified %}
-            <span class="text-emerald-600">Yes</span>
+            <span class="text-amber">Yes</span>
           {% else %}
             <span class="text-amber-600">Pending</span>
           {% endif %}
         </td>
         <td class="px-4 py-3 whitespace-nowrap">
           {% if is_active %}
-            <span class="text-emerald-600">Active</span>
+            <span class="text-amber">Active</span>
           {% else %}
-            <span class="text-red-600">Deactivated</span>
+            <span class="text-red-400">Deactivated</span>
           {% endif %}
         </td>
         <td class="px-4 py-3 whitespace-nowrap">
           {% if plan_key %}
             {{ plans[plan_key].name if plan_key in plans else plan_key }}
-            {% if status != "ACTIVE" %}<span class="text-slate-400">(inactive)</span>{% endif %}
+            {% if status != "ACTIVE" %}<span class="text-paper-dim">(inactive)</span>{% endif %}
           {% else %}
-            <span class="text-slate-400">—</span>
+            <span class="text-paper-dim">—</span>
           {% endif %}
         </td>
         <td class="px-4 py-3 whitespace-nowrap">
-          {% if quota_limit %}{{ quota_used }} / {{ quota_limit }}{% else %}<span class="text-slate-400">—</span>{% endif %}
+          {% if quota_limit %}{{ quota_used }} / {{ quota_limit }}{% else %}<span class="text-paper-dim">—</span>{% endif %}
         </td>
-        <td class="px-4 py-3 whitespace-nowrap text-slate-500">
+        <td class="px-4 py-3 whitespace-nowrap text-paper-dim">
           {% if plan_key == "free" %}
             Never
           {% else %}
@@ -64,7 +64,7 @@
         </td>
         <td class="px-4 py-3">
           {% if is_admin %}
-            <span class="text-xs text-slate-400">—</span>
+            <span class="text-xs text-paper-dim">—</span>
           {% else %}
             <div class="flex flex-wrap gap-2">
               {% if plan_key %}
@@ -78,14 +78,14 @@
                     data-confirm-title="Deactivate account"
                     data-confirm-message="Deactivate {{ login }}? They will be logged out immediately."
                     data-confirm-label="Deactivate"
-                    data-confirm-button-class="bg-amber-600 hover:bg-amber-500"
+                    data-confirm-button-class="bg-amber-600 text-ink hover:bg-amber-500"
                     data-confirm-form="deactivate-form-{{ id }}"
                     onclick="openConfirmModal(this)"
-                    class="whitespace-nowrap rounded-md bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100">Deactivate</button>
+                    class="whitespace-nowrap rounded-md bg-amber-500/10 px-2.5 py-1.5 text-xs font-medium text-amber-300 hover:bg-amber-500/20">Deactivate</button>
                 </form>
               {% else %}
                 <form method="post" action="/admin/users/{{ id }}/reactivate">
-                  <button type="submit" class="whitespace-nowrap rounded-md bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">Reactivate</button>
+                  <button type="submit" class="whitespace-nowrap rounded-md bg-teal/10 px-2.5 py-1.5 text-xs font-medium text-teal hover:bg-teal/15">Reactivate</button>
                 </form>
               {% endif %}
               <form id="delete-form-{{ id }}" method="post" action="/admin/users/{{ id }}/delete">
@@ -93,10 +93,10 @@
                   data-confirm-title="Delete user"
                   data-confirm-message="Permanently delete {{ login }} and all their data? This cannot be undone."
                   data-confirm-label="Delete"
-                  data-confirm-button-class="bg-red-600 hover:bg-red-500"
+                  data-confirm-button-class="bg-red-500/100 text-ink hover:bg-red-400"
                   data-confirm-form="delete-form-{{ id }}"
                   onclick="openConfirmModal(this)"
-                  class="whitespace-nowrap rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100">Delete</button>
+                  class="whitespace-nowrap rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/20">Delete</button>
               </form>
             </div>
           {% endif %}

@@ -31,6 +31,38 @@ async def lifespan(app: FastAPI):
         await connection.run_sync(Base.metadata.create_all)
         if is_first_boot_with_predictions_table:
             await connection.execute(text("UPDATE usage_log SET prediction_id = NULL"))
+
+        # One-time: create_all only creates missing tables, not new columns
+        # on ones that already exist — predictions.fixture_date was added
+        # after predictions itself first shipped (see models.Prediction).
+        has_fixture_date = (
+            await connection.execute(
+                text(
+                    "SELECT 1 FROM information_schema.columns "
+                    "WHERE table_name = 'predictions' AND column_name = 'fixture_date'"
+                )
+            )
+        ).first() is not None
+        if not has_fixture_date:
+            await connection.execute(
+                text("ALTER TABLE predictions ADD COLUMN fixture_date TIMESTAMPTZ")
+            )
+
+        # One-time: users.is_privileged was added after users first shipped
+        # (see models.User) — grants unlimited quota + manual picker to a
+        # trusted user without making them a full admin.
+        has_is_privileged = (
+            await connection.execute(
+                text(
+                    "SELECT 1 FROM information_schema.columns "
+                    "WHERE table_name = 'users' AND column_name = 'is_privileged'"
+                )
+            )
+        ).first() is not None
+        if not has_is_privileged:
+            await connection.execute(
+                text("ALTER TABLE users ADD COLUMN is_privileged BOOLEAN NOT NULL DEFAULT FALSE")
+            )
     yield
 
 
@@ -74,7 +106,12 @@ async def robots_txt() -> PlainTextResponse:
 
 @app.get("/sitemap.xml", include_in_schema=False)
 async def sitemap_xml() -> Response:
-    pages = ["/", "/login", "/register", "/privacy", "/terms"]
+    # /login and /register deliberately excluded — see their templates'
+    # {% block robots %}noindex{% endblock %} override: they're transactional
+    # steps, not content, and listing them here told search engines to treat
+    # them as equally important as the homepage for the site's own brand
+    # name query, which is exactly what pushed them above / in results.
+    pages = ["/", "/privacy", "/terms"]
     entries = []
     for p in pages:
         en_url, fr_url = f"{SITE_URL}{p}", f"{SITE_URL}{localize_path(p, 'fr')}"

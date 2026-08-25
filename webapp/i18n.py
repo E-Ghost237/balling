@@ -30,14 +30,37 @@ LOCALES = ("en", "fr")
 # dotted/namespaced (page.element) so collisions are obvious at a glance.
 TRANSLATIONS: dict[str, dict[str, str]] = {
     # --- nav (base.html) ---
+    "nav.fixtures": {"en": "Fixtures", "fr": "Matchs"},
+    "landing.cta_hero_logged_in": {"en": "See today's fixtures", "fr": "Voir les matchs du jour"},
     "nav.admin": {"en": "Admin", "fr": "Admin"},
     "nav.history": {"en": "History", "fr": "Historique"},
     "nav.feedback": {"en": "Feedback", "fr": "Avis"},
     "nav.account": {"en": "Account", "fr": "Compte"},
     "nav.logout": {"en": "Log out", "fr": "Déconnexion"},
     "nav.login": {"en": "Log in", "fr": "Connexion"},
+    "nav.register": {"en": "Sign up free", "fr": "Inscription gratuite"},
     "nav.lang_switch": {"en": "FR", "fr": "EN"},
     "nav.lang_switch_title": {"en": "Voir en français", "fr": "View in English"},
+
+    # --- landing.html (public homepage) ---
+    "landing.title": {"en": "Balling Predictions | Free Football Match Predictions",
+                       "fr": "Balling Predictions | Pronostics football gratuits"},
+    "landing.description": {
+        "en": "A statistical engine that replays every match thousands of times — dynamic team "
+              "ratings, xG-weighted attack/defense, large-scale simulation — to turn uncertainty "
+              "into calibrated probability, published before kickoff.",
+        "fr": "Un moteur statistique qui rejoue chaque match des milliers de fois — notation "
+              "dynamique des équipes, attaque/défense pondérée par l'xG, simulation à grande "
+              "échelle — pour transformer l'incertitude en probabilité calibrée, publiée avant "
+              "le coup d'envoi.",
+    },
+    "landing.nav_method": {"en": "Method", "fr": "Méthode"},
+    "landing.nav_coverage": {"en": "Competitions", "fr": "Compétitions"},
+    "landing.nav_pricing": {"en": "Subscription", "fr": "Abonnement"},
+    "landing.card_payment": {"en": "Card payment", "fr": "Carte bancaire"},
+    "landing.coming_soon": {"en": "Coming soon", "fr": "Bientôt"},
+    "landing.cta_free": {"en": "Create my account", "fr": "Créer mon compte"},
+    "landing.cta_paid": {"en": "Subscribe", "fr": "S'abonner"},
 
     # --- shared ---
     "common.email": {"en": "Email", "fr": "E-mail"},
@@ -46,8 +69,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "common.hide": {"en": "Hide", "fr": "Masquer"},
 
     # --- login.html ---
-    "login.title": {"en": "Log in — Balling Predictions | Free Football Match Predictions",
-                     "fr": "Connexion — Balling Predictions | Pronostics football gratuits"},
+    "login.title": {"en": "Log in | Balling Predictions | Free Football Match Predictions",
+                     "fr": "Connexion | Balling Predictions | Pronostics football gratuits"},
     "login.description": {
         "en": "Log in to Balling Predictions for free, data-driven football match predictions — "
               "win/draw/loss probabilities, correct scorelines, BTTS and over/under across 700+ "
@@ -65,8 +88,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "login.create_account": {"en": "Create an account", "fr": "Créer un compte"},
 
     # --- register.html ---
-    "register.title": {"en": "Create a Free Account — Balling Predictions",
-                        "fr": "Créer un compte gratuit — Balling Predictions"},
+    "register.title": {"en": "Create a Free Account | Balling Predictions",
+                        "fr": "Créer un compte gratuit | Balling Predictions"},
     "register.description": {
         "en": "Create a free Balling Predictions account and get 20 free football match "
               "predictions every month — win/draw/loss, correct score, BTTS and over/under, "
@@ -88,8 +111,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "register.login_link": {"en": "Log in", "fr": "Connexion"},
 
     # --- verify_email.html ---
-    "verify.title": {"en": "Confirm your email — Balling Predictions",
-                      "fr": "Confirmez votre e-mail — Balling Predictions"},
+    "verify.title": {"en": "Confirm your email | Balling Predictions",
+                      "fr": "Confirmez votre e-mail | Balling Predictions"},
     "verify.heading": {"en": "Check your inbox", "fr": "Consultez votre boîte de réception"},
     "verify.subtitle_pre": {"en": "We sent a 6-digit code to", "fr": "Nous avons envoyé un code à 6 chiffres à"},
     "verify.subtitle_post": {"en": "Enter it below to confirm your email and continue.",
@@ -101,8 +124,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "verify.resend": {"en": "Resend code", "fr": "Renvoyer le code"},
 
     # --- forgot_password.html ---
-    "forgot.title": {"en": "Forgot password — Balling Predictions",
-                      "fr": "Mot de passe oublié — Balling Predictions"},
+    "forgot.title": {"en": "Forgot password | Balling Predictions",
+                      "fr": "Mot de passe oublié | Balling Predictions"},
     "forgot.heading": {"en": "Reset your password", "fr": "Réinitialisez votre mot de passe"},
     "forgot.subtitle": {
         "en": "Enter your account email and we'll send you a code to reset your password.",
@@ -113,8 +136,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "forgot.back_to_login": {"en": "Back to log in", "fr": "Retour à la connexion"},
 
     # --- reset_password.html ---
-    "reset.title": {"en": "Reset password — Balling Predictions",
-                     "fr": "Réinitialiser le mot de passe — Balling Predictions"},
+    "reset.title": {"en": "Reset password | Balling Predictions",
+                     "fr": "Réinitialiser le mot de passe | Balling Predictions"},
     "reset.heading": {"en": "Enter your reset code", "fr": "Saisissez votre code de réinitialisation"},
     "reset.subtitle_pre": {"en": "If an account exists for", "fr": "Si un compte existe pour"},
     "reset.subtitle_post": {"en": "we've emailed a 6-digit code.",
@@ -123,8 +146,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "reset.submit": {"en": "Reset password", "fr": "Réinitialiser le mot de passe"},
 
     # --- simulate ---
-    "simulate.title": {"en": "Simulate a Match — Balling Predictions",
-                        "fr": "Simuler un match — Balling Predictions"},
+    "simulate.title": {"en": "Simulate a Match | Balling Predictions",
+                        "fr": "Simuler un match | Balling Predictions"},
     "simulate.subscribe_heading": {"en": "Subscribe to start predicting",
                                     "fr": "Abonnez-vous pour commencer à pronostiquer"},
     "simulate.subscribe_subtitle": {"en": "You need an active subscription to run match simulations.",
@@ -138,6 +161,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "simulate.quota_warning": {"en": "{remaining} matchups left this cycle.",
                                 "fr": "Il vous reste {remaining} confrontations ce cycle."},
     "simulate.pick_matchup": {"en": "Pick a matchup", "fr": "Choisissez un match"},
+    "simulate.fixtures_heading": {"en": "Today's fixtures", "fr": "Matchs du jour"},
+    "simulate.fixtures_subtitle": {
+        "en": "Tap a match to simulate it instantly — no need to search for teams.",
+        "fr": "Touchez un match pour le simuler instantanément — pas besoin de chercher les équipes.",
+    },
+    "simulate.fixtures_empty": {
+        "en": "No fixtures loaded yet — check back soon.",
+        "fr": "Aucun match chargé pour l'instant — revenez bientôt.",
+    },
+    "simulate.or_pick_manually": {"en": "Or pick any matchup", "fr": "Ou choisissez un match"},
+    "simulate.day_today": {"en": "Today", "fr": "Aujourd'hui"},
+    "simulate.day_tomorrow": {"en": "Tomorrow", "fr": "Demain"},
     "simulate.league_label": {"en": "League", "fr": "Championnat"},
     "simulate.choose_league": {"en": "Choose a league…", "fr": "Choisissez un championnat…"},
     "simulate.league_hint": {
@@ -156,11 +191,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
                                "fr": "{used} / {limit} confrontations utilisées ce cycle."},
 
     # --- _result_card.html ---
-    "result.elo_line": {"en": "Elo {home_elo} vs {away_elo} · {n_sims} simulations",
-                         "fr": "Elo {home_elo} vs {away_elo} · {n_sims} simulations"},
+    "result.elo_line": {"en": "Rating {home_elo} vs {away_elo} · {n_sims} simulations",
+                         "fr": "Indice {home_elo} vs {away_elo} · {n_sims} simulations"},
     "result.win_suffix": {"en": "win", "fr": "victoire"},
     "result.draw": {"en": "Draw", "fr": "Nul"},
     "result.expected_goals": {"en": "Expected goals", "fr": "Buts attendus"},
+    "result.simulations": {"en": "simulations", "fr": "simulations"},
+    "result.panel_label": {"en": "Simulation result", "fr": "Résultat de la simulation"},
     "result.most_likely_score": {"en": "Most likely score", "fr": "Score le plus probable"},
     "result.saved_as": {"en": "Saved as", "fr": "Enregistré sous"},
     "result.best_picks": {"en": "Best picks", "fr": "Meilleurs pronostics"},
@@ -186,17 +223,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "result.under": {"en": "Under", "fr": "Moins de"},
 
     # --- payment.html ---
-    "payment.title": {"en": "Subscribe — Balling Predictions", "fr": "Abonnement — Balling Predictions"},
+    "payment.title": {"en": "Subscribe | Balling Predictions", "fr": "Abonnement | Balling Predictions"},
     "payment.heading": {"en": "Upgrade your plan", "fr": "Améliorez votre abonnement"},
     "payment.subtitle": {
         "en": "Every account already gets the Free plan (20 matchups/month) automatically — "
               "no card, no risk. Ready for more? Pick a plan, enter your Mobile Money number "
-              "below, and approve the prompt on your phone — your plan activates automatically, "
-              "no waiting on manual review.",
+              "below, and approve the prompt on your phone — your plan activates automatically.",
         "fr": "Chaque compte reçoit automatiquement le plan Gratuit (20 confrontations/mois) — "
               "sans carte, sans risque. Prêt pour plus ? Choisissez un plan, saisissez votre "
               "numéro Mobile Money ci-dessous et validez la demande sur votre téléphone — votre "
-              "abonnement s'active automatiquement, sans attendre de validation manuelle.",
+              "abonnement s'active automatiquement.",
     },
     "payment.selected": {"en": "Selected", "fr": "Sélectionné"},
     "payment.operator_label": {"en": "Mobile Money operator", "fr": "Opérateur Mobile Money"},
@@ -205,7 +241,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "payment.pay_button": {"en": "Pay with Mobile Money", "fr": "Payer avec Mobile Money"},
 
     # --- payment_submitted.html ---
-    "submitted.title": {"en": "Submitted — Balling Predictions", "fr": "Envoyé — Balling Predictions"},
+    "submitted.title": {"en": "Submitted | Balling Predictions", "fr": "Envoyé | Balling Predictions"},
     "submitted.heading": {"en": "Submitted for review", "fr": "Envoyé pour vérification"},
     "submitted.subtitle": {
         "en": "We'll verify your payment and activate your subscription within 24 hours. "
@@ -216,7 +252,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "submitted.view_account": {"en": "View account status", "fr": "Voir l'état du compte"},
 
     # --- account.html ---
-    "account.title": {"en": "Account — Balling Predictions", "fr": "Compte — Balling Predictions"},
+    "account.title": {"en": "Account | Balling Predictions", "fr": "Compte | Balling Predictions"},
     "account.heading": {"en": "Account", "fr": "Compte"},
     "account.logged_in_as": {"en": "Logged in as", "fr": "Connecté en tant que"},
     "account.superadmin": {"en": "Superadmin account — unlimited access, no subscription needed.",
@@ -234,7 +270,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "account.subscribe_now": {"en": "Subscribe now", "fr": "S'abonner maintenant"},
 
     # --- forbidden.html ---
-    "forbidden.title": {"en": "Not available — Balling Predictions", "fr": "Non disponible — Balling Predictions"},
+    "forbidden.title": {"en": "Not available | Balling Predictions", "fr": "Non disponible | Balling Predictions"},
     "forbidden.heading": {"en": "Not available", "fr": "Non disponible"},
     "forbidden.needs_subscription": {
         "en": "This needs an active subscription, or you don't have access to this page.",
@@ -245,7 +281,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "forbidden.back_to_simulate": {"en": "Back to Simulate", "fr": "Retour à Simuler"},
 
     # --- history_list.html / history_detail.html ---
-    "history.title": {"en": "History — Balling Predictions", "fr": "Historique — Balling Predictions"},
+    "history.title": {"en": "History | Balling Predictions", "fr": "Historique | Balling Predictions"},
     "history.heading": {"en": "Your prediction history", "fr": "Votre historique de pronostics"},
     "history.empty": {"en": "You haven't simulated any matches yet.",
                        "fr": "Vous n'avez encore simulé aucun match."},
@@ -253,15 +289,15 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "history.neutral_venue": {"en": "Neutral venue", "fr": "Terrain neutre"},
     "history.most_likely_score": {"en": "most likely score", "fr": "score le plus probable"},
     "history.details_unavailable": {"en": "Details unavailable", "fr": "Détails indisponibles"},
-    "history.newer": {"en": "← Newer", "fr": "← Plus récent"},
-    "history.older": {"en": "Older →", "fr": "Plus ancien →"},
-    "history.back_to_history": {"en": "← Back to history", "fr": "← Retour à l'historique"},
+    "history.newer": {"en": "Newer", "fr": "Plus récent"},
+    "history.older": {"en": "Older", "fr": "Plus ancien"},
+    "history.back_to_history": {"en": "Back to history", "fr": "Retour à l'historique"},
     "history.simulated_at": {"en": "Simulated {date}", "fr": "Simulé le {date}"},
-    "history.detail_title": {"en": "{home} vs {away} — History — Balling Predictions",
-                              "fr": "{home} vs {away} — Historique — Balling Predictions"},
+    "history.detail_title": {"en": "{home} vs {away} | History | Balling Predictions",
+                              "fr": "{home} vs {away} | Historique | Balling Predictions"},
 
     # --- feedback.html ---
-    "feedback.title": {"en": "Feedback — Balling Predictions", "fr": "Avis — Balling Predictions"},
+    "feedback.title": {"en": "Feedback | Balling Predictions", "fr": "Avis | Balling Predictions"},
     "feedback.heading": {"en": "Share your feedback", "fr": "Partagez votre avis"},
     "feedback.subtitle": {
         "en": "Still early days — tell us what's working, what's confusing, or what you'd want next.",
@@ -280,8 +316,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "feedback.send": {"en": "Send feedback", "fr": "Envoyer l'avis"},
 
     # --- payment_pending.html / _payment_status.html ---
-    "pending.title": {"en": "Payment pending — Balling Predictions",
-                       "fr": "Paiement en attente — Balling Predictions"},
+    "pending.title": {"en": "Payment pending | Balling Predictions",
+                       "fr": "Paiement en attente | Balling Predictions"},
     "pending.check_phone": {"en": "Check your phone", "fr": "Vérifiez votre téléphone"},
     "pending.prompt_sent": {
         "en": "We sent a {operator} payment prompt to {phone} for {amount} FCFA. "
@@ -305,18 +341,52 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     "footer.terms": {"en": "Terms of Service", "fr": "Conditions générales d'utilisation"},
     "footer.privacy": {"en": "Privacy Policy", "fr": "Politique de confidentialité"},
     "footer.rights": {"en": "All rights reserved.", "fr": "Tous droits réservés."},
+    "footer.accuracy": {"en": "Track record", "fr": "Historique de précision"},
+
+    # --- accuracy.html (public track record) ---
+    "accuracy.title": {"en": "Track Record | Balling Predictions", "fr": "Historique de précision | Balling Predictions"},
+    "accuracy.description": {
+        "en": "Every prediction we've made for a real fixture, graded against the actual result — wins and misses both, nothing hidden.",
+        "fr": "Chaque pronostic fait pour un vrai match, évalué par rapport au résultat réel — réussites et échecs, sans rien cacher.",
+    },
+    "accuracy.heading": {"en": "Track record", "fr": "Historique de précision"},
+    "accuracy.subtitle": {
+        "en": "Every prediction we've made for a real, scheduled fixture — graded automatically once the match finishes. Wins and misses both shown, nothing curated out.",
+        "fr": "Chaque pronostic fait pour un vrai match programmé — évalué automatiquement une fois la rencontre terminée. Réussites et échecs affichés, rien n'est trié.",
+    },
+    "accuracy.stat_outcome_label": {"en": "Result accuracy (1X2)", "fr": "Précision du résultat (1N2)"},
+    "accuracy.stat_score_label": {"en": "Exact score accuracy", "fr": "Précision du score exact"},
+    "accuracy.stat_graded": {"en": "graded predictions", "fr": "pronostics évalués"},
+    "accuracy.no_data": {"en": "Not enough graded predictions yet — check back soon.", "fr": "Pas encore assez de pronostics évalués — revenez bientôt."},
+    "accuracy.pending": {"en": "Pending", "fr": "En attente"},
+    "accuracy.correct": {"en": "Correct", "fr": "Correct"},
+    "accuracy.incorrect": {"en": "Incorrect", "fr": "Incorrect"},
+    "accuracy.predicted": {"en": "Predicted", "fr": "Prédit"},
+    "accuracy.actual": {"en": "Actual", "fr": "Résultat"},
+    "accuracy.exact_score": {"en": "Exact score", "fr": "Score exact"},
+    "landing.won": {"en": "Won", "fr": "Gagnés"},
+    "landing.lost": {"en": "Lost", "fr": "Perdus"},
+    "landing.this_season": {"en": "this season", "fr": "cette saison"},
+
+    # --- landing.html accuracy stats block ---
+    "landing.accuracy_heading": {"en": "Our track record", "fr": "Notre historique"},
+    "landing.accuracy_subtitle": {
+        "en": "Every graded prediction, wins and misses both.",
+        "fr": "Chaque pronostic évalué, réussites et échecs confondus.",
+    },
+    "landing.accuracy_view_log": {"en": "View the full log", "fr": "Voir le journal complet"},
 
     # --- privacy_policy.html ---
-    "privacy.title": {"en": "Privacy Policy — Balling Predictions",
-                       "fr": "Politique de confidentialité — Balling Predictions"},
+    "privacy.title": {"en": "Privacy Policy | Balling Predictions",
+                       "fr": "Politique de confidentialité | Balling Predictions"},
     "privacy.description": {
         "en": "How Balling Predictions collects, uses, and protects your personal data.",
         "fr": "Comment Balling Predictions collecte, utilise et protège vos données personnelles.",
     },
 
     # --- terms.html ---
-    "terms.title": {"en": "Terms of Service — Balling Predictions",
-                     "fr": "Conditions générales d'utilisation — Balling Predictions"},
+    "terms.title": {"en": "Terms of Service | Balling Predictions",
+                     "fr": "Conditions générales d'utilisation | Balling Predictions"},
     "terms.description": {
         "en": "The terms that govern your use of Balling Predictions.",
         "fr": "Les conditions qui régissent votre utilisation de Balling Predictions.",

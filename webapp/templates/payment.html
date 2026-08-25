@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% from "_components.html" import badge %}
+{% from "_icons.html" import icon_check_solid %}
 {% block title %}{{ t(request, 'payment.title') }}{% endblock %}
-{% block page_bg %}bg-page-payment{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-5xl">
-  <div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h1 class="mb-2 text-2xl font-semibold text-slate-900">{{ t(request, 'payment.heading') }}</h1>
-    <p class="text-sm text-slate-500">{{ t(request, 'payment.subtitle') }}</p>
+  <div class="mb-8 rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
+    <h1 class="mb-2 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'payment.heading') }}</h1>
+    <p class="text-sm text-paper-dim">{{ t(request, 'payment.subtitle') }}</p>
   </div>
 
   <form method="post" action="{{ url(request, '/payment') }}" class="space-y-8">
@@ -14,64 +15,64 @@
       <label class="group relative block cursor-pointer">
         <input type="radio" name="plan" value="{{ plan.key }}" data-price="{{ plan.price_fcfa }}" class="peer sr-only"
           onchange="syncPlanAmount()" {% if loop.first %}checked{% endif %} required />
-        <div class="flex h-full flex-col rounded-xl border-2 border-slate-200 bg-white p-6 shadow-sm transition peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500/30 hover:border-slate-300">
+        <div class="flex h-full flex-col rounded-xl border-2 border-line bg-ink-2 p-6 shadow-sm transition peer-checked:border-amber peer-checked:ring-2 peer-checked:ring-amber/30 hover:border-paper-dim">
           {% set highlight = plan_t(request, plan.key, 'highlight', plan.highlight) %}
           {% if highlight %}
-          <span class="mb-3 inline-block w-fit rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">{{ highlight }}</span>
+          <div class="mb-3">{{ badge(highlight, variant="accent") }}</div>
           {% else %}
           <span class="mb-3 h-[26px]"></span>
           {% endif %}
-          <h2 class="text-lg font-semibold text-slate-900">{{ plan_t(request, plan.key, 'name', plan.name) }}</h2>
+          <h2 class="font-display text-lg font-semibold uppercase tracking-wide text-paper">{{ plan_t(request, plan.key, 'name', plan.name) }}</h2>
           <p class="mt-2">
-            <span class="text-3xl font-bold text-slate-900">{{ "{:,}".format(plan.price_fcfa) }}</span>
-            <span class="text-sm text-slate-500"> FCFA</span>
+            <span class="font-mono text-3xl font-bold text-paper">{{ "{:,}".format(plan.price_fcfa) }}</span>
+            <span class="text-sm text-paper-dim"> FCFA</span>
           </p>
-          <ul class="mt-5 flex-1 space-y-2.5 text-sm text-slate-600">
+          <ul class="mt-5 flex-1 space-y-2.5 text-sm text-paper-dim">
             {% for feature in plan_t(request, plan.key, 'features', plan.features) %}
             <li class="flex gap-2">
-              <svg class="mt-0.5 h-4 w-4 flex-none text-emerald-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.4 7.4a1 1 0 01-1.4 0L3.3 9.5a1 1 0 111.4-1.4l3.9 3.9 6.7-6.7a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>
+              {{ icon_check_solid('mt-0.5 h-4 w-4 flex-none text-teal') }}
               <span>{{ feature }}</span>
             </li>
             {% endfor %}
           </ul>
-          <div class="mt-6 h-9 w-full rounded-lg border-2 border-slate-200 text-center text-sm font-medium leading-[34px] text-slate-500 peer-checked:hidden group-has-[:checked]:hidden"></div>
-          <div class="mt-6 hidden h-9 w-full rounded-lg bg-emerald-600 text-center text-sm font-medium leading-[34px] text-white peer-checked:block group-has-[:checked]:block">{{ t(request, 'payment.selected') }}</div>
+          <div class="mt-6 h-9 w-full rounded-lg border-2 border-line text-center text-sm font-medium leading-[34px] text-paper-dim peer-checked:hidden group-has-[:checked]:hidden"></div>
+          <div class="mt-6 hidden h-9 w-full rounded-lg bg-amber text-center text-sm font-medium leading-[34px] text-ink peer-checked:block group-has-[:checked]:block">{{ t(request, 'payment.selected') }}</div>
         </div>
       </label>
       {% endfor %}
     </div>
 
-    <div class="mx-auto max-w-lg space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="mx-auto max-w-lg space-y-4 rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'payment.operator_label') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'payment.operator_label') }}</label>
         <div class="grid grid-cols-2 gap-3">
-          <label class="flex cursor-pointer items-center justify-center rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-700">
+          <label class="flex cursor-pointer items-center justify-center rounded-lg border-2 border-line px-4 py-2.5 text-sm font-medium text-paper-dim has-[:checked]:border-amber has-[:checked]:bg-amber/10 has-[:checked]:text-amber">
             <input type="radio" name="operator" value="MTN_MOMO_CMR" class="sr-only" required checked />
             MTN Mobile Money
           </label>
-          <label class="flex cursor-pointer items-center justify-center rounded-lg border-2 border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-700">
+          <label class="flex cursor-pointer items-center justify-center rounded-lg border-2 border-line px-4 py-2.5 text-sm font-medium text-paper-dim has-[:checked]:border-amber has-[:checked]:bg-amber/10 has-[:checked]:text-amber">
             <input type="radio" name="operator" value="ORANGE_CMR" class="sr-only" required />
             Orange Money
           </label>
         </div>
       </div>
       <div>
-        <label class="mb-1 block text-sm text-slate-600">{{ t(request, 'payment.phone_label') }}</label>
+        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'payment.phone_label') }}</label>
         <input name="phone_number" type="tel" placeholder="6XX XXX XXX" required
-          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+          class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
       </div>
-      <div class="rounded-lg bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
-        {{ t(request, 'payment.charge_notice_pre') }} <span id="amount-preview" class="font-semibold text-slate-900"></span> FCFA.
+      <div class="rounded-lg bg-ink-3 px-3 py-2.5 text-sm text-paper-dim">
+        {{ t(request, 'payment.charge_notice_pre') }} <span id="amount-preview" class="font-semibold text-paper"></span> FCFA.
       </div>
       <button type="submit"
-        class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white hover:bg-emerald-500">
+        class="w-full rounded-lg bg-amber px-4 py-2.5 font-mono font-semibold text-ink hover:brightness-110">
         {{ t(request, 'payment.pay_button') }}
       </button>
-      <p class="text-center text-xs text-slate-400">
+      <p class="text-center text-xs text-paper-dim">
         {{ t(request, 'consent.payment_pre') }}
-        <a href="{{ url(request, '/terms') }}" class="underline hover:text-slate-600">{{ t(request, 'footer.terms') }}</a>
+        <a href="{{ url(request, '/terms') }}" class="underline hover:text-paper">{{ t(request, 'footer.terms') }}</a>
         {{ t(request, 'consent.and') }}
-        <a href="{{ url(request, '/privacy') }}" class="underline hover:text-slate-600">{{ t(request, 'footer.privacy') }}</a>.
+        <a href="{{ url(request, '/privacy') }}" class="underline hover:text-paper">{{ t(request, 'footer.privacy') }}</a>.
       </p>
     </div>
   </form>
