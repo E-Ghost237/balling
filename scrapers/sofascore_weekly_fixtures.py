@@ -118,7 +118,18 @@ def main() -> None:
         "SofaScore-tracked league"
     )
     parser.add_argument("--db", default="data/football.db")
+    all_keys = list(SOFASCORE_LEAGUES.keys()) + list(WEEKLY_FIXTURES_LEAGUES.keys())
+    parser.add_argument(
+        "--leagues",
+        nargs="+",
+        default=all_keys,
+        help=f"Subset of leagues to refresh (default: all). Options: {all_keys}",
+    )
     args = parser.parse_args()
+
+    unknown = [k for k in args.leagues if k not in all_keys]
+    if unknown:
+        parser.error(f"Unknown league(s): {unknown}")
 
     conn = sqlite3.connect(args.db, timeout=30)
     conn.execute("PRAGMA foreign_keys = ON")
@@ -136,8 +147,10 @@ def main() -> None:
     # season, since that's the only thing this script needs from them.
     all_leagues = [
         (key, cfg, cfg["season_ids"][-1]) for key, cfg in SOFASCORE_LEAGUES.items()
+        if key in args.leagues
     ] + [
         (key, cfg, cfg["season_id"]) for key, cfg in WEEKLY_FIXTURES_LEAGUES.items()
+        if key in args.leagues
     ]
 
     try:
