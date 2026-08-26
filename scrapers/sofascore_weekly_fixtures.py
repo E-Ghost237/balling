@@ -1,28 +1,44 @@
 """
-Lightweight refresh of *upcoming* fixtures for every SofaScore-tracked
-league (see leagues_config.SOFASCORE_LEAGUES) — powers the Monday-Sunday
-fixture picker on /simulate (see _load_upcoming_fixtures in
-webapp/routes/customer.py).
+Lightweight refresh of *upcoming and recently-finished* fixtures for
+every SofaScore-tracked league (see leagues_config.SOFASCORE_LEAGUES /
+WEEKLY_FIXTURES_LEAGUES). Powers two features from the one pass over
+each tournament's events:
+
+  1. The Monday-Sunday fixture picker on /simulate (see
+     _load_upcoming_fixtures in webapp/routes/customer.py) — from the
+     upcoming (events/next) side.
+  2. Grading the /accuracy track record — a prediction stays "Pending"
+     until some row in `matches` shows status='finished' for that team
+     pair/date (see webapp/accuracy.py's _actual_result, which matches
+     by team name + date window, not by source — a finished row landed
+     here satisfies it exactly the same as one from
+     api_football_daily_fixtures.py). This is now the primary result
+     source, specifically because it isn't capped to "yesterday" the
+     way that script's free-tier API-Football lookback is, and covers
+     whatever's in this file's league config rather than only whatever
+     already has a matching `leagues` row by name/country.
 
 Deliberately NOT a re-run of sofascore_scraper.py's full backfill (which
 walks a league's entire round structure — many requests per league).
 Instead this hits SofaScore's GET
-.../unique-tournament/{id}/season/{id}/events/next/{page} endpoint —
-confirmed directly against the live API: one page returns the next 30
-upcoming events for a tournament/season, more than enough to cover a
-week for any single competition. One request per *distinct*
-(tournament_id, season_id) pair per run — several configured leagues
-share a tournament_id (e.g. UEFA Europa League / UEFA Europa League
-Qualification both key off tournament_id 679), so the raw response is
-fetched once and reused for each config that references it, via
-event_passes_filter, rather than fetched twice.
+.../unique-tournament/{id}/season/{id}/events/next/{page} AND
+.../events/last/{page} endpoints — confirmed directly against the live
+API: one page returns 30 events, more than enough to cover a week
+either direction for any single competition. Two requests per
+*distinct* (tournament_id, season_id) pair per run — several configured
+leagues share a tournament_id (e.g. UEFA Europa League / UEFA Europa
+League Qualification both key off tournament_id 679), so each raw
+response is fetched once and reused for every config that references
+it, via event_passes_filter, rather than re-fetched per league.
 
-Per the project's usual rule this would run locally only, but per
-explicit instruction this is the one SofaScore job allowed on the
-production server — same carve-out already made for
-api_football_daily_fixtures.py — specifically because it's this cheap
-(one request per unique tournament/season, run once a day), not a
-license to run it more often or widen it without re-checking that math.
+Per the project's standing rule, this runs locally, never on the
+production server — see sofascore_scraper.py's own docstring for why.
+An earlier version of this docstring claimed a carve-out to run on the
+server (matching api_football_daily_fixtures.py's daily_fixtures_sync.sh
+cron); that was reverted 2026-08-25 after confirming SofaScore 403s the
+EC2 IP immediately, on the very first request, independent of how
+infrequently this runs — not a request-volume problem, so there's no
+safe frequency to fall back to on that box.
 
 Usage:
     python sofascore_weekly_fixtures.py --db data/football.db
@@ -42,7 +58,7 @@ from sofascore_scraper import (
     get_or_create_team,
 )
 
-PAGES_PER_TOURNAMENT = 1  # 30 events/page — enough for a week, per league
+PAGES_PER_TOURNAMENT = 1  # 30 events/page — enough for a week, per league, per direction
 
 
 def _current_season_row(conn: sqlite3.Connection, league_id: int) -> int | None:
@@ -58,7 +74,9 @@ def _current_season_row(conn: sqlite3.Connection, league_id: int) -> int | None:
     return row[0] if row else None
 
 
-def insert_upcoming_event(conn, league_id: int, season_row_id: int, event: dict) -> None:
+def insert_upcoming_event(conn, league_id: int, season_row_id: int, event: dict) -> bool:
+    """Returns whether the event was recorded as finished — callers use
+    this just for the finished/upcoming split in their own totals."""
     home = event["homeTeam"]
     away = event["awayTeam"]
     home_id = get_or_create_team(conn, home["id"], home["name"], home.get("country", {}).get("name") or "")
@@ -91,11 +109,13 @@ def insert_upcoming_event(conn, league_id: int, season_row_id: int, event: dict)
          home_goals, away_goals, status, SOURCE, source_match_id),
     )
     conn.commit()
+    return is_finished
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Refresh upcoming fixtures for every SofaScore-tracked league"
+        description="Refresh upcoming fixtures and recent results for every "
+        "SofaScore-tracked league"
     )
     parser.add_argument("--db", default="data/football.db")
     args = parser.parse_args()
@@ -106,9 +126,9 @@ def main() -> None:
 
     # Cache the raw fetch per (tournament_id, season_id) so leagues that
     # share one (e.g. the Europa/Conference League main-comp + qualifier
-    # pairs) only cost one request, not two.
+    # pairs) only cost two requests (next + last), not four.
     raw_cache: dict[tuple[int, int], list[dict]] = {}
-    totals = {"inserted": 0, "skipped_unknown_team": 0}
+    totals = {"inserted": 0, "skipped_unknown_team": 0, "finished": 0, "upcoming": 0}
 
     # SOFASCORE_LEAGUES entries keep a multi-season history array (for
     # sofascore_scraper.py's full backfill) — only the latest is relevant
@@ -142,33 +162,41 @@ def main() -> None:
 
             if cache_key not in raw_cache:
                 events: list[dict] = []
-                for page in range(PAGES_PER_TOURNAMENT):
-                    data = _get(f"{BASE_URL}/unique-tournament/{tournament_id}/season/{season_id}/events/next/{page}")
-                    if not data:
-                        break
-                    events.extend(data.get("events", []))
-                    if not data.get("hasNextPage"):
-                        break
+                for direction in ("next", "last"):
+                    for page in range(PAGES_PER_TOURNAMENT):
+                        data = _get(f"{BASE_URL}/unique-tournament/{tournament_id}/season/{season_id}/events/{direction}/{page}")
+                        if not data:
+                            break
+                        events.extend(data.get("events", []))
+                        if not data.get("hasNextPage"):
+                            break
                 raw_cache[cache_key] = events
 
             events = [e for e in raw_cache[cache_key] if event_passes_filter(e, cfg)]
 
-            inserted = 0
+            inserted = finished = 0
             for event in events:
-                insert_upcoming_event(conn, league_id, season_row_id, event)
+                is_finished = insert_upcoming_event(conn, league_id, season_row_id, event)
                 inserted += 1
+                finished += is_finished
             totals["inserted"] += inserted
-            print(f"  [{cfg['name']}] {inserted} upcoming fixture(s) loaded/updated")
+            totals["finished"] += finished
+            totals["upcoming"] += inserted - finished
+            print(f"  [{cfg['name']}] {inserted} fixture(s) loaded/updated "
+                  f"({finished} finished, {inserted - finished} upcoming)")
     except BlockedError as exc:
         conn.close()
         print(f"\nABORTED — {exc}")
-        print(f"{totals['inserted']} fixture(s) loaded/updated before aborting.")
+        print(f"{totals['inserted']} fixture(s) loaded/updated before aborting "
+              f"({totals['finished']} finished, {totals['upcoming']} upcoming).")
         raise SystemExit(2) from None
 
     conn.close()
-    print(f"\nDone. {totals['inserted']} upcoming fixture(s) loaded/updated "
+    print(f"\nDone. {totals['inserted']} fixture(s) loaded/updated "
+          f"({totals['finished']} finished, {totals['upcoming']} upcoming) "
           f"across {len(all_leagues)} configured league(s) "
-          f"({len(raw_cache)} distinct tournament/season request(s)).")
+          f"({len(raw_cache)} distinct tournament/season pair(s), "
+          f"{len(raw_cache) * 2} request(s)).")
 
 
 if __name__ == "__main__":

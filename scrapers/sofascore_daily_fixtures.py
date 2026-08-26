@@ -19,16 +19,24 @@ and real downside (a name-spelling mismatch would silently create a
 duplicate "shadow" team with zero rating history). Skipped fixtures are
 counted and logged, not silently dropped.
 
-IMPORTANT — field-path caveat: this was written before the current
-SofaScore IP block cleared, so the exact response shape for
-/sport/football/scheduled-events/{date} hasn't been verified against a
-real response yet (only inferred from the "event" object shape already
-proven correct elsewhere in sofascore_scraper.py, which SofaScore's API
-appears to reuse consistently across listing endpoints). Every field
-access below is defensive (.get() chains, per-event try/except) and
-insert_scheduled_event() prints the raw keys of the first event it sees
-so a first real run immediately confirms or corrects these assumptions
-without needing a code change first.
+BROKEN — confirmed 2026-08-25: /sport/football/scheduled-events/{date}
+is not a real SofaScore endpoint (clean 404, not a block — checked the
+raw response body directly). Sniffed the actual network calls
+www.sofascore.com's own football page makes for a given date and it's a
+two-step fetch instead: GET
+/sport/football/scheduled-tournaments/{date}/page/{n} to find which
+tournaments have anything on that date, then GET
+/unique-tournament/{id}/scheduled-events/{date} per tournament — no
+single flat "everything today" call exists. That's a much heavier,
+unbounded-per-day request shape (one call per active tournament,
+globally) than this project wants to lean on, especially against a
+source that's already shown it'll circuit-break/block on request
+volume — so results-grading was built into sofascore_weekly_fixtures.py
+instead (adds an events/last/{page} pass alongside its existing
+events/next/{page} one, scoped to the already-curated league config,
+same proven request shape). Left this file's original code below
+un-run rather than half-migrated, in case the two-step approach above
+is ever worth revisiting for broader coverage.
 
 Per the project's standing rule, this runs locally, never on the
 production server — see sofascore_scraper.py's own docstring for why.
