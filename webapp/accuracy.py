@@ -59,9 +59,19 @@ def _actual_result(db_path: str, home: str, away: str, fixture_date: datetime) -
     return row[0], row[1]
 
 
-def _predicted_outcome(row: dict) -> str:
-    probs = {"H": row["prob_home_win"], "D": row["prob_draw"], "A": row["prob_away_win"]}
-    return max(probs, key=probs.get)
+def _predicted_outcome(predicted_score: str) -> str:
+    """Derives H/D/A from the displayed predicted score itself (e.g.
+    "1-1" -> D, "6+-0" -> H) rather than from the separate
+    prob_home_win/prob_draw/prob_away_win aggregates. Those aggregates
+    can legitimately point to a different outcome than the single
+    most-likely scoreline — e.g. several distinct home-win scorelines
+    can each individually be less likely than the one draw scoreline,
+    while their probabilities still sum to more than the draw's. Grading
+    against a number other than the one shown as "Predicted" reads as a
+    bug to anyone looking at the page even though it isn't one,
+    statistically — so /accuracy grades exactly what it displays."""
+    home_str, away_str = predicted_score.split("-")
+    return _actual_outcome(int(home_str.rstrip("+")), int(away_str.rstrip("+")))
 
 
 def _actual_outcome(home_goals: int, away_goals: int) -> str:
@@ -119,7 +129,7 @@ async def graded_predictions(
             "home_team": row["home_team"],
             "away_team": row["away_team"],
             "predicted_score": row["most_likely_score"],
-            "predicted_outcome": _predicted_outcome(row),
+            "predicted_outcome": _predicted_outcome(row["most_likely_score"]),
             "settled": actual is not None,
         }
         if actual is not None:
