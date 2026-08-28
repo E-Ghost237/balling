@@ -3,6 +3,9 @@
    each league already alphabetical with its own fixtures already
    kickoff-ordered — see _load_upcoming_fixtures. current_weekday names
    which key should open by default (today, in FIXTURES_DISPLAY_TZ).
+   week_day_numbers = {"monday": 24, ..., "sunday": 30} — the day-of-
+   month for each tab's label (e.g. "Fri 28"), same Monday-anchored week
+   as fixture_days — see _current_week_day_numbers.
    Every fixture is its own tiny <form> posting straight to
    POST /simulate with the exact same league_id/home/away fields the
    manual picker sends — same endpoint, same quota/prediction logic, no
@@ -44,13 +47,13 @@
   <input type="radio" name="fixture-day" id="fixture-day-saturday" class="peer/saturday sr-only" {{ 'checked' if current_weekday == 'saturday' }} />
   <input type="radio" name="fixture-day" id="fixture-day-sunday" class="peer/sunday sr-only" {{ 'checked' if current_weekday == 'sunday' }} />
 
-  <label for="fixture-day-monday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/monday:border-amber peer-checked/monday:text-amber">{{ t(request, 'simulate.day_monday') }}</label>
-  <label for="fixture-day-tuesday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/tuesday:border-amber peer-checked/tuesday:text-amber">{{ t(request, 'simulate.day_tuesday') }}</label>
-  <label for="fixture-day-wednesday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/wednesday:border-amber peer-checked/wednesday:text-amber">{{ t(request, 'simulate.day_wednesday') }}</label>
-  <label for="fixture-day-thursday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/thursday:border-amber peer-checked/thursday:text-amber">{{ t(request, 'simulate.day_thursday') }}</label>
-  <label for="fixture-day-friday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/friday:border-amber peer-checked/friday:text-amber">{{ t(request, 'simulate.day_friday') }}</label>
-  <label for="fixture-day-saturday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/saturday:border-amber peer-checked/saturday:text-amber">{{ t(request, 'simulate.day_saturday') }}</label>
-  <label for="fixture-day-sunday" class="mb-4 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/sunday:border-amber peer-checked/sunday:text-amber">{{ t(request, 'simulate.day_sunday') }}</label>
+  <label for="fixture-day-monday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/monday:border-amber peer-checked/monday:text-amber">{{ t(request, 'simulate.day_monday') }} {{ week_day_numbers.monday }}</label>
+  <label for="fixture-day-tuesday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/tuesday:border-amber peer-checked/tuesday:text-amber">{{ t(request, 'simulate.day_tuesday') }} {{ week_day_numbers.tuesday }}</label>
+  <label for="fixture-day-wednesday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/wednesday:border-amber peer-checked/wednesday:text-amber">{{ t(request, 'simulate.day_wednesday') }} {{ week_day_numbers.wednesday }}</label>
+  <label for="fixture-day-thursday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/thursday:border-amber peer-checked/thursday:text-amber">{{ t(request, 'simulate.day_thursday') }} {{ week_day_numbers.thursday }}</label>
+  <label for="fixture-day-friday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/friday:border-amber peer-checked/friday:text-amber">{{ t(request, 'simulate.day_friday') }} {{ week_day_numbers.friday }}</label>
+  <label for="fixture-day-saturday" class="mb-4 mr-1.5 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/saturday:border-amber peer-checked/saturday:text-amber">{{ t(request, 'simulate.day_saturday') }} {{ week_day_numbers.saturday }}</label>
+  <label for="fixture-day-sunday" class="mb-4 inline-block cursor-pointer rounded-md border border-line px-2.5 py-1.5 font-mono text-xs text-paper-dim peer-checked/sunday:border-amber peer-checked/sunday:text-amber">{{ t(request, 'simulate.day_sunday') }} {{ week_day_numbers.sunday }}</label>
 
   {% macro fixture_leagues(leagues) %}
     {% if leagues %}

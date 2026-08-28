@@ -432,6 +432,16 @@ FIXTURES_DISPLAY_TZ = timezone(timedelta(hours=1))  # WAT / Cameroon, UTC+1
 WEEKDAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 
+def _current_week_day_numbers() -> dict[str, int]:
+    """Day-of-month for each tab label (e.g. "Fri 28") — same Monday-
+    anchored week as _load_upcoming_fixtures, computed independently so
+    the tabs still show real dates even on the `active=False` path
+    where fixtures aren't loaded at all."""
+    today = datetime.now(FIXTURES_DISPLAY_TZ).date()
+    monday = today - timedelta(days=today.weekday())
+    return {day: (monday + timedelta(days=i)).day for i, day in enumerate(WEEKDAY_KEYS)}
+
+
 def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
     """Scheduled fixtures for the current Monday-Sunday week, split into
     one tab per day and grouped by league within each (alphabetical —
@@ -596,6 +606,7 @@ async def simulate_page(
             "leagues": leagues,
             "fixture_days": fixture_days,
             "current_weekday": WEEKDAY_KEYS[datetime.now(FIXTURES_DISPLAY_TZ).weekday()],
+            "week_day_numbers": _current_week_day_numbers(),
             "teams": [],
             "quota_used": quota_used,
             "quota_limit": quota_limit,
@@ -647,6 +658,7 @@ async def simulate_submit(
             "teams": teams,
             "fixture_days": fixture_days,
             "current_weekday": WEEKDAY_KEYS[datetime.now(FIXTURES_DISPLAY_TZ).weekday()],
+            "week_day_numbers": _current_week_day_numbers(),
             "selected_league_id": league_id,
             "selected_home": home,
             "selected_away": away,
