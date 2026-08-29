@@ -48,6 +48,7 @@ import argparse
 import sqlite3
 from datetime import UTC, datetime
 
+from dedupe_teams import merge_duplicate_teams
 from leagues_config import SOFASCORE_LEAGUES, WEEKLY_FIXTURES_LEAGUES
 from sofascore_scraper import (
     BASE_URL,
@@ -198,11 +199,32 @@ def main() -> None:
             print(f"  [{cfg['name']}] {inserted} fixture(s) loaded/updated "
                   f"({finished} finished, {inserted - finished} upcoming)")
     except BlockedError as exc:
+        # Dedupe even on an aborted run — whatever fixtures did land
+        # before the block hit can still have created a duplicate, and
+        # there's no reason to leave it sitting there until the next
+        # successful run happens to trigger this same cleanup again.
+        merged = merge_duplicate_teams(conn)
         conn.close()
         print(f"\nABORTED — {exc}")
         print(f"{totals['inserted']} fixture(s) loaded/updated before aborting "
               f"({totals['finished']} finished, {totals['upcoming']} upcoming).")
+        if merged:
+            print(f"({len(merged)} duplicate team(s) merged before aborting — see dedupe_teams.py)")
         raise SystemExit(2) from None
+
+    # Every fetch above resolves teams by exact name+country match
+    # (get_or_create_team) — a SofaScore name that doesn't exactly match
+    # what's already in `teams` creates a fresh, historyless duplicate
+    # instead of reusing the real team. Cleaning that up here, right
+    # after the fetch that could have created one, means a fixture never
+    # reaches the week-picker (or a click) still pointing at an unrated
+    # shadow team — see dedupe_teams.py's own docstring for how this was
+    # found (Bayern Munich among 40 duplicates from one ordinary run).
+    merged = merge_duplicate_teams(conn)
+    if merged:
+        print(f"\n{len(merged)} duplicate team(s) merged (see dedupe_teams.py):")
+        for new_id, orig_id, new_name, orig_name in merged:
+            print(f"  {new_id} ({new_name!r}) -> {orig_id} ({orig_name!r})")
 
     conn.close()
     print(f"\nDone. {totals['inserted']} fixture(s) loaded/updated "

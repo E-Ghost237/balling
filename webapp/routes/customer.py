@@ -25,7 +25,7 @@ from webapp.auth import (
 from webapp.config import get_settings
 from webapp.deps import get_db, get_optional_user, require_login
 from webapp.email import send_email
-from webapp.i18n import redirect, t_locale, url_for_locale
+from webapp.i18n import redirect, t, t_locale, url_for_locale
 from webapp.models import PaymentRequest, Subscription, User
 from webapp.otp import (
     PURPOSE_EMAIL_VERIFY,
@@ -704,11 +704,22 @@ async def simulate_submit(
         )
     except ValueError as exc:
         conn.close()
+        # Raised for a team with no rating yet (e.g. just promoted into a
+        # tracked league, no finished matches to compute one from), an
+        # unresolved team name, or missing model metadata — none of that
+        # ("No ratings found for team id 1213 — run rating_engine.py
+        # first") belongs on a page real users see. Logged here instead,
+        # shown to the user as a plain "try again later"; see also
+        # _load_upcoming_fixtures' own rated-team filter, which is meant
+        # to keep an unrated fixture from ever reaching this path via the
+        # week-picker in the first place — this except is the backstop
+        # for the manual "pick any matchup" picker, which isn't filtered.
+        print(f"simulate_submit: predict_match failed for {home!r} vs {away!r}: {exc}")
         return _render_simulate(
             request,
             base_context(
                 quota_used=quota_state.distinct_used if quota_state else 0,
-                form_error=str(exc),
+                form_error=t(request, "simulate.no_data_error"),
             ),
         )
     conn.close()

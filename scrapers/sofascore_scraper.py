@@ -42,6 +42,7 @@ from datetime import UTC, datetime
 
 import cloudscraper
 
+from dedupe_teams import merge_duplicate_teams
 from leagues_config import SOFASCORE_LEAGUES
 
 BASE_URL = "https://api.sofascore.com/api/v1"
@@ -415,10 +416,29 @@ def main() -> None:
             print(f"\n=== {cfg['name']} ({cfg['country']}) ===")
             grand_total += load_league(conn, key, cfg)
     except BlockedError as exc:
+        # Dedupe even on an aborted run — see the non-aborted path below
+        # for why this matters (get_or_create_team can create a
+        # duplicate any time a name doesn't exactly match).
+        merged = merge_duplicate_teams(conn)
         conn.close()
         print(f"\nABORTED — {exc}")
         print(f"{grand_total} finished match(es) loaded/updated before aborting.")
+        if merged:
+            print(f"({len(merged)} duplicate team(s) merged before aborting — see dedupe_teams.py)")
         raise SystemExit(2) from None
+
+    # get_or_create_team above resolves by exact name+country match — a
+    # name that doesn't exactly match what's already in `teams` creates a
+    # fresh, historyless duplicate instead of reusing the real team (see
+    # dedupe_teams.py's own docstring: confirmed live, 40 duplicates from
+    # one ordinary fixtures run, Bayern Munich among them). Cleaning that
+    # up here means a backfilled team never sits there unrated because
+    # its SofaScore name happened to differ from its existing row.
+    merged = merge_duplicate_teams(conn)
+    if merged:
+        print(f"\n{len(merged)} duplicate team(s) merged (see dedupe_teams.py):")
+        for new_id, orig_id, new_name, orig_name in merged:
+            print(f"  {new_id} ({new_name!r}) -> {orig_id} ({orig_name!r})")
 
     conn.close()
     print(f"\nDone. {grand_total} total finished matches loaded/updated across "

@@ -170,6 +170,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "No fixtures loaded yet — check back soon.",
         "fr": "Aucun match chargé pour l'instant — revenez bientôt.",
     },
+    "simulate.no_data_error": {
+        "en": "We don't have enough match history for one of these teams yet — "
+        "try again once they've played a few games this season.",
+        "fr": "Nous n'avons pas encore assez d'historique pour l'une de ces équipes — "
+        "réessayez une fois qu'elles auront joué quelques matchs cette saison.",
+    },
     "simulate.or_pick_manually": {"en": "Or pick any matchup", "fr": "Ou choisissez un match"},
     "simulate.day_monday": {"en": "Mon", "fr": "Lun"},
     "simulate.day_tuesday": {"en": "Tue", "fr": "Mar"},
