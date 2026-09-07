@@ -486,6 +486,27 @@ SOFASCORE_LEAGUES = {
 # futsal, basketball, handball, and volleyball respectively. Verified
 # 2026-08-25.
 WEEKLY_FIXTURES_LEAGUES = {
+    # Deliberately absent from SOFASCORE_LEAGUES (see that dict's own
+    # comment on UEFA_Champions_League_Qualification) — the main comp's
+    # full history already exists from football-data.org, and an early
+    # attempt at fetching it fresh from SofaScore produced duplicate
+    # teams/matches from name mismatches ("AS Monaco FC" vs "AS Monaco").
+    # That's no longer the blocker it was: dedupe_teams.py now runs
+    # automatically after every fetch and merges exactly that kind of
+    # mismatch, so this is safe to add here for what this dict is for —
+    # upcoming fixtures only, not a re-backfill. Confirmed live
+    # 2026-09-07: football-data.org's own CL data stops dead at last
+    # season's final (2026-05-30) — nothing was keeping the *current*
+    # season's fixtures flowing in at all, which is why they were
+    # missing from the week-picker. Same tournament_id as the
+    # Qualification entry above (7) — same season_id too, SofaScore
+    # nests both under one tournament/season, split by
+    # exclude_name_contains the same way Europa/Conference League are.
+    "UEFA_Champions_League": {
+        "name": "UEFA Champions League", "country": None, "kind": "club",
+        "tournament_id": 7, "season_id": 96518,
+        "exclude_name_contains": "Qualification",
+    },
     "Premier_League": {
         "name": "Premier League", "country": "England", "kind": "club",
         "tournament_id": 17, "season_id": 96668,
