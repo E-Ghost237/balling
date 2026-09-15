@@ -1,12 +1,18 @@
 #!/bin/bash
-# Server-side cron target (crontab: `15 4 * * * /opt/balling/daily_fixtures_sync.sh`).
-# Runs the API-Football fetch inside the already-running `api` container,
+# REMOVED FROM THE SERVER CRONTAB 2026-09-15, per explicit instruction:
+# SofaScore (via sofascore_weekly_fixtures.py, run locally, see
+# balling-local-data-fetch-workflow) is now the sole source for fixtures
+# and results — api_football_daily_fixtures.py's ongoing ingestion was
+# creating a second, redundant/conflicting source. This file is left in
+# the repo, unscheduled, as a manual fallback only (e.g. if SofaScore
+# were ever unreachable for an extended stretch) — do not re-add its
+# cron entry without checking that's still wanted.
+#
+# Formerly: server-side cron target
+# (`15 4 * * * /opt/balling/daily_fixtures_sync.sh`). Runs the
+# API-Football fetch inside the already-running `api` container,
 # straight against the live, bind-mounted data/football.db — no separate
 # push step needed since this *is* the production file.
-#
-# Deliberately the one piece of fetch work that runs on the server rather
-# than the user's own machine (explicit instruction) — a handful of rate
-# limited API calls, not scraping traffic, so it's safe here.
 #
 # Lives at the repo root, tracked in git, specifically so deploy.sh's
 # rsync keeps it present on every deploy — it used to be a one-off file
