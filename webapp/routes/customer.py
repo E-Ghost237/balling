@@ -454,26 +454,39 @@ def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
     same endpoint and quota/prediction path the manual team picker
     already uses, just pre-filled instead of typed.
 
-    source='sofascore' only, deliberately — API-Football's free tier
-    caps at a 3-day rolling window (yesterday/today/tomorrow) so it can
-    never fill a full week; SofaScore's per-league fetch has no such
-    limit (see sofascore_weekly_fixtures.py). Mixing both sources in one
-    week view would mean API-Football leagues silently vanish after
-    tomorrow, which reads as a bug rather than the real limitation it
-    is."""
+    source in ('sofascore', 'international_results') — deliberately not
+    API-Football, whose free tier caps at a 3-day rolling window
+    (yesterday/today/tomorrow) so it can never fill a full week
+    (see sofascore_weekly_fixtures.py). international_results
+    (international_results_loader.py — national-team competitions:
+    AFCON, World Cup, UEFA Nations League, etc.) is included specifically
+    so international-break fixtures (no club football that week) don't
+    leave the picker empty — but unlike sofascore, it has no real
+    kickoff *time*, only a match_date (the source CSV doesn't carry
+    one). Those rows get a synthetic midday-UTC timestamp purely so they
+    sort/bucket into the right day and carry a fixture_date a prediction
+    can be graded against later (see accuracy.py's ±1-day match
+    window, which tolerates this fine) — time_label is left blank for
+    them rather than showing a fake kick-off time.
+
+    Mixing in a source with an even shorter window than API-Football
+    (API-Football's own gap is why it isn't here) would mean fixtures
+    silently vanish after a day or two, which reads as a bug rather than
+    the real limitation it is — international_results doesn't have that
+    problem, so it's safe to include."""
     conn = sqlite3.connect(db_path)
     try:
         rows = conn.execute(
             """
-            SELECT l.id, l.name, l.country, m.kickoff_utc,
+            SELECT l.id, l.name, l.country, m.kickoff_utc, m.match_date,
                    ht.id, ht.name, at.id, at.name
             FROM matches m
             JOIN leagues l ON l.id = m.league_id
             JOIN teams ht ON ht.id = m.home_team_id
             JOIN teams at ON at.id = m.away_team_id
-            WHERE m.status = 'scheduled' AND m.kickoff_utc IS NOT NULL
-                  AND m.source = 'sofascore'
-            ORDER BY l.name, m.kickoff_utc
+            WHERE m.status = 'scheduled'
+                  AND m.source IN ('sofascore', 'international_results')
+            ORDER BY l.name, COALESCE(m.kickoff_utc, m.match_date)
             """
         ).fetchall()
     finally:
@@ -485,10 +498,26 @@ def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
     date_to_key = dict(zip(week_dates, WEEKDAY_KEYS))
 
     day_groups: dict[str, dict[int, dict]] = {day: {} for day in WEEKDAY_KEYS}
-    for (league_id, league_name, league_country, kickoff_utc,
+    for (league_id, league_name, league_country, kickoff_utc, match_date,
          home_id, home_name, away_id, away_name) in rows:
-        kickoff_dt = datetime.fromtimestamp(kickoff_utc, tz=FIXTURES_DISPLAY_TZ)
-        day_key = date_to_key.get(kickoff_dt.date())
+        if kickoff_utc is not None:
+            kickoff_dt = datetime.fromtimestamp(kickoff_utc, tz=FIXTURES_DISPLAY_TZ)
+            match_day = kickoff_dt.date()
+            time_label = kickoff_dt.strftime("%H:%M")
+            effective_kickoff = kickoff_utc
+        else:
+            # international_results row: no real kick-off time, just a
+            # date. Midday UTC keeps it on the right calendar day in
+            # every plausible FIXTURES_DISPLAY_TZ and gives a real,
+            # gradeable fixture_date without pretending to know the
+            # actual kick-off time.
+            match_day = datetime.strptime(match_date, "%Y-%m-%d").date()
+            time_label = "TBD"
+            effective_kickoff = int(
+                datetime(match_day.year, match_day.month, match_day.day, 12, tzinfo=UTC).timestamp()
+            )
+
+        day_key = date_to_key.get(match_day)
         if day_key is None:
             continue
 
@@ -500,8 +529,8 @@ def _load_upcoming_fixtures(db_path: str) -> dict[str, list[dict]]:
         })
         group["fixtures"].append({
             "league_id": league_id,
-            "kickoff_utc": kickoff_utc,
-            "time_label": kickoff_dt.strftime("%H:%M"),
+            "kickoff_utc": effective_kickoff,
+            "time_label": time_label,
             "home": {"id": home_id, "name": home_name},
             "away": {"id": away_id, "name": away_name},
         })

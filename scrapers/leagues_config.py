@@ -507,6 +507,40 @@ WEEKLY_FIXTURES_LEAGUES = {
         "tournament_id": 7, "season_id": 96518,
         "exclude_name_contains": "Qualification",
     },
+    # National-team competitions — added 2026-09-23 so an international
+    # break (no club football that week) doesn't leave the week-picker
+    # empty. Historical results for these already come from the CSV in
+    # international_results_loader.py (see leagues_config.
+    # INTERNATIONAL_COMPETITIONS), but that source has no forward-looking
+    # data at all — confirmed live, its most recent row was months old
+    # with zero scheduled fixtures. SofaScore has real upcoming fixtures
+    # with real kick-off times, so it's the fixtures source here, same as
+    # UEFA_Champions_League above; both resolve to the SAME `leagues` row
+    # the CSV loader already created (name+country match), so history and
+    # upcoming fixtures end up on one competition, not two.
+    #
+    # Tournament ids verified the project's usual way — fetched a real
+    # page of events and confirmed actual national teams, not trusted
+    # from search metadata (a plain "Africa Cup of Nations" search turned
+    # up several ids). AFCON itself was wrong on the first pass here: id
+    # 270/season 71636 is the *finals tournament* SofaScore already has
+    # marked finished (played out in real life already), so it had zero
+    # upcoming fixtures — confirmed the hard way when a user flagged a
+    # real Libya vs Botswana qualifier (2026-09-24) that wasn't showing.
+    # What's actually being played during *this* international break is
+    # qualifying for the next edition — a separate SofaScore tournament
+    # id, 1848 (not 270 with a different season). Matches the existing
+    # `leagues` row for "Africa Cup of Nations Qualification" the CSV
+    # loader already created, same as UEFA_Champions_League above pairs
+    # with its own qualification entry.
+    "UEFA_Nations_League": {
+        "name": "UEFA Nations League", "country": None, "kind": "international",
+        "tournament_id": 10783, "season_id": 89945,
+    },
+    "AFCON_Qualification": {
+        "name": "Africa Cup of Nations Qualification", "country": None, "kind": "international",
+        "tournament_id": 1848, "season_id": 90940,
+    },
     "Premier_League": {
         "name": "Premier League", "country": "England", "kind": "club",
         "tournament_id": 17, "season_id": 96668,
@@ -683,6 +717,12 @@ INTERNATIONAL_COMPETITIONS = {
         "country": None,
         "kind": "international",
         "tournament_values": ["UEFA Euro qualification"],
+    },
+    "UEFA_Nations_League": {
+        "name": "UEFA Nations League",
+        "country": None,
+        "kind": "international",
+        "tournament_values": ["UEFA Nations League"],
     },
     "AFCON": {
         "name": "Africa Cup of Nations",
