@@ -3,23 +3,25 @@
 {% block description %}{{ t(request, 'login.description') }}{% endblock %}
 {% block robots %}noindex, follow{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-sm rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
+<div class="auth-layout">
+  {% include "_auth_story.html" %}
+<div class="auth-form mx-auto max-w-sm rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
   <h1 class="mb-2 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'login.heading') }}</h1>
   <p class="mb-8 text-sm text-paper-dim">{{ t(request, 'login.subtitle') }}</p>
   <form method="post" action="{{ url(request, '/login') }}" class="space-y-4">
     <input type="hidden" name="next" value="{{ url(request, next) }}" />
     <div>
-      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.email') }}</label>
-      <input name="login" type="email" required autofocus
+      <label for="login-login" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.email') }}</label>
+      <input id="login-login" name="login" autocomplete="email" type="email" required autofocus
         class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
     </div>
     <div>
       <div class="mb-1 flex items-center justify-between">
-        <label class="block text-sm text-paper-dim">{{ t(request, 'common.password') }}</label>
+        <label for="password" class="block text-sm text-paper-dim">{{ t(request, 'common.password') }}</label>
         <a href="{{ url(request, '/forgot-password') }}" class="text-xs text-amber hover:underline">{{ t(request, 'login.forgot_password') }}</a>
       </div>
       <div class="relative">
-        <input id="password" name="password" type="password" required
+        <input id="password" name="password" autocomplete="current-password" type="password" required
           class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 pr-16 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
         <button type="button" onclick="togglePasswordField('password', this)"
           data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
@@ -34,5 +36,6 @@
   <p class="mt-6 text-center text-sm text-paper-dim">
     {{ t(request, 'login.new_here') }} <a href="{{ url(request, '/register') }}" class="font-medium text-amber hover:underline">{{ t(request, 'login.create_account') }}</a>
   </p>
+</div>
 </div>
 {% endblock %}

@@ -3,31 +3,33 @@
 {% block description %}{{ t(request, 'register.description') }}{% endblock %}
 {% block robots %}noindex, follow{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-sm rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
+<div class="auth-layout">
+  {% include "_auth_story.html" %}
+<div class="auth-form mx-auto max-w-sm rounded-xl border border-line bg-ink-2 p-6 shadow-sm">
   <h1 class="mb-2 font-display text-2xl font-semibold uppercase tracking-wide text-paper">{{ t(request, 'register.heading') }}</h1>
   <p class="mb-8 text-sm text-paper-dim">{{ t(request, 'register.subtitle') }}</p>
   <form method="post" action="{{ url(request, '/register') }}" class="space-y-4" onsubmit="return checkPasswordsMatch()">
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.first_name') }}</label>
-        <input name="first_name" type="text" required autofocus
+        <label for="register-first_name" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.first_name') }}</label>
+        <input id="register-first_name" name="first_name" autocomplete="given-name" type="text" required autofocus
           class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
       </div>
       <div>
-        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.last_name') }}</label>
-        <input name="last_name" type="text" required
+        <label for="register-last_name" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.last_name') }}</label>
+        <input id="register-last_name" name="last_name" autocomplete="family-name" type="text" required
           class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
       </div>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.email') }}</label>
-      <input name="login" type="email" required
+      <label for="register-login" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.email') }}</label>
+      <input id="register-login" name="login" autocomplete="email" type="email" required
         class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
     </div>
     <div>
-      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.password') }}</label>
+      <label for="password" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'common.password') }}</label>
       <div class="relative">
-        <input id="password" name="password" type="password" required minlength="8"
+        <input id="password" name="password" autocomplete="new-password" type="password" required minlength="8"
           class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 pr-16 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
         <button type="button" onclick="togglePasswordField('password', this)"
           data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
@@ -36,9 +38,9 @@
       <p class="mt-1 text-xs text-paper-dim">{{ t(request, 'register.password_hint') }}</p>
     </div>
     <div>
-      <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.confirm_password') }}</label>
+      <label for="confirm_password" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'register.confirm_password') }}</label>
       <div class="relative">
-        <input id="confirm_password" name="confirm_password" type="password" required minlength="8"
+        <input id="confirm_password" name="confirm_password" autocomplete="new-password" type="password" required minlength="8"
           class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 pr-16 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber" />
         <button type="button" onclick="togglePasswordField('confirm_password', this)"
           data-show-label="{{ t(request, 'common.show') }}" data-hide-label="{{ t(request, 'common.hide') }}"
@@ -74,4 +76,5 @@
     return true;
   }
 </script>
+</div>
 {% endblock %}

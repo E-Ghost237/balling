@@ -1,0 +1,8 @@
+{% from "_icons.html" import icon_check_solid %}
+<aside class="auth-story">
+  <svg class="pitch-art" viewBox="0 0 560 560" fill="none" aria-hidden="true"><rect x="35" y="25" width="490" height="510"/><path d="M35 280h490"/><circle cx="280" cy="280" r="75"/><path d="M160 25v95h240V25M220 25v40h120V25M160 535v-95h240v95"/></svg>
+  <div class="eyebrow">{{ 'BIENVENUE CHEZ BALLING' if request.state.locale == 'fr' else 'WELCOME TO BALLING' }}</div>
+  <h2>{{ 'La passion du jeu.' if request.state.locale == 'fr' else 'Love the game.' }}<br><span>{{ 'La force des données.' if request.state.locale == 'fr' else 'Know the numbers.' }}</span></h2>
+  <p>{{ 'Un autre regard sur le football. Des milliers de simulations pour mieux comprendre chaque rencontre.' if request.state.locale == 'fr' else 'A fresh perspective on football. Thousands of simulations to help you understand every match a little better.' }}</p>
+  <div class="auth-proof">{{ icon_check_solid('h-4 w-4') }}{{ '55 compétitions. Tous les marchés. Votre avantage.' if request.state.locale == 'fr' else '55 competitions. Every market. Your advantage.' }}</div>
+</aside>
