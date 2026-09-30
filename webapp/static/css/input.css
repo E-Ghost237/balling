@@ -1,20 +1,17 @@
 @import "tailwindcss";
 
-/* Design system matches the marketing landing page exactly (confirmed
-   design, see conversation) — an ink/amber/teal editorial-data aesthetic,
-   replacing the earlier light emerald/slate system site-wide so every page
-   reads as one product. */
+/* Flat matchday design. Semantic token names are retained so all existing
+   customer and admin templates share the same accessible light palette. */
 @theme {
-  --color-ink: #0b1220;      /* page ground */
-  --color-ink-2: #101a2e;    /* card/panel surface */
-  --color-ink-3: #142140;    /* deeper panel / hover state */
-  --color-paper: #edefe9;    /* primary text on dark */
-  --color-paper-dim: #93a0b7; /* secondary text on dark */
-  --color-line: #223056;     /* borders */
-  --color-amber: #ffb020;    /* primary accent — CTAs, highlights, peaks */
-  --color-teal: #2bb3a3;     /* secondary accent — live/data emphasis */
-
-  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --color-ink: #f7f8f4;
+  --color-ink-2: #ffffff;
+  --color-ink-3: #edf2eb;
+  --color-paper: #182c25;
+  --color-paper-dim: #5c6a60;
+  --color-line: #dfe5dc;
+  --color-amber: #216344;
+  --color-teal: #287869;
+  --font-display: "Manrope", "Inter", sans-serif;
   --font-mono: "IBM Plex Mono", "Courier New", monospace;
 }
 
@@ -22,20 +19,6 @@
 
 body {
   background: var(--color-ink);
-}
-
-/* Subtle film-grain texture over the whole page, matching the landing
-   page — keeps large flat ink areas from looking dead/plasticky. Fixed +
-   pointer-events:none so it never intercepts clicks or scrolls with the
-   page. */
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background-image: radial-gradient(rgba(237, 239, 233, 0.035) 1px, transparent 1px);
-  background-size: 3px 3px;
-  mix-blend-mode: overlay;
 }
 
 .htmx-indicator {

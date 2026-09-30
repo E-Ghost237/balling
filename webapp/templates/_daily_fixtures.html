@@ -1,4 +1,4 @@
-{% from "_icons.html" import icon_chevron_right %}
+{% from "_icons.html" import icon_chevron_right, icon_ball %}
 {# fixture_days = {"monday": [...leagues], ..., "sunday": [...leagues]},
    each league already alphabetical with its own fixtures already
    kickoff-ordered — see _load_upcoming_fixtures. current_weekday names
@@ -35,7 +35,7 @@
    day's fixtures were server-side correct, but no tab ever visually
    showed its content, because the CSS for the show/hide behavior was
    never generated in the first place. #}
-<div class="mb-8">
+<div class="fixtures-board mb-8">
   <h2 class="mb-1 font-display text-lg font-semibold uppercase tracking-wide text-paper">{{ t(request, 'simulate.fixtures_heading') }}</h2>
   <p class="mb-4 text-sm text-paper-dim">{{ t(request, 'simulate.fixtures_subtitle') }}</p>
 
@@ -71,7 +71,7 @@
               <input type="hidden" name="home" value="{{ fx.home.name }}" />
               <input type="hidden" name="away" value="{{ fx.away.name }}" />
               <input type="hidden" name="fixture_kickoff" value="{{ fx.kickoff_utc }}" />
-              <button type="submit" class="flex w-full items-center gap-4 bg-ink-2 px-4 py-3 text-left transition hover:bg-ink-3">
+              <button type="submit" class="fixture-row flex w-full items-center gap-4 bg-ink-2 px-4 py-3 text-left transition hover:bg-ink-3">
                 <div class="w-12 flex-none font-mono text-xs text-paper-dim">{{ fx.time_label }}</div>
                 <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
                   <span class="flex min-w-0 items-center gap-2 text-sm text-paper">
@@ -84,7 +84,7 @@
                     <img src="/assets/logos/{{ fx.away.id }}.png?v={{ asset_version }}" alt="" class="h-5 w-5 flex-none object-contain" onerror="this.style.display='none'" />
                   </span>
                 </div>
-                <span class="flex-none text-paper-dim">{{ icon_chevron_right('h-4 w-4') }}</span>
+                <span class="fixture-action flex-none"><span>{{ 'Analyser' if request.state.locale == 'fr' else 'Predict match' }}</span>{{ icon_chevron_right('h-4 w-4') }}</span>
               </button>
             </form>
             {% endfor %}
@@ -93,7 +93,8 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="rounded-xl border border-dashed border-line bg-ink-2 px-4 py-6 text-center text-sm text-paper-dim">
+      <div class="fixture-empty rounded-xl border border-dashed border-line bg-ink-2 px-4 py-6 text-center text-sm text-paper-dim">
+        {{ icon_ball() }}
         {{ t(request, 'simulate.fixtures_empty') }}
       </div>
     {% endif %}

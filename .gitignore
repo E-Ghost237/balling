@@ -5,3 +5,7 @@ __pycache__/
 .env
 bin/
 data/dedup_review/*.csv
+
+# Local frontend tooling
+node_modules/
+.venv/

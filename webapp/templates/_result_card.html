@@ -14,13 +14,13 @@
   </div>
 {% endmacro %}
 
-<div class="space-y-6">
+<div class="result-stack space-y-6" tabindex="-1" role="region" aria-label="{{ t(request, 'result.panel_label') }}">
   <div class="rounded-xl border border-line bg-ink-2 p-6">
     <div class="mb-1 flex items-center justify-between font-mono text-[11px] uppercase tracking-wide text-paper-dim">
       <span>{{ t(request, 'result.panel_label') }}</span>
       <span class="flex items-center gap-1.5 text-teal"><span class="h-1.5 w-1.5 rounded-full bg-teal"></span>{{ result.n_sims }} {{ t(request, 'result.simulations') }}</span>
     </div>
-    <div class="mb-6 flex items-center justify-center gap-10">
+    <div class="result-teams mb-6 flex items-center justify-center gap-10">
       {{ team_badge(home_badge) }}
       <span class="font-mono text-sm text-paper-dim">vs</span>
       {{ team_badge(away_badge) }}
@@ -78,6 +78,7 @@
   {% call card(title=t(request, 'result.scoreline_probabilities'), icon=icon_table_cells('h-4 w-4'), muted=True) %}
     <p class="mb-4 -mt-2 text-xs text-paper-dim">{{ t(request, 'result.rows_cols', home=result.home_team, away=result.away_team) }}</p>
     <div class="overflow-x-auto">
+      {% set heatmap_max = (scoreline_matrix.grid | sum(start=[]) | map(attribute='value') | max) or 1 %}
       <table class="mx-auto border-separate" style="border-spacing: 3px;">
         <thead>
           <tr>
@@ -92,8 +93,8 @@
             <tr>
               <th class="pr-2 text-xs font-normal text-paper-dim">{{ scoreline_matrix.labels[loop.index0] }}</th>
               {% for cell in row %}
-                <td class="h-12 w-12 rounded text-center text-xs font-medium"
-                    style="background-color: {{ cell.color }}; color: {{ cell.text_color }};">
+                <td class="heatmap-cell h-12 w-12 rounded text-center text-xs font-medium"
+                    style="--cell-strength: {{ (cell.value / heatmap_max * 100) | round(1) }}%;">
                   {{ cell.value }}
                 </td>
               {% endfor %}

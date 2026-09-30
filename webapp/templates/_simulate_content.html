@@ -12,6 +12,12 @@
 {% endmacro %}
 
 <div id="simulate-page">
+  <div class="workspace-heading">
+    <div><div class="eyebrow">{{ 'VOTRE CENTRE DE MATCHS' if request.state.locale == 'fr' else 'YOUR MATCHDAY HUB' }}</div>
+    <h1>{{ 'Un coup d’avance.' if request.state.locale == 'fr' else 'Ahead of the game.' }}</h1>
+    <p>{{ 'Choisissez un match. Explorez les probabilités. Voyez le football autrement.' if request.state.locale == 'fr' else 'Pick a fixture. Explore the probabilities. See football differently.' }}</p></div>
+    {% if active %}<span class="workspace-badge"><span class="status-dot"></span>{{ t(request, 'simulate.quota_footer', used=quota_used, limit=quota_limit) }}</span>{% endif %}
+  </div>
 
 {% if not active %}
   <div class="mx-auto max-w-md text-center">
@@ -56,8 +62,8 @@
     <form hx-post="{{ url(request, '/simulate') }}" hx-target="#simulate-page" hx-swap="outerHTML" hx-indicator="#sim-spinner"
           class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="sm:col-span-2">
-        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.league_label') }}</label>
-        <select name="league_id" required
+        <label for="league-select" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.league_label') }}</label>
+        <select id="league-select" name="league_id" required
                 hx-get="{{ url(request, '/simulate/teams-for-league') }}" hx-include="this" hx-target="body" hx-swap="none"
                 class="w-full rounded-lg border border-line bg-ink-2 px-3 py-2.5 text-paper outline-none focus:border-amber focus:ring-1 focus:ring-amber">
           <option value="" disabled {% if not selected_league_id %}selected{% endif %}>{{ t(request, 'simulate.choose_league') }}</option>
@@ -72,11 +78,11 @@
         <p class="mt-1 text-xs text-paper-dim">{{ t(request, 'simulate.league_hint') }}</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.home_team') }}</label>
+        <label for="home-select" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.home_team') }}</label>
         {{ team_input('home', teams, selected_home) }}
       </div>
       <div>
-        <label class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.away_team') }}</label>
+        <label for="away-select" class="mb-1 block text-sm text-paper-dim">{{ t(request, 'simulate.away_team') }}</label>
         {{ team_input('away', teams, selected_away) }}
       </div>
       <label class="flex items-center gap-2 text-sm text-paper-dim sm:col-span-2">
